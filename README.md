@@ -1,0 +1,1 @@
+[Docs](https://mykyta-home-server.github.io/homeserver/#/)
