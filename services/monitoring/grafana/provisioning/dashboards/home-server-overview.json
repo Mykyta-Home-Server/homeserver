@@ -238,7 +238,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count(count_over_time({container=\"caddy\"}[1m]) > 0) or vector(0)",
+          "expr": "sum(count_over_time({container=\"caddy\"}[5m]))",
           "legendFormat": "Caddy",
           "refId": "A"
         },
@@ -247,7 +247,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count(count_over_time({container=\"authelia\"}[1m]) > 0) or vector(0)",
+          "expr": "sum(count_over_time({container=\"authelia\"}[5m]))",
           "hide": false,
           "legendFormat": "Authelia",
           "refId": "B"
@@ -257,7 +257,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count(count_over_time({container=\"jellyfin\"}[1m]) > 0) or vector(0)",
+          "expr": "sum(count_over_time({container=\"jellyfin\"}[5m]))",
           "hide": false,
           "legendFormat": "Jellyfin",
           "refId": "C"
@@ -267,7 +267,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count(count_over_time({container=\"grafana\"}[1m]) > 0) or vector(0)",
+          "expr": "sum(count_over_time({container=\"grafana\"}[5m]))",
           "hide": false,
           "legendFormat": "Grafana",
           "refId": "D"
@@ -277,7 +277,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count(count_over_time({container=\"github-runner\"}[1m]) > 0) or vector(0)",
+          "expr": "sum(count_over_time({container=\"github-runner\"}[5m]))",
           "hide": false,
           "legendFormat": "CI/CD Runner",
           "refId": "E"
@@ -287,13 +287,13 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count(count_over_time({container=\"cloudflared\"}[1m]) > 0) or vector(0)",
+          "expr": "sum(count_over_time({container=\"cloudflared\"}[5m]))",
           "hide": false,
           "legendFormat": "Cloudflare Tunnel",
           "refId": "F"
         }
       ],
-      "title": "Core Services Status",
+      "title": "Core Services Log Activity (5m)",
       "type": "gauge"
     },
     {
@@ -774,8 +774,8 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum by (container_name) (count_over_time({container=~\"jellyfin|sonarr|radarr|prowlarr|qbittorrent|jellyseerr\"} [10m]))",
-          "legendFormat": "{{container_name}}",
+          "expr": "sum by (container) (count_over_time({container=~\"jellyfin|sonarr|radarr|prowlarr|qbittorrent|jellyseerr\"} [10m]))",
+          "legendFormat": "{{container}}",
           "refId": "A"
         }
       ],
@@ -866,8 +866,8 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum by (container_name) (count_over_time({container=~\"caddy|cloudflared|authelia\"} [5m]))",
-          "legendFormat": "{{container_name}}",
+          "expr": "sum by (container) (count_over_time({container=~\"caddy|cloudflared|authelia\"} [5m]))",
+          "legendFormat": "{{container}}",
           "refId": "A"
         }
       ],
