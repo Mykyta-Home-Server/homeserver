@@ -127,7 +127,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count_over_time({container_name=\"caddy\"}[5m])",
+          "expr": "count_over_time({container=\"caddy\"}[5m])",
           "legendFormat": "Proxy (Caddy)",
           "refId": "A"
         },
@@ -136,7 +136,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count_over_time({container_name=\"authelia\"}[5m])",
+          "expr": "count_over_time({container=\"authelia\"}[5m])",
           "hide": false,
           "legendFormat": "Authentication",
           "refId": "B"
@@ -146,7 +146,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count_over_time({container_name=~\"jellyfin|sonarr|radarr|prowlarr|qbittorrent|jellyseerr\"}[5m])",
+          "expr": "count_over_time({container=~\"jellyfin|sonarr|radarr|prowlarr|qbittorrent|jellyseerr\"}[5m])",
           "hide": false,
           "legendFormat": "Media Stack",
           "refId": "C"
@@ -156,7 +156,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count_over_time({container_name=~\"grafana|loki|promtail\"}[5m])",
+          "expr": "count_over_time({container=~\"grafana|loki|promtail\"}[5m])",
           "hide": false,
           "legendFormat": "Monitoring",
           "refId": "D"
@@ -238,7 +238,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count(count_over_time({container_name=\"caddy\"}[1m]) > 0) or vector(0)",
+          "expr": "count(count_over_time({container=\"caddy\"}[1m]) > 0) or vector(0)",
           "legendFormat": "Caddy",
           "refId": "A"
         },
@@ -247,7 +247,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count(count_over_time({container_name=\"authelia\"}[1m]) > 0) or vector(0)",
+          "expr": "count(count_over_time({container=\"authelia\"}[1m]) > 0) or vector(0)",
           "hide": false,
           "legendFormat": "Authelia",
           "refId": "B"
@@ -257,7 +257,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count(count_over_time({container_name=\"jellyfin\"}[1m]) > 0) or vector(0)",
+          "expr": "count(count_over_time({container=\"jellyfin\"}[1m]) > 0) or vector(0)",
           "hide": false,
           "legendFormat": "Jellyfin",
           "refId": "C"
@@ -267,7 +267,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count(count_over_time({container_name=\"grafana\"}[1m]) > 0) or vector(0)",
+          "expr": "count(count_over_time({container=\"grafana\"}[1m]) > 0) or vector(0)",
           "hide": false,
           "legendFormat": "Grafana",
           "refId": "D"
@@ -277,7 +277,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count(count_over_time({container_name=\"github-runner\"}[1m]) > 0) or vector(0)",
+          "expr": "count(count_over_time({container=\"github-runner\"}[1m]) > 0) or vector(0)",
           "hide": false,
           "legendFormat": "CI/CD Runner",
           "refId": "E"
@@ -287,7 +287,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "count(count_over_time({container_name=\"cloudflared\"}[1m]) > 0) or vector(0)",
+          "expr": "count(count_over_time({container=\"cloudflared\"}[1m]) > 0) or vector(0)",
           "hide": false,
           "legendFormat": "Cloudflare Tunnel",
           "refId": "F"
@@ -378,7 +378,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(rate({container_name=\"caddy\"} |= \"\" [1m]))",
+          "expr": "sum(rate({container=\"caddy\"} |= \"\" [1m]))",
           "legendFormat": "Caddy",
           "refId": "A"
         },
@@ -387,7 +387,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(rate({container_name=\"authelia\"} |= \"\" [1m]))",
+          "expr": "sum(rate({container=\"authelia\"} |= \"\" [1m]))",
           "hide": false,
           "legendFormat": "Authelia",
           "refId": "B"
@@ -397,7 +397,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(rate({container_name=\"portal\"} |= \"\" [1m]))",
+          "expr": "sum(rate({container=\"portal\"} |= \"\" [1m]))",
           "hide": false,
           "legendFormat": "Portal",
           "refId": "C"
@@ -465,7 +465,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container_name=~\"caddy|authelia|portal|hello-world|cloudflared|github-runner\"} |~ \"(?i)error\" [5m]))",
+          "expr": "sum(count_over_time({container=~\"caddy|authelia|portal|hello-world|cloudflared|github-runner\"} |~ \"(?i)error\" [5m]))",
           "legendFormat": "Errors (5m)",
           "refId": "A"
         }
@@ -526,7 +526,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container_name=~\"sonarr|radarr\"} |~ \"(?i)download\" [1h]))",
+          "expr": "sum(count_over_time({container=~\"sonarr|radarr\"} |~ \"(?i)download\" [1h]))",
           "legendFormat": "Downloads",
           "refId": "A"
         }
@@ -587,7 +587,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container_name=\"authelia\"} |~ \"(?i)(login|authentication successful)\" [1h]))",
+          "expr": "sum(count_over_time({container=\"authelia\"} |~ \"(?i)(login|authentication successful)\" [1h]))",
           "legendFormat": "Successful Logins",
           "refId": "A"
         }
@@ -648,7 +648,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container_name=\"github-runner\"} |~ \"(?i)(running job|job completed)\" [24h]))",
+          "expr": "sum(count_over_time({container=\"github-runner\"} |~ \"(?i)(running job|job completed)\" [24h]))",
           "legendFormat": "CI/CD Jobs",
           "refId": "A"
         }
@@ -685,7 +685,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "{container_name=~\"caddy|authelia|portal|jellyfin|sonarr|radarr|github-runner\"} |~ \"(?i)error|warning|fail\"",
+          "expr": "{container=~\"caddy|authelia|portal|jellyfin|sonarr|radarr|github-runner\"} |~ \"(?i)error|warning|fail\"",
           "refId": "A"
         }
       ],
@@ -774,7 +774,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum by (container_name) (count_over_time({container_name=~\"jellyfin|sonarr|radarr|prowlarr|qbittorrent|jellyseerr\"} [10m]))",
+          "expr": "sum by (container_name) (count_over_time({container=~\"jellyfin|sonarr|radarr|prowlarr|qbittorrent|jellyseerr\"} [10m]))",
           "legendFormat": "{{container_name}}",
           "refId": "A"
         }
@@ -866,7 +866,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum by (container_name) (count_over_time({container_name=~\"caddy|cloudflared|authelia\"} [5m]))",
+          "expr": "sum by (container_name) (count_over_time({container=~\"caddy|cloudflared|authelia\"} [5m]))",
           "legendFormat": "{{container_name}}",
           "refId": "A"
         }
