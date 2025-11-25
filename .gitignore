@@ -306,3 +306,9 @@ secrets/
 services/auth/postgres/data/
 services/auth/redis/data/**
 data/**
+
+# AI
+
+.claude
+CLAUDE.md
+sessions/**
