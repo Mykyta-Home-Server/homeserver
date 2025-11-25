@@ -23,11 +23,11 @@ https://torrent.mykyta-ryasny.dev {
 
 # Jellyfin - Media streaming server
 # Access: https://streaming.mykyta-ryasny.dev
+# NOTE: No Authelia auth - Jellyfin has its own authentication via LDAP
 https://streaming.mykyta-ryasny.dev {
     import cf_tls
 
-    # Authelia SSO Authentication
-    import authelia_auth
+    # No Authelia - users go directly to Jellyfin login (uses LDAP)
 
     reverse_proxy jellyfin:8096
 }
@@ -40,6 +40,10 @@ https://movies.mykyta-ryasny.dev {
     # Authelia SSO Authentication
     import authelia_auth
 
+    # Intercept logout and redirect to Authelia logout with return URL
+    @logout path /logout
+    redir @logout https://auth.mykyta-ryasny.dev/logout?rd=https://movies.mykyta-ryasny.dev 302
+
     reverse_proxy radarr:7878
 }
 
@@ -50,6 +54,10 @@ https://tv.mykyta-ryasny.dev {
 
     # Authelia SSO Authentication
     import authelia_auth
+
+    # Intercept logout and redirect to Authelia logout with return URL
+    @logout path /logout
+    redir @logout https://auth.mykyta-ryasny.dev/logout?rd=https://tv.mykyta-ryasny.dev 302
 
     reverse_proxy sonarr:8989
 }
@@ -62,22 +70,20 @@ https://indexers.mykyta-ryasny.dev {
     # Authelia SSO Authentication
     import authelia_auth
 
+    # Intercept logout and redirect to Authelia logout with return URL
+    @logout path /logout
+    redir @logout https://auth.mykyta-ryasny.dev/logout?rd=https://indexers.mykyta-ryasny.dev 302
+
     reverse_proxy prowlarr:9696
 }
 
 # Jellyseerr - Request management interface
 # Access: https://requests.mykyta-ryasny.dev
+# NOTE: No Authelia auth - Jellyseerr uses Jellyfin authentication (which uses LDAP)
 https://requests.mykyta-ryasny.dev {
     import cf_tls
 
-    # Authelia SSO Authentication
-    import authelia_auth
+    # No Authelia - users authenticate via Jellyfin (uses LDAP)
 
-    reverse_proxy jellyseerr:5055 {
-        # Pass Authelia authentication headers to Jellyseerr
-        # Jellyseerr can use these for proxy authentication
-        # Configure in Jellyseerr: Settings → General → Enable Proxy Support
-        header_up X-Forwarded-User {http.request.header.Remote-User}
-        header_up X-Forwarded-Email {http.request.header.Remote-Email}
-    }
+    reverse_proxy jellyseerr:5055
 }

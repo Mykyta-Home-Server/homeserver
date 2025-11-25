@@ -31,4 +31,5 @@ include:
   - compose/uptime-kuma.yml
   - compose/auth.yml
   - compose/ldap.yml
+  - compose/user-management.yml
   - compose/github-runner.yml

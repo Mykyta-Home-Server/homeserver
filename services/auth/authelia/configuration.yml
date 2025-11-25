@@ -95,20 +95,47 @@ authentication_backend:
   # Note: password_policy moved to top level in newer Authelia versions
 
   # ============================================================================
-  # File-based Authentication (for initial admin user)
+  # LDAP Authentication Backend
   # ============================================================================
-  # We'll use this to create the first admin, then switch to PostgreSQL UI
-  file:
-    path: /config/users_database.yml
-    password:
-      algorithm: argon2
-      argon2:
-        variant: argon2id
-        iterations: 3
-        memory: 65536  # 64 MB
-        parallelism: 4
-        key_length: 32
-        salt_length: 16
+  # Centralized user directory - single source of truth for all services
+  ldap:
+    # LDAP server implementation
+    implementation: custom
+
+    # LDAP server address (internal Docker network)
+    address: 'ldap://openldap:389'
+
+    # Connection timeout
+    timeout: 5s
+
+    # Don't use StartTLS (we're on internal network)
+    start_tls: false
+
+    # Base DN for all LDAP queries
+    base_dn: 'dc=mykyta-ryasny,dc=dev'
+
+    # Admin credentials for Authelia to query LDAP
+    user: 'cn=admin,dc=mykyta-ryasny,dc=dev'
+    password: 'ZRR+BWr7vErpTSzdaiZgOZEMqNmLJCDQSfi3ptVh/3A='
+
+    # Where to find users (relative to base_dn)
+    additional_users_dn: 'ou=users'
+
+    # User search filter - allows login by username OR email
+    users_filter: '(&(|({username_attribute}={input})({mail_attribute}={input}))(objectClass=inetOrgPerson))'
+
+    # LDAP attributes for user info (modern format)
+    attributes:
+      username: 'uid'
+      mail: 'mail'
+      display_name: 'cn'
+      group_name: 'cn'
+
+    # Where to find groups (relative to base_dn)
+    additional_groups_dn: 'ou=groups'
+
+    # Group membership filter
+    groups_filter: '(&(member={dn})(objectClass=groupOfNames))'
 
 # ============================================================================
 # Password Policy

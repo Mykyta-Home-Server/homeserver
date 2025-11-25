@@ -1,20 +1,37 @@
 # Home Portal - Angular SPA (Docker container)
 https://home.mykyta-ryasny.dev {
     import cf_tls
-    import authelia_auth
 
-    # Reverse proxy to portal container (nginx serves Angular app inside container)
-    reverse_proxy portal:80
-
-    # Pass Authelia user info as response headers
-    # Your Angular app can read these to show/hide services
-    header {
-        X-Auth-User {http.request.header.Remote-User}
-        X-Auth-Groups {http.request.header.Remote-Groups}
-        X-Auth-Name {http.request.header.Remote-Name}
-        X-Auth-Email {http.request.header.Remote-Email}
+    # Public API endpoints (no Authelia auth - API validates tokens internally)
+    @public_api path /api/register /api/invitations/validate/* /api/health /api/health/*
+    handle @public_api {
+        reverse_proxy user-management:3000
     }
 
-    # Enable gzip compression
-    encode gzip
+    # Admin API endpoints (Authelia required - admin only)
+    @admin_api path /api/users* /api/invitations /api/invitations/*
+    handle @admin_api {
+        import authelia_auth
+        reverse_proxy user-management:3000
+    }
+
+    # Portal frontend (authenticated)
+    handle {
+        import authelia_auth
+
+        # Pass Authelia user info as response headers
+        # Your Angular app can read these to show/hide services
+        header {
+            X-Auth-User {http.request.header.Remote-User}
+            X-Auth-Groups {http.request.header.Remote-Groups}
+            X-Auth-Name {http.request.header.Remote-Name}
+            X-Auth-Email {http.request.header.Remote-Email}
+        }
+
+        # Reverse proxy to portal container
+        reverse_proxy portal:80
+
+        # Enable gzip compression
+        encode gzip
+    }
 }
