@@ -11,7 +11,12 @@ https://torrent.mykyta-ryasny.dev {
     import authelia_auth
 
     reverse_proxy qbittorrent:8080 {
-        # Pass authentication headers to qBittorrent
+        # qBittorrent bypass authentication based on subnet whitelist (172.18.0.0/16)
+        # Don't forward client IP - use Caddy's proxy IP so qBittorrent sees trusted subnet
+        header_up -X-Forwarded-For
+        header_up -X-Real-IP
+
+        # Pass authentication headers (for future use/logging)
         header_up X-Forwarded-User {http.request.header.Remote-User}
     }
 }
@@ -68,5 +73,11 @@ https://requests.mykyta-ryasny.dev {
     # Authelia SSO Authentication
     import authelia_auth
 
-    reverse_proxy jellyseerr:5055
+    reverse_proxy jellyseerr:5055 {
+        # Pass Authelia authentication headers to Jellyseerr
+        # Jellyseerr can use these for proxy authentication
+        # Configure in Jellyseerr: Settings → General → Enable Proxy Support
+        header_up X-Forwarded-User {http.request.header.Remote-User}
+        header_up X-Forwarded-Email {http.request.header.Remote-Email}
+    }
 }

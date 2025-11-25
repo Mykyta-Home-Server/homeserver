@@ -1,0 +1,43 @@
+# ============================================================================
+# phpLDAPadmin - Caddy Configuration
+# ============================================================================
+
+# phpLDAPadmin - LDAP user management interface
+# Access: https://ldap.mykyta-ryasny.dev
+https://ldap.mykyta-ryasny.dev {
+    # Use Cloudflare Origin Certificate
+    import cf_tls
+
+    # Authelia SSO Authentication
+    # Only admins should access LDAP management
+    import authelia_auth
+
+    # Reverse proxy to phpLDAPadmin
+    reverse_proxy phpldapadmin:80 {
+        # Preserve original host header
+        header_up Host {http.request.host}
+
+        # Pass real IP to phpLDAPadmin (for audit logs)
+        header_up X-Real-IP {http.request.remote.host}
+        header_up X-Forwarded-For {http.request.remote.host}
+        header_up X-Forwarded-Proto {http.request.scheme}
+    }
+
+    # Security headers
+    header {
+        # Enable XSS protection
+        X-XSS-Protection "1; mode=block"
+
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+
+        # Control framing (prevent clickjacking)
+        X-Frame-Options "SAMEORIGIN"
+
+        # Referrer policy
+        Referrer-Policy "same-origin"
+
+        # Remove server identification
+        -Server
+    }
+}

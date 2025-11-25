@@ -151,6 +151,7 @@ access_control:
         - "uptime.mykyta-ryasny.dev"       # Uptime Kuma
         - "indexers.mykyta-ryasny.dev"     # Prowlarr
         - "torrent.mykyta-ryasny.dev"      # qBittorrent
+        - "ldap.mykyta-ryasny.dev"         # LDAP Management (phpLDAPadmin)
       policy: one_factor  # Just password for now (can enable 2FA later)
       subject:
         - ["group:admins"]

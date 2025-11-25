@@ -307,6 +307,11 @@ services/auth/postgres/data/
 services/auth/redis/data/**
 data/**
 
+# LDAP data directories (contain runtime data and configs)
+services/auth/ldap/database/
+services/auth/ldap/config/
+services/auth/ldap/certs/
+
 # AI
 
 .claude

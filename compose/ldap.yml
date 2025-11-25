@@ -1,0 +1,103 @@
+services:
+  # OpenLDAP - Directory server for centralized user authentication
+  openldap:
+    profiles: ["auth", "all"]
+    image: osixia/openldap:1.5.0
+    container_name: openldap
+    restart: unless-stopped
+
+    # Environment variables
+    environment:
+      # LDAP organization and domain
+      LDAP_ORGANISATION: "Mykyta Home Server"
+      LDAP_DOMAIN: "mykyta-ryasny.dev"
+
+      # Admin credentials
+      # Username will be: cn=admin,dc=mykyta-ryasny,dc=dev
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+
+      # Additional config
+      LDAP_CONFIG_PASSWORD: ${LDAP_CONFIG_PASSWORD}
+      LDAP_READONLY_USER: "false"
+      LDAP_RFC2307BIS_SCHEMA: "false"
+      LDAP_BACKEND: "mdb"
+      LDAP_TLS: "true"
+      LDAP_TLS_CRT_FILENAME: "ldap.crt"
+      LDAP_TLS_KEY_FILENAME: "ldap.key"
+      LDAP_TLS_DH_PARAM_FILENAME: "dhparam.pem"
+      LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
+      LDAP_TLS_ENFORCE: "false"
+      LDAP_TLS_CIPHER_SUITE: "SECURE256:-VERS-SSL3.0"
+      LDAP_TLS_PROTOCOL_MIN: "3.1"
+      LDAP_TLS_VERIFY_CLIENT: "demand"
+      LDAP_REPLICATION: "false"
+      KEEP_EXISTING_CONFIG: "false"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "true"
+      LDAP_SSL_HELPER_PREFIX: "ldap"
+
+    # Volumes
+    volumes:
+      - ../services/auth/ldap/database:/var/lib/ldap
+      - ../services/auth/ldap/config:/etc/ldap/slapd.d
+      - ../services/auth/ldap/certs:/container/service/slapd/assets/certs
+
+    # Networks
+    networks:
+      - internal
+
+    # Ports (internal only)
+    ports:
+      - "389:389"   # LDAP
+      - "636:636"   # LDAPS (SSL)
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://localhost", "-b", "dc=mykyta-ryasny,dc=dev", "-D", "cn=admin,dc=mykyta-ryasny,dc=dev", "-w", "${LDAP_ADMIN_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=authentication"
+      - "com.homeserver.description=OpenLDAP directory server"
+
+  # phpLDAPadmin - Web interface for managing LDAP users
+  phpldapadmin:
+    profiles: ["auth", "all"]
+    image: osixia/phpldapadmin:0.9.0
+    container_name: phpldapadmin
+    restart: unless-stopped
+
+    # Environment variables
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "openldap"
+      PHPLDAPADMIN_HTTPS: "false"
+
+    # Networks
+    networks:
+      - internal
+      - proxy
+
+    # Ports (internal only - accessed via Caddy)
+    ports:
+      - "8080:80"
+
+    # Depends on
+    depends_on:
+      openldap:
+        condition: service_healthy
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=authentication"
+      - "com.homeserver.description=phpLDAPadmin web interface"
