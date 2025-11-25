@@ -1,0 +1,42 @@
+# ============================================================================
+# Network Definitions - Centralized Network Configuration
+# ============================================================================
+# Three-network architecture for simplified management:
+# - proxy: External-facing services (Caddy, Cloudflared)
+# - internal: All internal services (media, auth, apps)
+# - monitoring: Monitoring stack (Grafana, Loki, Promtail)
+# ============================================================================
+
+networks:
+  # External-facing services (Caddy, Cloudflared)
+  proxy:
+    driver: bridge
+    name: proxy
+    ipam:
+      config:
+        - subnet: 172.18.0.0/24
+    labels:
+      - "com.homeserver.network=proxy"
+      - "com.homeserver.description=External-facing reverse proxy network"
+
+  # All internal services (media, auth, apps, webhook)
+  internal:
+    driver: bridge
+    name: internal
+    ipam:
+      config:
+        - subnet: 172.19.0.0/24
+    labels:
+      - "com.homeserver.network=internal"
+      - "com.homeserver.description=Internal services network"
+
+  # Monitoring stack (needs Docker socket access)
+  monitoring:
+    driver: bridge
+    name: monitoring
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+    labels:
+      - "com.homeserver.network=monitoring"
+      - "com.homeserver.description=Monitoring and logging network"

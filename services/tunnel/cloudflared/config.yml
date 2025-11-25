@@ -1,0 +1,91 @@
+# Cloudflare Tunnel Configuration
+
+tunnel: 07fbc124-6f0e-40c5-b254-3a1bdd98cf3c
+credentials-file: /etc/cloudflared/credentials.json
+
+# Ingress rules - use HTTPS with origin certificates (Full SSL mode)
+ingress:
+  # Media services
+  - hostname: torrent.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+      originServerName: torrent.mykyta-ryasny.dev
+  - hostname: streaming.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+      originServerName: streaming.mykyta-ryasny.dev
+  - hostname: movies.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+      originServerName: movies.mykyta-ryasny.dev
+  - hostname: tv.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+      originServerName: tv.mykyta-ryasny.dev
+  - hostname: indexers.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+      originServerName: indexers.mykyta-ryasny.dev
+  - hostname: requests.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+      originServerName: requests.mykyta-ryasny.dev
+
+  # Monitoring - Grafana dashboard
+  - hostname: monitor.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+      originServerName: monitor.mykyta-ryasny.dev
+
+  # Monitoring - Uptime Kuma
+  - hostname: uptime.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+      originServerName: uptime.mykyta-ryasny.dev
+
+  # Automation - Deployment API
+  - hostname: deploy.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+      originServerName: deploy.mykyta-ryasny.dev
+
+  # Authentication - Authelia SSO portal
+  - hostname: auth.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+      originServerName: auth.mykyta-ryasny.dev
+
+  # Home Portal - Angular dashboard
+  - hostname: home.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+      originServerName: home.mykyta-ryasny.dev
+
+  - hostname: mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      # Don't verify TLS because origin cert is signed by Cloudflare (not a public CA)
+      noTLSVerify: true
+      # Use proper hostname for SNI (Server Name Indication)
+      originServerName: mykyta-ryasny.dev
+
+  - hostname: www.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      # Don't verify TLS because origin cert is signed by Cloudflare (not a public CA)
+      noTLSVerify: true
+      # Use proper hostname for SNI (Server Name Indication)
+      originServerName: www.mykyta-ryasny.dev
+
+  - service: http_status:404

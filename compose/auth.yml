@@ -1,0 +1,184 @@
+# ============================================================================
+# Authentication Stack - Docker Compose Configuration
+# ============================================================================
+# Services: PostgreSQL, Redis, Authelia
+# Networks: auth (internal), proxy (external to Caddy)
+# ============================================================================
+
+services:
+  # ==========================================================================
+  # PostgreSQL - User database
+  # ==========================================================================
+  postgres-auth:
+    image: postgres:16-alpine
+    container_name: postgres-auth
+
+    restart: unless-stopped
+
+    # Environment variables
+    # Note: Define these in /opt/homeserver/.env.auth
+    # Password now uses Docker secrets for better security
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+
+    # Docker secrets
+    secrets:
+      - postgres_password
+
+    # Volumes
+    volumes:
+      # Persistent database storage
+      - ../services/auth/postgres/data:/var/lib/postgresql/data
+
+      # Initialization script (Authelia will create tables automatically)
+      # - ../services/auth/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+    # Networks - only internal
+    networks:
+      - internal
+
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=auth"
+      - "com.homeserver.description=PostgreSQL database for Authelia"
+
+  # ==========================================================================
+  # Redis - Session storage and cache
+  # ==========================================================================
+  redis-auth:
+    image: redis:7-alpine
+    container_name: redis-auth
+
+    restart: unless-stopped
+
+    # Command - enable persistence with password authentication
+    command: sh -c "redis-server --appendonly yes --requirepass $$(cat /run/secrets/redis_password)"
+
+    # Docker secrets
+    secrets:
+      - redis_password
+
+    # Volumes
+    volumes:
+      - ../services/auth/redis/data:/data
+
+    # Networks - only internal
+    networks:
+      - internal
+
+    # Health check (with password authentication)
+    healthcheck:
+      test: ["CMD", "sh", "-c", "redis-cli -a $$(cat /run/secrets/redis_password) ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=auth"
+      - "com.homeserver.description=Redis cache for sessions"
+
+  # ==========================================================================
+  # Authelia - Authentication server
+  # ==========================================================================
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+
+    restart: unless-stopped
+
+    # Environment variables
+    # Note: Define these in /opt/homeserver/.env
+    # Database and Redis passwords now use Docker secrets
+    environment:
+      - TZ=${TZ}
+      - AUTHELIA_JWT_SECRET=${AUTHELIA_JWT_SECRET}
+      - AUTHELIA_SESSION_SECRET=${AUTHELIA_SESSION_SECRET}
+      - AUTHELIA_STORAGE_ENCRYPTION_KEY=${AUTHELIA_STORAGE_ENCRYPTION_KEY}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+      - AUTHELIA_SESSION_REDIS_PASSWORD_FILE=/run/secrets/redis_password
+
+    # Docker secrets
+    secrets:
+      - postgres_password
+      - redis_password
+
+    # Volumes
+    volumes:
+      # Configuration file
+      - ../services/auth/authelia/configuration.yml:/config/configuration.yml:ro
+
+      # User database (file-based for initial admin)
+      - ../services/auth/authelia/users_database.yml:/config/users_database.yml:ro
+
+    # Networks
+    networks:
+      - internal   # Connect to database, Redis, and Caddy
+
+    # Ports (internal only)
+    ports:
+      - "9091:9091"  # Authelia web interface
+
+    # Depends on database and cache
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      redis-auth:
+        condition: service_healthy
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9091/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=auth"
+      - "com.homeserver.description=Authelia authentication server"
+
+# ============================================================================
+# Docker Secrets
+# ============================================================================
+secrets:
+  postgres_password:
+    file: ../secrets/postgres_password.txt
+  redis_password:
+    file: ../secrets/redis_password.txt

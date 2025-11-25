@@ -1,0 +1,22 @@
+# ============================================================================
+# Grafana Dashboard Provisioning
+# ============================================================================
+# This file tells Grafana where to find dashboard JSON files
+#
+# Official docs: https://grafana.com/docs/grafana/latest/administration/provisioning/#dashboards
+# ============================================================================
+
+apiVersion: 1
+
+providers:
+  # Provider for homeserver dashboards
+  - name: 'Homeserver Dashboards'
+    orgId: 1
+    folder: 'Homeserver'
+    type: file
+    disableDeletion: false  # Allow deletion in UI
+    updateIntervalSeconds: 10  # Check for changes every 10 seconds
+    allowUiUpdates: true  # Allow editing in UI (changes saved to JSON)
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: true

@@ -1,0 +1,136 @@
+services:
+  # qBittorrent - Torrent download client
+  qbittorrent:
+    profiles: ["media", "all"]
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+      - WEBUI_PORT=8080
+    volumes:
+      - ../services/media/qbittorrent/config:/config
+      - ../data/media:/data/media
+    networks:
+      - internal
+    restart: unless-stopped
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v2/app/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Resource limits (prevent resource exhaustion)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Jellyfin - Media streaming server
+  jellyfin:
+    profiles: ["media", "all"]
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ../services/media/jellyfin/config:/config
+      - ../services/media/jellyfin/cache:/cache
+      - ../data/media:/data/media:ro
+    networks:
+      - internal
+    restart: unless-stopped
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Resource limits (heavy transcoding workload)
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  # Radarr - Movie automation
+  radarr:
+    profiles: ["media", "all"]
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ../services/media/radarr/config:/config
+      - ../data/media:/data/media
+    networks:
+      - internal
+    restart: unless-stopped
+
+  # Sonarr - TV show automation
+  sonarr:
+    profiles: ["media", "all"]
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ../services/media/sonarr/config:/config
+      - ../data/media:/data/media
+    networks:
+      - internal
+    restart: unless-stopped
+
+  # Prowlarr - Indexer manager
+  prowlarr:
+    profiles: ["media", "all"]
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ../services/media/prowlarr/config:/config
+    networks:
+      - internal
+    restart: unless-stopped
+
+  # Jellyseerr - Request management
+  jellyseerr:
+    profiles: ["media", "all"]
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=info
+      - TZ=Europe/Madrid
+    volumes:
+      - ../services/media/jellyseerr/config:/app/config
+    networks:
+      - internal
+    restart: unless-stopped
+    depends_on:
+      - jellyfin
+      - radarr
+      - sonarr
+

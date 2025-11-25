@@ -1,0 +1,187 @@
+# ============================================================================
+# Loki 3.0 Configuration
+# ============================================================================
+# This configures how Loki stores and indexes logs
+#
+# Key Concepts:
+#   - Ingester: Receives logs from Promtail, creates chunks
+#   - Chunks: Compressed blocks of log lines (stored in /loki/chunks)
+#   - Index: Metadata about chunks (stored in /loki/index)
+#   - Retention: How long to keep logs (default: forever)
+#
+# Official docs: https://grafana.com/docs/loki/latest/configuration/
+# Migration guide: https://grafana.com/docs/loki/latest/upgrading/
+# ============================================================================
+
+# Authentication (disabled for single-tenant mode)
+auth_enabled: false
+
+# ============================================================================
+# Server Configuration
+# ============================================================================
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+  log_level: info
+
+# ============================================================================
+# Common Configuration (new in Loki 3.0)
+# ============================================================================
+# Shared configuration for all components
+common:
+  # Path prefix for all data
+  path_prefix: /loki
+
+  # Storage configuration
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+
+  # Replication factor (1 for single instance)
+  replication_factor: 1
+
+  # Ring configuration for distributed mode
+  ring:
+    kvstore:
+      store: inmemory
+
+# ============================================================================
+# Pattern Ingester (new in Loki 3.0)
+# ============================================================================
+# Automatically detects patterns in logs
+pattern_ingester:
+  enabled: false  # Disable for now, can enable later
+
+# ============================================================================
+# Ingester Configuration
+# ============================================================================
+# The ingester receives logs from Promtail and creates chunks
+ingester:
+  # Chunk settings
+  chunk_idle_period: 1h       # Flush chunks if no new logs for 1 hour
+  max_chunk_age: 1h           # Flush chunks after 1 hour regardless
+  chunk_target_size: 1572864  # Target chunk size: 1.5MB
+  chunk_retain_period: 30s    # Keep chunks in memory for 30s after flush
+
+  # WAL (Write-Ahead Log) for durability
+  wal:
+    enabled: true
+    dir: /loki/wal
+    flush_on_shutdown: true
+
+# ============================================================================
+# Schema Configuration
+# ============================================================================
+# Defines how logs are indexed and stored
+schema_config:
+  configs:
+    # TSDB schema (recommended for Loki 3.0)
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h  # Create new index every 24 hours
+
+# ============================================================================
+# Storage Configuration
+# ============================================================================
+storage_config:
+  # TSDB index storage (replaces boltdb-shipper)
+  tsdb_shipper:
+    active_index_directory: /loki/index
+    cache_location: /loki/index_cache
+
+  # Filesystem chunk storage
+  filesystem:
+    directory: /loki/chunks
+
+# ============================================================================
+# Compactor Configuration
+# ============================================================================
+# Compacts old index files and handles retention
+compactor:
+  working_directory: /loki/compactor
+  compaction_interval: 10m
+  retention_enabled: true
+  retention_delete_delay: 2h
+  retention_delete_worker_count: 150
+  delete_request_store: filesystem
+
+# ============================================================================
+# Limits Configuration
+# ============================================================================
+# Prevents abuse and controls resource usage
+limits_config:
+  # Reject logs older than 7 days
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h
+
+  # Ingestion rate limits
+  ingestion_rate_mb: 4
+  ingestion_burst_size_mb: 6
+
+  # Query limits
+  max_query_series: 500
+  max_query_parallelism: 32
+  max_streams_per_user: 0
+  max_global_streams_per_user: 5000
+
+  # Per-stream limits
+  per_stream_rate_limit: 3MB
+  per_stream_rate_limit_burst: 15MB
+
+  # Cardinality limits
+  max_label_name_length: 1024
+  max_label_value_length: 2048
+  max_label_names_per_series: 30
+
+  # Retention period (30 days)
+  retention_period: 720h
+
+  # Split queries by time range
+  split_queries_by_interval: 15m
+
+# ============================================================================
+# Query Scheduler (improves query performance)
+# ============================================================================
+query_scheduler:
+  max_outstanding_requests_per_tenant: 2048
+
+# ============================================================================
+# Query Frontend Configuration
+# ============================================================================
+frontend:
+  # Compress responses
+  compress_responses: true
+
+  # Log slow queries
+  log_queries_longer_than: 5s
+
+  # Query parallelization
+  max_outstanding_per_tenant: 256
+
+# ============================================================================
+# Querier Configuration
+# ============================================================================
+querier:
+  # Max concurrent queries
+  max_concurrent: 20
+
+# ============================================================================
+# Ruler Configuration (for alerts)
+# ============================================================================
+# Disabled for now, can enable later
+ruler:
+  storage:
+    type: local
+    local:
+      directory: /loki/rules
+  rule_path: /loki/rules-temp
+  ring:
+    kvstore:
+      store: inmemory
+  enable_api: true
+  enable_alertmanager_v2: false

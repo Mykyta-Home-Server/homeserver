@@ -1,0 +1,21 @@
+services:
+  # Hello World - Simple test application
+  hello-world:
+    image: nginx:alpine
+    container_name: hello-world
+    restart: unless-stopped
+    volumes:
+      - ../services/web/hello-world/index.html:/usr/share/nginx/html/index.html:ro
+    networks:
+      - internal
+
+  # Angular Portal - Home dashboard (Docker deployment)
+  portal:
+    image: ghcr.io/mykyta-home-server/homeserver-portal:latest
+    container_name: portal
+    restart: unless-stopped
+    networks:
+      - internal
+    labels:
+      - "com.homeserver.group=web"
+      - "com.homeserver.description=Angular home dashboard"

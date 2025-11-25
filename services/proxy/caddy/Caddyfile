@@ -1,0 +1,51 @@
+# ============================================================================
+# Caddyfile - Master Configuration
+# ============================================================================
+# This is the main Caddy configuration file that imports all service configs.
+# Individual service configurations are stored in the sites/ directory.
+#
+# To add a new service:
+# 1. Create a new .caddy file in sites/ directory
+# 2. Use the (cf_tls) snippet for Cloudflare Origin Certificates
+# 3. Caddy will automatically load it on restart/reload
+# ============================================================================
+
+# Global Options
+{
+    # Disable automatic HTTPS - we manually configure TLS with Cloudflare certs
+    auto_https off
+}
+
+# ============================================================================
+# Reusable Snippets
+# ============================================================================
+
+# Cloudflare Origin Certificate snippet
+# Use this in all HTTPS site blocks: import cf_tls
+(cf_tls) {
+    tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+}
+
+# Authelia Forward Authentication snippet
+# Use this to protect services with SSO: import authelia_auth
+(authelia_auth) {
+    # Forward authentication request to Authelia
+    forward_auth authelia:9091 {
+        # Forward the original URI and method to Authelia
+        uri /api/verify?rd=https://auth.mykyta-ryasny.dev
+
+        # Copy headers from Authelia response back to the original request
+        # These headers tell the backend service who the authenticated user is
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+
+        # Trusted proxies (Authelia's response is trusted)
+        trusted_proxies private_ranges
+    }
+}
+
+# ============================================================================
+# Import All Service Configurations
+# ============================================================================
+
+# Import all .Caddyfile files from the sites directory
+import sites/*.Caddyfile

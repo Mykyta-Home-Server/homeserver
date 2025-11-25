@@ -1,0 +1,308 @@
+# ============================================================================
+# Home Server .gitignore
+# ============================================================================
+# Prevents sensitive data, credentials, and runtime files from being committed
+# ============================================================================
+
+# ============================================================================
+# CRITICAL SECURITY - Credentials & Secrets
+# ============================================================================
+
+# Environment files with secrets
+.env
+.env.*
+!.env.example
+*.env
+
+# Cloudflare Tunnel credentials (VERY SENSITIVE - Never commit!)
+# OLD STRUCTURE (keeping for backwards compatibility)
+services/cloudflared/credentials.json
+services/cloudflared/*.json
+!services/cloudflared/config.yml
+# NEW STRUCTURE (current directory layout)
+services/tunnel/cloudflared/credentials.json
+services/tunnel/cloudflared/*.json
+!services/tunnel/cloudflared/config.yml  # Config is safe, credentials are not
+
+# Cloudflare Origin Certificates & Private Keys
+# Global patterns (catch any location)
+**/*.pem
+**/*.key
+**/*.crt
+# OLD STRUCTURE (keeping for backwards compatibility)
+services/caddy/certs/*.pem
+services/caddy/certs/*.key
+services/caddy/certs/*.crt
+# NEW STRUCTURE (current directory layout)
+services/proxy/caddy/certs/*.pem
+services/proxy/caddy/certs/*.key
+services/proxy/caddy/certs/*.crt
+
+# SSH keys
+id_rsa
+id_ed25519
+*.pub
+authorized_keys
+
+# API keys and tokens
+*_token
+*_secret
+*_key.txt
+api_keys.txt
+secrets.txt
+credentials.txt
+
+# Password files
+passwords.txt
+*.password
+
+# Database credentials
+database.env
+db.env
+
+# ============================================================================
+# Service-Specific Data & Runtime Files
+# ============================================================================
+
+# Caddy runtime data (auto-generated, can be large)
+# OLD STRUCTURE
+services/caddy/data/
+services/caddy/config/
+# NEW STRUCTURE
+services/proxy/caddy/data/
+services/proxy/caddy/config/
+
+# Application data volumes (media, downloads, configs)
+# NOTE: These patterns protect service runtime data with API keys and secrets
+services/*/data/
+services/*/config/
+services/*/downloads/
+services/*/media/
+services/*/cache/
+services/*/logs/
+
+# NEW STRUCTURE - Media services (contains API keys, databases, credentials!)
+services/media/*/config/
+services/media/*/*/config/
+services/media/*/data/
+services/media/*/cache/
+services/media/*/downloads/
+
+# Specific media service configs (contain API keys!)
+services/media/prowlarr/config/
+services/media/sonarr/config/
+services/media/radarr/config/
+services/media/jellyfin/config/
+services/media/jellyseerr/config/
+services/media/qbittorrent/config/
+services/media/qbittorrent/downloads/
+
+# ASP.NET Core Data Protection Keys (used by Prowlarr/Sonarr/Radarr)
+**/asp/key-*.xml
+**/.aspnet/DataProtection-Keys/
+
+# Database files (contain user data, hashed passwords, API keys)
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.sql
+**/*.db
+**/*.db-wal
+**/*.db-shm
+**/*.sqlite*
+
+# ============================================================================
+# Docker & Container Runtime
+# ============================================================================
+
+# Docker volumes (if not using bind mounts)
+volumes/
+
+# Docker Compose override files (local dev customizations)
+docker-compose.override.yml
+
+# Container logs
+*.log
+logs/
+
+# ============================================================================
+# Backup Files
+# ============================================================================
+
+# Backup archives
+backups/
+*.backup
+*.bak
+*.tar.gz
+*.zip
+*.7z
+
+# Snapshot files
+snapshots/
+
+# ============================================================================
+# Temporary & Cache Files
+# ============================================================================
+
+# General temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Cache directories
+cache/
+.cache/
+
+# Thumbnail caches
+*.thumbnails
+.thumbnails/
+
+# ============================================================================
+# OS & Editor Files
+# ============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE_BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================================================
+# IDE & Editor Files
+# ============================================================================
+
+# VS Code (keep .vscode if you want to share settings)
+# .vscode/
+*.code-workspace
+
+# JetBrains IDEs (PyCharm, IntelliJ, etc.)
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================================================
+# Development & Build Artifacts
+# ============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm/
+package-lock.json  # Remove if you want to commit it
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Rust
+target/
+Cargo.lock
+
+# ============================================================================
+# Media Files (Optional - Uncomment if not storing media in repo)
+# ============================================================================
+
+# Large media files (uncomment if you don't want to track media)
+# *.mp4
+# *.mkv
+# *.avi
+# *.mov
+# *.flv
+# *.wmv
+# *.mp3
+# *.flac
+# *.wav
+# *.iso
+
+# ============================================================================
+# Project-Specific Exclusions
+# ============================================================================
+
+# GitHub Actions Runner (exclude entire directory except Dockerfile)
+services/github-runner/*
+!services/github-runner/Dockerfile
+!services/github-runner/.env
+
+# Test files you don't want to commit
+test-data/
+scratch/
+experiments/
+
+# Local development overrides
+local/
+.local/
+
+# Monitoring stack runtime data
+services/monitoring/grafana/data/
+services/monitoring/loki/data/
+services/monitoring/promtail/positions/
+
+# Secrets directory (already covered by wildcard patterns but explicit for clarity)
+secrets/
+
+# ============================================================================
+# SAFE TO COMMIT - These SHOULD be in version control
+# ============================================================================
+
+# Configuration files (without secrets):
+# ✅ docker-compose.yml
+# ✅ services/caddy/Caddyfile
+# ✅ services/caddy/sites/*.caddy
+# ✅ services/cloudflared/config.yml (has tunnel ID, no credentials)
+# ✅ services/*/index.html (static content)
+# ✅ .env.example (template without real values)
+# ✅ Documentation files (*.md)
+# ✅ Scripts (*.sh, *.py)
+
+# ============================================================================
+# END OF .gitignore
+# ============================================================================
+
+services/auth/postgres/data/
+services/auth/redis/data/**
+data/**

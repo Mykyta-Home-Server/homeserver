@@ -1,0 +1,19 @@
+# Home Server - Docker Compose Configuration
+# Services organized by category in compose/ directory
+#
+# Environment variables are loaded from .env file (Docker Compose default)
+# See .env.auth for authentication-specific variables
+
+include:
+  # Network definitions (must be first)
+  - compose/networks.yml
+
+  # Services
+  - compose/proxy.yml
+  - compose/tunnel.yml
+  - compose/web.yml
+  - compose/media.yml
+  - compose/monitoring.yml
+  - compose/uptime-kuma.yml
+  - compose/auth.yml
+  - compose/github-runner.yml

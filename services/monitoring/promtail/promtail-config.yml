@@ -1,0 +1,207 @@
+# ============================================================================
+# Promtail Configuration
+# ============================================================================
+# Promtail collects logs from Docker containers and ships them to Loki
+#
+# How it works:
+#   1. Scrapes Docker container logs via /var/lib/docker/containers
+#   2. Extracts labels from container metadata (name, image, compose service)
+#   3. Parses log lines and adds additional labels
+#   4. Pushes logs to Loki with labels attached
+#
+# Official docs: https://grafana.com/docs/loki/latest/clients/promtail/
+# ============================================================================
+
+# ============================================================================
+# Server Configuration
+# ============================================================================
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0  # Disable gRPC
+  log_level: info
+
+# ============================================================================
+# Positions File
+# ============================================================================
+# Tracks which log files have been read and where reading stopped
+# Prevents re-sending logs when Promtail restarts
+positions:
+  filename: /tmp/positions/positions.yaml
+
+# ============================================================================
+# Loki Client Configuration
+# ============================================================================
+# Where to send logs
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+    # Batching configuration (improves efficiency)
+    batchwait: 1s      # Wait up to 1 second to batch logs
+    batchsize: 1048576 # Batch size: 1MB
+
+    # Retry configuration
+    backoff_config:
+      min_period: 500ms
+      max_period: 5m
+      max_retries: 10
+
+    # Timeout
+    timeout: 10s
+
+# ============================================================================
+# Scrape Configurations
+# ============================================================================
+# Defines what logs to collect and how to process them
+scrape_configs:
+  # --------------------------------------------------------------------------
+  # Docker Container Logs
+  # --------------------------------------------------------------------------
+  - job_name: docker
+
+    # Use Docker service discovery
+    # This automatically finds all running containers
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+
+        # Filter containers (optional)
+        # filters:
+        #   - name: label
+        #     values: ["logging=promtail"]
+
+    # Relabeling - Extract metadata from Docker and create Loki labels
+    # This is where the magic happens!
+    relabel_configs:
+      # -----------------------------------------------------------------------
+      # Container Name
+      # -----------------------------------------------------------------------
+      # Extract container name from __meta_docker_container_name
+      # Example: /jellyfin → jellyfin
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+
+      # -----------------------------------------------------------------------
+      # Container ID (short)
+      # -----------------------------------------------------------------------
+      # Extract first 12 chars of container ID
+      - source_labels: ['__meta_docker_container_id']
+        regex: '([a-f0-9]{12}).*'
+        target_label: 'container_id'
+
+      # -----------------------------------------------------------------------
+      # Docker Compose Service Name
+      # -----------------------------------------------------------------------
+      # Extract compose service name from label
+      # Example: com.docker.compose.service=jellyfin → jellyfin
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
+        target_label: 'compose_service'
+
+      # -----------------------------------------------------------------------
+      # Docker Compose Project Name
+      # -----------------------------------------------------------------------
+      # Extract compose project name
+      # Example: com.docker.compose.project=homeserver → homeserver
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_project']
+        target_label: 'compose_project'
+
+      # -----------------------------------------------------------------------
+      # Docker Image
+      # -----------------------------------------------------------------------
+      # Extract image name (without tag)
+      # Example: grafana/loki:2.9.3 → grafana/loki
+      - source_labels: ['__meta_docker_container_label_org_opencontainers_image_title']
+        target_label: 'image_name'
+        replacement: '$1'
+
+      # -----------------------------------------------------------------------
+      # Custom Labels (homeserver project)
+      # -----------------------------------------------------------------------
+      # Extract our custom labels from docker-compose.yml
+      - source_labels: ['__meta_docker_container_label_com_homeserver_group']
+        target_label: 'service_group'
+
+      - source_labels: ['__meta_docker_container_label_com_homeserver_description']
+        target_label: 'service_description'
+
+      # -----------------------------------------------------------------------
+      # Log Path
+      # -----------------------------------------------------------------------
+      # Set the file path to read logs from
+      # Docker stores logs in: /var/lib/docker/containers/<container_id>/<container_id>-json.log
+      - source_labels: ['__meta_docker_container_id']
+        target_label: '__path__'
+        replacement: '/var/lib/docker/containers/$1/$1-json.log'
+
+    # Pipeline stages - Process log lines
+    pipeline_stages:
+      # -----------------------------------------------------------------------
+      # Stage 1: Parse Docker JSON format
+      # -----------------------------------------------------------------------
+      # Docker logs are JSON: {"log":"actual log line\n","stream":"stdout","time":"2024-01-01T00:00:00Z"}
+      - json:
+          expressions:
+            output: log      # Extract the "log" field
+            stream: stream   # Extract "stdout" or "stderr"
+            timestamp: time  # Extract timestamp
+
+      # -----------------------------------------------------------------------
+      # Stage 2: Add stream label (stdout/stderr)
+      # -----------------------------------------------------------------------
+      - labels:
+          stream:
+
+      # -----------------------------------------------------------------------
+      # Stage 3: Parse timestamp
+      # -----------------------------------------------------------------------
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+
+      # -----------------------------------------------------------------------
+      # Stage 4: Set log line output
+      # -----------------------------------------------------------------------
+      - output:
+          source: output
+
+      # -----------------------------------------------------------------------
+      # Stage 5: Detect and label log levels (optional but useful!)
+      # -----------------------------------------------------------------------
+      # This regex detects common log level patterns and adds a "level" label
+      # Matches: ERROR, WARN, INFO, DEBUG, FATAL, etc.
+      - regex:
+          expression: '(?i)(?P<level>(error|err|warn|warning|info|debug|trace|fatal|critical))'
+
+      - labels:
+          level:
+
+      # -----------------------------------------------------------------------
+      # Stage 6: Drop noisy logs (optional)
+      # -----------------------------------------------------------------------
+      # Example: Drop health check logs to reduce noise
+      # - match:
+      #     selector: '{container="caddy"}'
+      #     stages:
+      #       - drop:
+      #           expression: ".*GET /health.*"
+
+      # Example: Drop debug logs from specific containers
+      # - match:
+      #     selector: '{container="grafana",level="debug"}'
+      #     stages:
+      #       - drop:
+      #           expression: ".*"
+
+# ============================================================================
+# Limits Configuration
+# ============================================================================
+limits_config:
+  # Readline rate limiting
+  readline_rate: 10000     # Max 10k lines/sec
+  readline_burst: 20000    # Burst up to 20k lines
+
+  # Maximum line length
+  max_line_size: 256kb     # Drop lines longer than 256KB
+
+  # Maximum streams (label combinations)
+  max_streams: 0           # No limit (be careful with cardinality!)

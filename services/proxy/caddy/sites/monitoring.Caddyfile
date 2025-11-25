@@ -1,0 +1,51 @@
+# ============================================================================
+# Monitoring Services - Caddy Configuration
+# ============================================================================
+
+# Grafana - Log visualization and dashboards
+# Access: https://monitor.mykyta-ryasny.dev
+https://monitor.mykyta-ryasny.dev {
+    # Use Cloudflare Origin Certificate
+    import cf_tls
+
+    # Authelia SSO Authentication
+    # Users must authenticate via Authelia before accessing Grafana
+    import authelia_auth
+
+    # Reverse proxy to Grafana
+    reverse_proxy grafana:3000 {
+        # Enable WebSocket support for real-time features
+        # Grafana uses WebSockets for:
+        # - Live dashboard updates
+        # - Real-time log streaming
+        # - Alert notifications
+        header_up Connection {http.request.header.Connection}
+        header_up Upgrade {http.request.header.Upgrade}
+
+        # Preserve original host header
+        header_up Host {http.request.host}
+
+        # Pass real IP to Grafana (for audit logs)
+        header_up X-Real-IP {http.request.remote.host}
+        header_up X-Forwarded-For {http.request.remote.host}
+        header_up X-Forwarded-Proto {http.request.scheme}
+    }
+
+    # Security headers
+    header {
+        # Enable XSS protection
+        X-XSS-Protection "1; mode=block"
+
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+
+        # Control framing (prevent clickjacking)
+        X-Frame-Options "SAMEORIGIN"
+
+        # Referrer policy
+        Referrer-Policy "same-origin"
+
+        # Remove server identification
+        -Server
+    }
+}

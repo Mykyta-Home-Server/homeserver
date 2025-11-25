@@ -1,0 +1,15 @@
+services:
+  # Cloudflare Tunnel - Secure external access without exposed ports
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ../services/tunnel/cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      - ../services/tunnel/cloudflared/credentials.json:/etc/cloudflared/credentials.json:ro
+    networks:
+      - proxy
+    depends_on:
+      - caddy
+

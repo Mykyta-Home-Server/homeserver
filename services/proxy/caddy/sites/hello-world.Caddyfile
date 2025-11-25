@@ -1,0 +1,24 @@
+# ============================================================================
+# Hello World Service Configuration
+# ============================================================================
+# Main website hosted at the root domain
+# Container: hello-world (nginx:alpine)
+# ============================================================================
+
+# Main domain
+https://mykyta-ryasny.dev {
+    # Import Cloudflare Origin Certificate configuration
+    import cf_tls
+
+    # Reverse proxy to hello-world container on port 80
+    reverse_proxy hello-world:80
+}
+
+# WWW subdomain - redirect to main domain
+https://www.mykyta-ryasny.dev {
+    # Import Cloudflare Origin Certificate configuration
+    import cf_tls
+
+    # Redirect to non-www version
+    redir https://mykyta-ryasny.dev{uri}
+}

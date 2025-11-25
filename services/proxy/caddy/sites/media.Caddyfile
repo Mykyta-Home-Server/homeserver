@@ -1,0 +1,72 @@
+# Media Services - Caddy Configuration
+# All media-related subdomains with authentication
+
+# qBittorrent - Torrent download client
+# Access: https://torrent.mykyta-ryasny.dev
+https://torrent.mykyta-ryasny.dev {
+    # Use Cloudflare Origin Certificate
+    import cf_tls
+
+    # Authelia SSO Authentication
+    import authelia_auth
+
+    reverse_proxy qbittorrent:8080 {
+        # Pass authentication headers to qBittorrent
+        header_up X-Forwarded-User {http.request.header.Remote-User}
+    }
+}
+
+# Jellyfin - Media streaming server
+# Access: https://streaming.mykyta-ryasny.dev
+https://streaming.mykyta-ryasny.dev {
+    import cf_tls
+
+    # Authelia SSO Authentication
+    import authelia_auth
+
+    reverse_proxy jellyfin:8096
+}
+
+# Radarr - Movie automation
+# Access: https://movies.mykyta-ryasny.dev
+https://movies.mykyta-ryasny.dev {
+    import cf_tls
+
+    # Authelia SSO Authentication
+    import authelia_auth
+
+    reverse_proxy radarr:7878
+}
+
+# Sonarr - TV show automation
+# Access: https://tv.mykyta-ryasny.dev
+https://tv.mykyta-ryasny.dev {
+    import cf_tls
+
+    # Authelia SSO Authentication
+    import authelia_auth
+
+    reverse_proxy sonarr:8989
+}
+
+# Prowlarr - Indexer manager
+# Access: https://indexers.mykyta-ryasny.dev
+https://indexers.mykyta-ryasny.dev {
+    import cf_tls
+
+    # Authelia SSO Authentication
+    import authelia_auth
+
+    reverse_proxy prowlarr:9696
+}
+
+# Jellyseerr - Request management interface
+# Access: https://requests.mykyta-ryasny.dev
+https://requests.mykyta-ryasny.dev {
+    import cf_tls
+
+    # Authelia SSO Authentication
+    import authelia_auth
+
+    reverse_proxy jellyseerr:5055
+}

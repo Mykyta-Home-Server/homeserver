@@ -1,0 +1,1 @@
+../docs/ZSH_SETUP_SOLUTION.md

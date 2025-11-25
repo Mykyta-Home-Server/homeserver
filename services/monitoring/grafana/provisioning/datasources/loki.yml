@@ -1,0 +1,49 @@
+# ============================================================================
+# Grafana Datasource Provisioning - Loki
+# ============================================================================
+# This file automatically configures Loki as a datasource in Grafana
+# No manual UI configuration needed!
+#
+# Official docs: https://grafana.com/docs/grafana/latest/administration/provisioning/#datasources
+# ============================================================================
+
+apiVersion: 1
+
+# Deletion policy
+# - Delete datasources from UI if they're removed from this file
+deleteDatasources:
+  - name: Loki
+    orgId: 1
+
+# Datasource definitions
+datasources:
+  # Loki datasource
+  - name: Loki
+    type: loki
+    access: proxy  # Grafana server makes requests (not browser)
+    uid: loki  # Unique ID used by dashboards to reference this datasource
+
+    # Loki URL (internal Docker network)
+    url: http://loki:3100
+
+    # Basic settings
+    isDefault: true  # Make this the default datasource
+    version: 1
+    editable: false  # Prevent editing in UI (enforce Infrastructure as Code)
+
+    # JSON configuration
+    jsonData:
+      # Max query lines to return (prevents overwhelming browser)
+      maxLines: 1000
+
+      # Timeout for queries
+      timeout: 60
+
+      # Derived fields - Extract data from logs and create links
+      # Example: Extract trace IDs and link to tracing system
+      derivedFields:
+        # Extract container ID from logs and create link to container
+        - datasourceUid: loki
+          matcherRegex: "container_id=([a-f0-9]+)"
+          name: "Container"
+          url: "$${__value.raw}"

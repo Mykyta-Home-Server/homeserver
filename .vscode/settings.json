@@ -1,0 +1,18 @@
+{
+  // Force VS Code to use ZSH in the integrated terminal
+  "terminal.integrated.defaultProfile.linux": "zsh",
+
+  // Define the ZSH profile
+  "terminal.integrated.profiles.linux": {
+    "zsh": {
+      "path": "/usr/bin/zsh",
+      "args": []
+    },
+    "bash": {
+      "path": "/bin/bash"
+    }
+  },
+
+  // Use login shell to load .zshrc properly
+  "terminal.integrated.inheritEnv": true
+}
