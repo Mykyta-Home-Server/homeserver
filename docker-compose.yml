@@ -3,6 +3,20 @@
 #
 # Environment variables are loaded from .env file (Docker Compose default)
 # See .env.auth for authentication-specific variables
+#
+# ============================================================================
+# IMPORTANT: This project uses Docker Compose profiles!
+# ============================================================================
+# To start ALL services (including media & monitoring), use:
+#   docker compose --profile all up -d
+#
+# Without --profile all, only core services (proxy, auth, web) will start.
+#
+# Available profiles:
+#   - all         : Start everything
+#   - media       : Media stack (Jellyfin, Sonarr, Radarr, etc.)
+#   - monitoring  : Monitoring stack (Grafana, Loki, Promtail)
+# ============================================================================
 
 include:
   # Network definitions (must be first)
