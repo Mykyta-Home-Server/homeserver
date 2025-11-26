@@ -1,35 +1,48 @@
+# ============================================================================
 # Home Server - Docker Compose Configuration
+# ============================================================================
 # Services organized by category in compose/ directory
 #
-# Environment variables are loaded from .env file (Docker Compose default)
-# See .env.auth for authentication-specific variables
+# Environment variables loaded from .env file
 #
 # ============================================================================
-# IMPORTANT: This project uses Docker Compose profiles!
+# Docker Compose Profiles
 # ============================================================================
-# To start ALL services (including media & monitoring), use:
+# This project uses profiles to control which services start:
+#
+# DEFAULT (no profile):
+#   docker compose up -d
+#   → Starts: Infrastructure + Authentication
+#   → Services: caddy, cloudflared, postgres-auth, redis-auth, authelia,
+#               openldap, phpldapadmin, user-management
+#
+# PROFILES:
+#   --profile web         : Web applications (portal, hello-world)
+#   --profile media       : Media stack (Jellyfin, Sonarr, Radarr, etc.)
+#   --profile monitoring  : Monitoring (Grafana, Loki, Promtail, Uptime Kuma)
+#   --profile cicd        : GitHub Actions runner
+#   --profile all         : Everything
+#
+# EXAMPLES:
+#   # Start infrastructure + auth + media + monitoring
+#   docker compose --profile media --profile monitoring up -d
+#
+#   # Start everything
 #   docker compose --profile all up -d
 #
-# Without --profile all, only core services (proxy, auth, web) will start.
-#
-# Available profiles:
-#   - all         : Start everything
-#   - media       : Media stack (Jellyfin, Sonarr, Radarr, etc.)
-#   - monitoring  : Monitoring stack (Grafana, Loki, Promtail)
+#   # Start just core services (infra + auth)
+#   docker compose up -d
 # ============================================================================
 
 include:
   # Network definitions (must be first)
   - compose/networks.yml
 
-  # Services
-  - compose/proxy.yml
-  - compose/tunnel.yml
-  - compose/web.yml
-  - compose/media.yml
-  - compose/monitoring.yml
-  - compose/uptime-kuma.yml
-  - compose/auth.yml
-  - compose/ldap.yml
-  - compose/user-management.yml
-  - compose/github-runner.yml
+  # Core services (always run - no profile needed)
+  - compose/infrastructure.yml  # caddy, cloudflared, github-runner (cicd profile)
+  - compose/auth.yml            # All authentication services
+
+  # Optional services (require profiles)
+  - compose/web.yml             # Web applications (profile: web, all)
+  - compose/media.yml           # Media stack (profile: media, all)
+  - compose/monitoring.yml      # Monitoring stack (profile: monitoring, all)

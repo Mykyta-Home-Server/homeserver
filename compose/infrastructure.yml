@@ -1,0 +1,145 @@
+# ============================================================================
+# Infrastructure Services - Core services that always run
+# ============================================================================
+# Services: Caddy (reverse proxy), Cloudflared (tunnel), GitHub Runner (CI/CD)
+# Networks: proxy (external), internal (backend services)
+# ============================================================================
+
+services:
+  # ==========================================================================
+  # Caddy - Reverse proxy with automatic HTTPS
+  # ==========================================================================
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+
+    # Ports - ONLY service that should expose ports
+    ports:
+      - "80:80"    # HTTP (redirects to HTTPS)
+      - "443:443"  # HTTPS
+
+    # Volumes
+    volumes:
+      - ../services/proxy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../services/proxy/caddy/sites:/etc/caddy/sites:ro
+      - ../services/proxy/caddy/data:/data
+      - ../services/proxy/caddy/config:/config
+      - ../services/proxy/caddy/certs:/etc/caddy/certs:ro
+
+    # Networks - connects proxy and internal
+    networks:
+      - proxy      # External-facing (Cloudflared connects here)
+      - internal   # Backend services (auth, media, web)
+
+    # Health check - check if Caddy process is running
+    healthcheck:
+      test: ["CMD", "sh", "-c", "pgrep caddy || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=infrastructure"
+      - "com.homeserver.description=Caddy reverse proxy with automatic HTTPS"
+
+  # ==========================================================================
+  # Cloudflare Tunnel - Secure external access without exposed ports
+  # ==========================================================================
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+
+    # Command
+    command: tunnel --config /etc/cloudflared/config.yml run
+
+    # Volumes
+    volumes:
+      - ../services/tunnel/cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      - ../services/tunnel/cloudflared/credentials.json:/etc/cloudflared/credentials.json:ro
+
+    # Networks - only proxy (connects to Caddy)
+    networks:
+      - proxy
+
+    # Depends on
+    depends_on:
+      - caddy
+
+    # Health check - cloudflared minimal container, disable for now
+    # The tunnel will log errors if it's not connected
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pgrep cloudflared || exit 1"]
+    #   interval: 60s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 30s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=infrastructure"
+      - "com.homeserver.description=Cloudflare Tunnel for secure external access"
+
+  # ==========================================================================
+  # GitHub Runner - CI/CD self-hosted runner
+  # ==========================================================================
+  github-runner:
+    profiles: ["cicd", "all"]
+    image: actions-runner:custom
+    container_name: github-runner
+    restart: unless-stopped
+
+    # Environment
+    environment:
+      - TZ=Europe/Madrid
+
+    # Volumes
+    volumes:
+      # Docker socket - allows runner to execute docker commands
+      # WARNING: This grants significant privileges - use with caution
+      - /var/run/docker.sock:/var/run/docker.sock
+
+      # Homeserver directory - for deployment scripts
+      # TODO: Consider limiting to specific subdirectories for security
+      - /opt/homeserver:/opt/homeserver
+
+      # Runner installation with credentials (pre-configured)
+      - /opt/homeserver/services/github-runner:/runner
+
+    # Working directory
+    working_dir: /runner
+
+    # Command
+    command: ./run.sh
+
+    # Networks
+    networks:
+      - internal
+
+    # Health check - check if runner process is active
+    healthcheck:
+      test: ["CMD", "sh", "-c", "pgrep -f 'Runner.Listener' || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=automation"
+      - "com.homeserver.description=GitHub Actions self-hosted runner"

@@ -8,6 +8,19 @@ https://home.mykyta-ryasny.dev {
         reverse_proxy user-management:3000
     }
 
+    # User info endpoint (authenticated - returns current user's info)
+    @user_info path /api/me
+    handle @user_info {
+        import authelia_auth
+        reverse_proxy user-management:3000 {
+            # Forward Authelia headers to backend
+            header_up Remote-User {http.request.header.Remote-User}
+            header_up Remote-Groups {http.request.header.Remote-Groups}
+            header_up Remote-Name {http.request.header.Remote-Name}
+            header_up Remote-Email {http.request.header.Remote-Email}
+        }
+    }
+
     # Admin API endpoints (Authelia required - admin only)
     @admin_api path /api/users* /api/invitations /api/invitations/*
     handle @admin_api {

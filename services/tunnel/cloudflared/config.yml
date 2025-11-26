@@ -65,13 +65,6 @@ ingress:
       noTLSVerify: true
       originServerName: auth.mykyta-ryasny.dev
 
-  # LDAP Management - phpLDAPadmin
-  - hostname: ldap.mykyta-ryasny.dev
-    service: https://caddy:443
-    originRequest:
-      noTLSVerify: true
-      originServerName: ldap.mykyta-ryasny.dev
-
   # Home Portal - Angular dashboard
   - hostname: home.mykyta-ryasny.dev
     service: https://caddy:443

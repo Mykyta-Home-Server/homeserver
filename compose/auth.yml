@@ -1,23 +1,20 @@
 # ============================================================================
 # Authentication Stack - Docker Compose Configuration
 # ============================================================================
-# Services: PostgreSQL, Redis, Authelia
-# Networks: auth (internal), proxy (external to Caddy)
+# Services: PostgreSQL, Redis, Authelia, OpenLDAP, phpLDAPadmin, User Management API
+# Networks: internal (databases), proxy (Authelia frontend)
 # ============================================================================
 
 services:
   # ==========================================================================
-  # PostgreSQL - User database
+  # PostgreSQL - User database for Authelia
   # ==========================================================================
   postgres-auth:
     image: postgres:16-alpine
     container_name: postgres-auth
-
     restart: unless-stopped
 
     # Environment variables
-    # Note: Define these in /opt/homeserver/.env.auth
-    # Password now uses Docker secrets for better security
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -29,13 +26,9 @@ services:
 
     # Volumes
     volumes:
-      # Persistent database storage
       - ../services/auth/postgres/data:/var/lib/postgresql/data
 
-      # Initialization script (Authelia will create tables automatically)
-      # - ../services/auth/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-
-    # Networks - only internal
+    # Networks - ONLY internal (databases should NOT be on proxy network)
     networks:
       - internal
 
@@ -67,12 +60,11 @@ services:
       - "com.homeserver.description=PostgreSQL database for Authelia"
 
   # ==========================================================================
-  # Redis - Session storage and cache
+  # Redis - Session storage and cache for Authelia
   # ==========================================================================
   redis-auth:
     image: redis:7-alpine
     container_name: redis-auth
-
     restart: unless-stopped
 
     # Command - enable persistence with password authentication
@@ -86,7 +78,7 @@ services:
     volumes:
       - ../services/auth/redis/data:/data
 
-    # Networks - only internal
+    # Networks - ONLY internal (databases should NOT be on proxy network)
     networks:
       - internal
 
@@ -105,20 +97,17 @@ services:
     # Labels
     labels:
       - "com.homeserver.group=auth"
-      - "com.homeserver.description=Redis cache for sessions"
+      - "com.homeserver.description=Redis cache for Authelia sessions"
 
   # ==========================================================================
-  # Authelia - Authentication server
+  # Authelia - SSO Authentication server
   # ==========================================================================
   authelia:
     image: authelia/authelia:latest
     container_name: authelia
-
     restart: unless-stopped
 
     # Environment variables
-    # Note: Define these in /opt/homeserver/.env
-    # Database and Redis passwords now use Docker secrets
     environment:
       - TZ=${TZ}
       - AUTHELIA_JWT_SECRET=${AUTHELIA_JWT_SECRET}
@@ -139,16 +128,13 @@ services:
       # Configuration file
       - ../services/auth/authelia/configuration.yml:/config/configuration.yml:ro
 
-      # User database (file-based for initial admin)
-      - ../services/auth/authelia/users_database.yml:/config/users_database.yml:ro
+      # User database (file-based) - DISABLED: Using LDAP instead
+      # - ../services/auth/authelia/users_database.yml:/config/users_database.yml:ro
 
-    # Networks
+    # Networks - CRITICAL: Must be on BOTH networks
     networks:
-      - internal   # Connect to database, Redis, and Caddy
-
-    # Ports (internal only)
-    ports:
-      - "9091:9091"  # Authelia web interface
+      - internal   # Connect to postgres-auth, redis-auth, openldap
+      - proxy      # Connect to Caddy for forward auth (SECURITY FIX)
 
     # Depends on database and cache
     depends_on:
@@ -172,7 +158,175 @@ services:
     # Labels
     labels:
       - "com.homeserver.group=auth"
-      - "com.homeserver.description=Authelia authentication server"
+      - "com.homeserver.description=Authelia SSO authentication server"
+
+  # ==========================================================================
+  # OpenLDAP - Directory server for centralized user authentication
+  # ==========================================================================
+  openldap:
+    image: osixia/openldap:1.5.0
+    container_name: openldap
+    restart: unless-stopped
+
+    # Environment variables
+    environment:
+      # LDAP organization and domain
+      LDAP_ORGANISATION: "Mykyta Home Server"
+      LDAP_DOMAIN: "mykyta-ryasny.dev"
+
+      # Admin credentials
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+      LDAP_CONFIG_PASSWORD: ${LDAP_CONFIG_PASSWORD}
+
+      # Additional config
+      LDAP_READONLY_USER: "false"
+      LDAP_RFC2307BIS_SCHEMA: "false"
+      LDAP_BACKEND: "mdb"
+      LDAP_TLS: "true"
+      LDAP_TLS_CRT_FILENAME: "ldap.crt"
+      LDAP_TLS_KEY_FILENAME: "ldap.key"
+      LDAP_TLS_DH_PARAM_FILENAME: "dhparam.pem"
+      LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
+      LDAP_TLS_ENFORCE: "false"
+      LDAP_TLS_CIPHER_SUITE: "SECURE256:-VERS-SSL3.0"
+      LDAP_TLS_PROTOCOL_MIN: "3.1"
+      LDAP_TLS_VERIFY_CLIENT: "demand"
+      LDAP_REPLICATION: "false"
+      KEEP_EXISTING_CONFIG: "false"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "true"
+      LDAP_SSL_HELPER_PREFIX: "ldap"
+
+    # Volumes
+    volumes:
+      - ../services/auth/ldap/database:/var/lib/ldap
+      - ../services/auth/ldap/config:/etc/ldap/slapd.d
+      - ../services/auth/ldap/certs:/container/service/slapd/assets/certs
+
+    # Networks - ONLY internal (LDAP should not be directly accessible)
+    networks:
+      - internal
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://localhost", "-b", "dc=mykyta-ryasny,dc=dev", "-D", "cn=admin,dc=mykyta-ryasny,dc=dev", "-w", "${LDAP_ADMIN_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=authentication"
+      - "com.homeserver.description=OpenLDAP directory server"
+
+  # ==========================================================================
+  # phpLDAPadmin - Web interface for managing LDAP (local network only)
+  # ==========================================================================
+  phpldapadmin:
+    image: osixia/phpldapadmin:0.9.0
+    container_name: phpldapadmin
+    restart: unless-stopped
+
+    # Environment variables
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "openldap"
+      PHPLDAPADMIN_HTTPS: "false"
+
+    # Networks - ONLY internal (SECURITY FIX: removed proxy network)
+    # Access via local network port 8080 only - no public access
+    networks:
+      - internal
+
+    # Ports - exposed for local network access only
+    ports:
+      - "8080:80"
+
+    # Depends on
+    depends_on:
+      openldap:
+        condition: service_healthy
+
+    # Health check - phpLDAPadmin doesn't have wget/curl, check process
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'php-fpm|apache2|httpd' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=authentication"
+      - "com.homeserver.description=phpLDAPadmin (local access only on port 8080)"
+
+  # ==========================================================================
+  # User Management API - Backend API for user registration and management
+  # ==========================================================================
+  user-management:
+    image: ghcr.io/mykyta-home-server/user-management-api:latest
+    container_name: user-management
+    restart: unless-stopped
+
+    # Environment variables
+    environment:
+      # Redis configuration (for invitation tokens)
+      - REDIS_HOST=redis-auth
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD_FILE=/run/secrets/redis_password  # SECURITY FIX
+
+      # LDAP configuration (for user credentials)
+      - LDAP_SERVER=openldap
+      - LDAP_PORT=389
+      - LDAP_ADMIN_DN=cn=admin,dc=mykyta-ryasny,dc=dev
+      - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
+      - LDAP_BASE_DN=dc=mykyta-ryasny,dc=dev
+
+      # Application configuration
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=${USER_MANAGEMENT_JWT_SECRET}
+      - TZ=${TZ}
+
+    # Docker secrets
+    secrets:
+      - redis_password
+
+    # Networks - internal for backend, proxy for Caddy reverse proxy
+    networks:
+      - internal
+      - proxy
+
+    # Depends on
+    depends_on:
+      openldap:
+        condition: service_healthy
+      redis-auth:
+        condition: service_healthy
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=authentication"
+      - "com.homeserver.description=User Management API for LDAP"
 
 # ============================================================================
 # Docker Secrets

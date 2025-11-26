@@ -85,6 +85,14 @@ services:
       - internal
     restart: unless-stopped
 
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7878/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   # Sonarr - TV show automation
   sonarr:
     profiles: ["media", "all"]
@@ -101,6 +109,14 @@ services:
       - internal
     restart: unless-stopped
 
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8989/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   # Prowlarr - Indexer manager
   prowlarr:
     profiles: ["media", "all"]
@@ -116,6 +132,14 @@ services:
       - internal
     restart: unless-stopped
 
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9696/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   # Jellyseerr - Request management
   jellyseerr:
     profiles: ["media", "all"]
@@ -130,7 +154,18 @@ services:
       - internal
     restart: unless-stopped
     depends_on:
-      - jellyfin
-      - radarr
-      - sonarr
+      jellyfin:
+        condition: service_healthy
+      radarr:
+        condition: service_healthy
+      sonarr:
+        condition: service_healthy
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5055/api/v1/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 

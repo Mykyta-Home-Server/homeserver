@@ -1,25 +1,12 @@
 # ============================================================================
 # Monitoring Stack - Docker Compose Configuration
 # ============================================================================
-# Grafana Loki logging stack for centralized log aggregation and monitoring
+# Services: Loki, Promtail, Grafana, Uptime Kuma
+# Networks: monitoring (logs), internal (backend), proxy (frontend)
 #
 # Architecture:
-#   Promtail → Loki → Grafana
-#   (collect)  (store) (visualize)
-#
-# Services:
-#   - Loki: Log aggregation and storage (like Prometheus for logs)
-#   - Promtail: Log collector that scrapes Docker container logs
-#   - Grafana: Visualization and dashboards
-#
-# Access:
-#   - Grafana UI: https://monitor.mykyta-ryasny.dev
-#   - Loki API: http://loki:3100 (internal only)
-#
-# Official docs:
-#   - Loki: https://grafana.com/docs/loki/latest/
-#   - Promtail: https://grafana.com/docs/loki/latest/clients/promtail/
-#   - Grafana: https://grafana.com/docs/grafana/latest/
+#   Promtail → Loki → Grafana (log aggregation)
+#   Uptime Kuma → Internal services (uptime monitoring)
 # ============================================================================
 
 services:
@@ -30,35 +17,26 @@ services:
     profiles: ["monitoring", "all"]
     image: grafana/loki:3.0.0
     container_name: loki
-
     restart: unless-stopped
 
     # Networks
     networks:
-      - monitoring  # Internal network for Promtail → Loki communication
-      - internal    # Internal services network
-
-    # Ports (internal only, not exposed to host)
-    ports:
-      - "3100:3100"  # Loki HTTP API
+      - monitoring  # Promtail → Loki communication
+      - internal    # Other services can query logs
 
     # Volumes
     volumes:
-      # Loki configuration file
       - ../services/monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
-
-      # Loki data storage (logs, index, chunks)
-      # This is where your logs are actually stored
       - ../services/monitoring/loki/data:/loki
 
-    # Command override - Use custom config
+    # Command
     command: -config.file=/etc/loki/local-config.yaml
 
     # Security
     security_opt:
       - no-new-privileges:true
 
-    # Resource limits (adjust based on your log volume)
+    # Resource limits
     deploy:
       resources:
         limits:
@@ -86,38 +64,36 @@ services:
     profiles: ["monitoring", "all"]
     image: grafana/promtail:3.0.0
     container_name: promtail
-
     restart: unless-stopped
 
-    # Networks
+    # Networks - SECURITY FIX: Add internal for better service discovery
     networks:
-      - monitoring  # Connects to Loki
+      - monitoring  # Connect to Loki
+      - internal    # Service discovery
 
     # Volumes
     volumes:
-      # Promtail configuration
       - ../services/monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
-
-      # Docker socket - Required to read container logs
-      # Read-only for security (Promtail only needs to read logs)
       - /var/run/docker.sock:/var/run/docker.sock:ro
-
-      # Docker container log files (alternative to socket, more efficient)
-      # Docker stores container logs in JSON format here
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-
-      # Promtail positions file (tracks which logs have been read)
-      # This ensures logs aren't re-sent if Promtail restarts
       - ../services/monitoring/promtail/positions:/tmp/positions
 
-    # Command override - Use custom config
+    # Command
     command: -config.file=/etc/promtail/config.yml
+
+    # Health check - check if promtail process is running
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep promtail || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
     # Security
     security_opt:
       - no-new-privileges:true
 
-    # Depends on Loki being available
+    # Depends on
     depends_on:
       loki:
         condition: service_healthy
@@ -142,36 +118,25 @@ services:
     profiles: ["monitoring", "all"]
     image: grafana/grafana:10.2.2
     container_name: grafana
-
     restart: unless-stopped
 
     # Networks
     networks:
-      - monitoring  # Connects to Loki
-      - internal    # Connects to internal services
-      - proxy       # Connects to Caddy for external access
-
-    # Ports (internal only)
-    ports:
-      - "3000:3000"  # Grafana web UI
+      - monitoring  # Connect to Loki
+      - internal    # Connect to internal services
+      - proxy       # Connect to Caddy for external access
 
     # Volumes
     volumes:
-      # Grafana data (dashboards, users, settings)
       - ../services/monitoring/grafana/data:/var/lib/grafana
-
-      # Grafana configuration
       - ../services/monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
-
-      # Provisioning - Auto-configure datasources and dashboards
-      # This is Infrastructure as Code for Grafana!
       - ../services/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
 
     # Environment variables
     environment:
-      # Security - Change these!
+      # Security - SHOULD BE IN .env FILE
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin  # TODO: Change this!
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}  # TODO: Set in .env
 
       # Server settings
       - GF_SERVER_ROOT_URL=https://monitor.mykyta-ryasny.dev
@@ -181,18 +146,14 @@ services:
       - GF_ANALYTICS_REPORTING_ENABLED=false
       - GF_ANALYTICS_CHECK_FOR_UPDATES=false
 
-      # Enable anonymous access for dashboards (optional)
-      # - GF_AUTH_ANONYMOUS_ENABLED=true
-      # - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
-
     # User - Run as grafana user (non-root)
-    user: "472:472"  # Default Grafana user ID
+    user: "472:472"
 
     # Security
     security_opt:
       - no-new-privileges:true
 
-    # Depends on Loki being available
+    # Depends on
     depends_on:
       loki:
         condition: service_healthy
@@ -217,4 +178,3 @@ services:
     labels:
       - "com.homeserver.group=monitoring"
       - "com.homeserver.description=Monitoring and visualization platform"
-

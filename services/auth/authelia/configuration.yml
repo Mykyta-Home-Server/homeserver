@@ -178,37 +178,32 @@ access_control:
         - "uptime.mykyta-ryasny.dev"       # Uptime Kuma
         - "indexers.mykyta-ryasny.dev"     # Prowlarr
         - "torrent.mykyta-ryasny.dev"      # qBittorrent
-        - "ldap.mykyta-ryasny.dev"         # LDAP Management (phpLDAPadmin)
       policy: one_factor  # Just password for now (can enable 2FA later)
       subject:
         - ["group:admins"]
 
     # ========================================================================
-    # Media Management (Admin + Family)
+    # Media Management - Admin Only (Radarr, Sonarr)
     # ========================================================================
     - domain:
         - "movies.mykyta-ryasny.dev"       # Radarr
         - "tv.mykyta-ryasny.dev"           # Sonarr
-        - "requests.mykyta-ryasny.dev"     # Jellyseerr
-      policy: one_factor  # Just password for now (can enable 2FA later)
+      policy: one_factor
+      subject:
+        - ["group:admins"]
+
+    # ========================================================================
+    # Family Access - Request, Streaming, Home Portal
+    # ========================================================================
+    # Jellyseerr - Request content (Admin + Family)
+    - domain:
+        - "requests.mykyta-ryasny.dev"    # Jellyseerr
+        - "streaming.mykyta-ryasny.dev"   # Jellyfin
+        - "home.mykyta-ryasny.dev"         # Your custom Angular dashboard
+      policy: one_factor
       subject:
         - ["group:admins"]
         - ["group:family"]
-
-    # ========================================================================
-    # Media Streaming (Everyone authenticated)
-    # ========================================================================
-    - domain:
-        - "streaming.mykyta-ryasny.dev"    # Jellyfin
-      policy: one_factor  # Just password, no 2FA required
-      # No subject = any authenticated user
-
-    # ========================================================================
-    # Home Dashboard (Everyone authenticated)
-    # ========================================================================
-    - domain:
-        - "home.mykyta-ryasny.dev"         # Your custom Angular dashboard
-      policy: one_factor
 
     # ========================================================================
     # Default: Require authentication for everything else
@@ -235,7 +230,7 @@ session:
   # Authelia reads this automatically from env
 
   # Session expiration
-  expiration: 1h      # Inactive sessions expire after 1 hour
+  expiration: 24h     # Inactive sessions expire after 24 hours (increased for media streaming)
   inactivity: 5m      # Refresh activity every 5 minutes
   remember_me: 1M     # "Remember me" keeps session for 1 month
 
