@@ -1,70 +1,21 @@
 /* Custom styles for Home Server Docs */
+/* Using Starlight's theming system - only override CSS variables */
 
-/* Light mode */
+/* Light mode accent colors */
 :root {
   --sl-color-accent-low: #c7d9f2;
   --sl-color-accent: #2563eb;
   --sl-color-accent-high: #1d4ed8;
-  --sl-color-white: #ffffff;
-  --sl-color-gray-1: #f8fafc;
-  --sl-color-gray-2: #e2e8f0;
-  --sl-color-gray-3: #cbd5e1;
-  --sl-color-gray-4: #94a3b8;
-  --sl-color-gray-5: #64748b;
-  --sl-color-gray-6: #475569;
-  --sl-color-black: #0f172a;
-  --sl-color-bg: #ffffff;
-  --sl-color-bg-nav: #f8fafc;
-  --sl-color-bg-sidebar: #f1f5f9;
 }
 
-/* Dark mode - proper dark colors */
+/* Dark mode - use Starlight's dark theme with custom accent */
 :root[data-theme='dark'] {
   --sl-color-accent-low: #1e3a5f;
   --sl-color-accent: #60a5fa;
   --sl-color-accent-high: #93c5fd;
-  --sl-color-white: #ffffff;
-  --sl-color-gray-1: #f8fafc;
-  --sl-color-gray-2: #e2e8f0;
-  --sl-color-gray-3: #94a3b8;
-  --sl-color-gray-4: #64748b;
-  --sl-color-gray-5: #475569;
-  --sl-color-gray-6: #334155;
-  --sl-color-black: #0f172a;
-  --sl-color-bg: #0f172a;
-  --sl-color-bg-nav: #1e293b;
-  --sl-color-bg-sidebar: #1e293b;
-  --sl-color-hairline-light: #334155;
-  --sl-color-hairline: #475569;
-  --sl-color-text: #e2e8f0;
-  --sl-color-text-accent: #93c5fd;
-}
-
-/* Force dark backgrounds in dark mode */
-[data-theme='dark'] {
-  background-color: #0f172a;
-  color: #e2e8f0;
-}
-
-[data-theme='dark'] .sidebar-pane,
-[data-theme='dark'] nav.sidebar {
-  background-color: #1e293b;
-}
-
-[data-theme='dark'] header {
-  background-color: #0f172a;
-  border-color: #334155;
-}
-
-[data-theme='dark'] .content-panel {
-  background-color: #0f172a;
 }
 
 /* Code block enhancements */
 .sl-markdown-content pre {
   border-radius: 0.5rem;
-}
-
-[data-theme='dark'] .sl-markdown-content pre {
-  background-color: #1e293b !important;
 }
