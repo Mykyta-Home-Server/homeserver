@@ -1,0 +1,40 @@
+---
+title: Home Server Documentation
+description: Documentation for personal home server with AI-powered automation
+template: splash
+hero:
+  tagline: Personal home server with AI-powered automation running 24 containers
+  image:
+    file: ../../assets/logo-light.svg
+  actions:
+    - text: Get Started
+      link: /homeserver/guides/introduction/
+      icon: right-arrow
+      variant: primary
+    - text: Quick Reference
+      link: /homeserver/reference/quick-reference/
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Quick Links
+
+<CardGrid stagger>
+  <Card title="Docker Guide" icon="setting">
+    Complete Docker installation, commands, and troubleshooting.
+    [Read more](/homeserver/guides/docker/)
+  </Card>
+  <Card title="Adding Services" icon="add-document">
+    How to add new services with HTTPS access.
+    [Read more](/homeserver/guides/adding-services/)
+  </Card>
+  <Card title="Monitoring" icon="laptop">
+    Grafana Loki centralized logging setup.
+    [Read more](/homeserver/guides/monitoring/)
+  </Card>
+  <Card title="Scripts" icon="document">
+    Automation scripts for maintenance.
+    [Read more](/homeserver/reference/scripts/)
+  </Card>
+</CardGrid>
