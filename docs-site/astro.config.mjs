@@ -1,14 +1,14 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import tailwind from '@astrojs/tailwind';
-import starlightClientMermaid from '@pasqal-io/starlight-client-mermaid';
+import mermaid from 'astro-mermaid';
 
 export default defineConfig({
   site: 'https://mykyta-ryasny.github.io',
   base: '/homeserver',
   integrations: [
+    mermaid(),
     starlight({
-      plugins: [starlightClientMermaid()],
       title: 'Home Server Docs',
       description: 'Documentation for personal home server with AI-powered automation',
       logo: {
