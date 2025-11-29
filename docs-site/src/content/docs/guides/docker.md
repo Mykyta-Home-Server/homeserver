@@ -1,0 +1,191 @@
+---
+title: Docker Guide
+description: Complete Docker installation, commands, and troubleshooting for Ubuntu Server
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+
+Complete guide for Docker installation, daily commands, and recovery procedures.
+
+## Why Docker?
+
+- **Isolation** - Each service runs in its own container
+- **Easy Updates** - Pull new images and restart
+- **Portability** - Same setup on VM and physical server
+- **Infrastructure as Code** - Everything in docker-compose.yml
+
+## Installation
+
+### 1. Update System
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+```
+
+### 2. Install Docker
+
+```bash
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+rm get-docker.sh
+```
+
+### 3. Add User to Docker Group
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+<Aside type="caution" title="Important">
+Log out and back in for group changes to take effect!
+</Aside>
+
+### 4. Verify Installation
+
+```bash
+docker --version
+docker compose version
+docker run hello-world
+```
+
+## Daily Commands
+
+### Container Management
+
+| Command | Description |
+|---------|-------------|
+| `docker ps` | List running containers |
+| `docker ps -a` | List all containers |
+| `docker logs <name>` | View logs |
+| `docker logs -f <name>` | Follow logs |
+| `docker restart <name>` | Restart container |
+| `docker exec -it <name> bash` | Shell into container |
+
+### Docker Compose
+
+| Command | Description |
+|---------|-------------|
+| `docker compose up -d` | Start services |
+| `docker compose down` | Stop and remove containers |
+| `docker compose ps` | List services |
+| `docker compose logs -f` | Follow all logs |
+| `docker compose restart <svc>` | Restart service |
+| `docker compose pull` | Pull latest images |
+
+### Cleanup
+
+```bash
+docker system prune          # Remove stopped containers, unused networks
+docker system prune -a       # Also remove unused images
+docker volume prune          # Remove unused volumes
+```
+
+## Recovery After `docker compose down`
+
+When you run `docker compose down`:
+- ✅ Containers are removed (will be recreated)
+- ✅ Networks are removed
+- ✅ **Data volumes are preserved!**
+
+### Quick Recovery
+
+```bash
+# Set permissions (if using monitoring)
+sudo chown -R 472:472 services/monitoring/grafana/data
+sudo chown -R 10001:10001 services/monitoring/loki/data
+
+# Start everything
+docker compose up -d
+
+# Verify
+docker compose ps
+```
+
+## Command Reference
+
+### Safe Commands (Data Preserved)
+
+| Command | Effect |
+|---------|--------|
+| `docker compose stop` | Stop containers (keeps them) |
+| `docker compose start` | Start stopped containers |
+| `docker compose restart` | Restart containers |
+| `docker compose down` | Remove containers & networks |
+| `docker compose up -d` | Start from config |
+
+### Dangerous Commands
+
+<Aside type="danger" title="Warning">
+`docker compose down --volumes` **deletes all data volumes!** Always backup first.
+</Aside>
+
+## Troubleshooting
+
+### Permission Denied
+
+```bash
+# Check docker group
+groups
+
+# Add to docker group
+sudo usermod -aG docker $USER
+
+# Then log out and back in
+exit
+```
+
+### Docker Not Running
+
+```bash
+sudo systemctl status docker
+sudo systemctl start docker
+sudo systemctl enable docker
+```
+
+### Container Keeps Restarting
+
+```bash
+# Check logs
+docker logs <container-name> --tail 50
+
+# Check exit code
+docker inspect <container-name> | jq '.[0].State'
+```
+
+### Network Issues
+
+```bash
+# List networks
+docker network ls
+
+# Check container networks
+docker inspect <name> | jq '.[0].NetworkSettings.Networks | keys'
+
+# Reconnect to network
+docker network connect proxy <container-name>
+```
+
+## Best Practices
+
+1. **Always backup before updates**
+   ```bash
+   cp docker-compose.yml docker-compose.yml.backup
+   ```
+
+2. **Use specific image versions**
+   ```yaml
+   image: nginx:1.25  # Good
+   image: nginx       # Bad (uses latest)
+   ```
+
+3. **Never commit secrets**
+   ```bash
+   echo ".env" >> .gitignore
+   ```
+
+4. **Use lazydocker for quick management**
+   ```bash
+   lazydocker
+   ```

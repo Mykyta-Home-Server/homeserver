@@ -1,0 +1,171 @@
+---
+title: Adding Services
+description: How to add new Docker services with HTTPS access through Caddy and Cloudflare Tunnel
+---
+
+import { Steps } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+
+Guide for adding new services with public HTTPS access.
+
+## Critical Requirements
+
+<Aside type="caution" title="Must-Follow Rules">
+These rules were learned from troubleshooting sessions!
+</Aside>
+
+### Caddyfile Rules
+- **Always use `https://` prefix** in site blocks
+- Use `.Caddyfile` extension for syntax highlighting
+
+```caddy
+# ✅ Correct
+https://myservice.mykyta-ryasny.dev {
+
+# ❌ Wrong
+myservice.mykyta-ryasny.dev {
+```
+
+### Cloudflare DNS Rules
+- **Type**: CNAME
+- **Target**: `<tunnel-id>.cfargotunnel.com`
+- **Proxy**: Must be **Proxied (orange cloud)** - grey cloud won't work!
+
+### Cloudflare Tunnel Config
+- Add every subdomain to `config.yml` ingress
+- Include `originServerName` matching hostname
+- Catch-all `http_status:404` must be LAST
+
+## File Organization
+
+```
+/opt/homeserver/
+├── docker-compose.yml
+├── compose/
+│   ├── media/           # Media stack
+│   ├── auth/            # Authentication
+│   └── monitoring/      # Observability
+└── services/
+    ├── proxy/caddy/
+    │   ├── Caddyfile
+    │   └── sites/*.Caddyfile
+    └── tunnel/cloudflared/
+        └── config.yml
+```
+
+## Step-by-Step Guide
+
+<Steps>
+
+1. **Create Docker Compose file**
+
+   Create `compose/category/myservice.yml`:
+
+   ```yaml
+   services:
+     myservice:
+       profiles: ["category", "all"]
+       image: myimage:latest
+       container_name: myservice
+       restart: unless-stopped
+       environment:
+         - PUID=1000
+         - PGID=1000
+         - TZ=Europe/Madrid
+       volumes:
+         - ../../services/category/myservice:/config
+       networks:
+         - internal
+   ```
+
+2. **Add to main docker-compose.yml**
+
+   ```yaml
+   include:
+     - compose/category/myservice.yml
+   ```
+
+3. **Create Caddyfile**
+
+   Create `services/proxy/caddy/sites/myservice.Caddyfile`:
+
+   ```caddy
+   https://myservice.mykyta-ryasny.dev {
+       import cf_tls
+       import authelia_auth
+
+       reverse_proxy myservice:8080
+   }
+   ```
+
+4. **Add to Cloudflare Tunnel**
+
+   Edit `services/tunnel/cloudflared/config.yml`:
+
+   ```yaml
+   - hostname: myservice.mykyta-ryasny.dev
+     service: https://caddy:443
+     originRequest:
+       noTLSVerify: true
+       originServerName: myservice.mykyta-ryasny.dev
+   ```
+
+5. **Add Cloudflare DNS record**
+
+   - Go to Cloudflare Dashboard → DNS
+   - Add CNAME: `myservice` → `<tunnel-id>.cfargotunnel.com`
+   - Ensure **Proxied** (orange cloud)
+
+6. **Add to Authelia (if protected)**
+
+   Edit `services/auth/authelia/configuration.yml`:
+
+   ```yaml
+   - domain: "myservice.mykyta-ryasny.dev"
+     policy: one_factor
+     subject:
+       - ["group:admins"]
+   ```
+
+7. **Deploy**
+
+   ```bash
+   docker compose up -d myservice
+   docker compose restart cloudflared caddy
+   ```
+
+</Steps>
+
+## Verification
+
+```bash
+# Check service is running
+docker compose ps myservice
+
+# Check Caddy config is valid
+docker exec caddy caddy validate --config /etc/caddy/Caddyfile
+
+# Check tunnel logs
+docker logs cloudflared --tail 20
+
+# Test access
+curl -I https://myservice.mykyta-ryasny.dev
+```
+
+## Troubleshooting
+
+### 502 Bad Gateway
+- Container not running or wrong port
+- Check: `docker logs myservice`
+
+### 521 Web Server Down
+- Cloudflare can't reach tunnel
+- Check: `docker logs cloudflared`
+
+### DNS_PROBE_FINISHED_NXDOMAIN
+- DNS record missing or not proxied
+- Check Cloudflare DNS settings
+
+### ERR_TOO_MANY_REDIRECTS
+- Missing `https://` prefix in Caddyfile
+- Check Cloudflare SSL mode is "Full"
