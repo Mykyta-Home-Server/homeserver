@@ -27,11 +27,14 @@
 /* Container styling - make diagrams larger and centered */
 .mermaid,
 pre.mermaid,
-.sl-markdown-content .mermaid {
+.sl-markdown-content .mermaid,
+.astro-mermaid {
+  position: relative;
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
   padding: 1.5rem;
+  padding-bottom: 2.5rem;
   margin: 1.5rem 0;
   background: var(--sl-color-bg-nav);
   border-radius: 1rem;
@@ -40,12 +43,14 @@ pre.mermaid,
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.mermaid:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.mermaid:hover,
+.astro-mermaid:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Make SVG responsive and larger */
-.mermaid svg {
+.mermaid svg,
+.astro-mermaid svg {
   max-width: 100%;
   height: auto;
   min-height: 200px;
@@ -61,10 +66,10 @@ pre.mermaid,
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.9);
   z-index: 9999;
   cursor: zoom-out;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
   animation: fadeIn 0.2s ease;
 }
 
@@ -76,19 +81,20 @@ pre.mermaid,
 
 .mermaid-modal .mermaid-content {
   max-width: 95vw;
-  max-height: 95vh;
+  max-height: 90vh;
   overflow: auto;
   background: var(--sl-color-bg);
   padding: 2rem;
   border-radius: 1rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 .mermaid-modal .mermaid-content svg {
   max-width: none;
   width: auto;
   height: auto;
-  max-height: 85vh;
+  min-width: 600px;
+  max-height: 80vh;
 }
 
 @keyframes fadeIn {
@@ -99,11 +105,11 @@ pre.mermaid,
 /* Close button for modal */
 .mermaid-modal-close {
   position: absolute;
-  top: 1rem;
+  top: 1.5rem;
   right: 1.5rem;
   font-size: 2rem;
   color: white;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   border: none;
   border-radius: 50%;
   width: 3rem;
@@ -113,10 +119,11 @@ pre.mermaid,
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
+  z-index: 10000;
 }
 
 .mermaid-modal-close:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* ============================================
@@ -203,26 +210,74 @@ pre.mermaid,
 }
 
 /* Sequence diagram specific */
-.mermaid .actor {
+.mermaid .actor,
+.astro-mermaid .actor {
   fill: var(--mermaid-primary) !important;
   stroke: var(--mermaid-line) !important;
+  rx: 8px !important;
+  ry: 8px !important;
 }
 
-.mermaid .actor-line {
+.mermaid .actor-line,
+.astro-mermaid .actor-line {
   stroke: var(--mermaid-line) !important;
+  stroke-dasharray: 4, 4;
 }
 
 .mermaid .messageLine0,
-.mermaid .messageLine1 {
+.mermaid .messageLine1,
+.astro-mermaid .messageLine0,
+.astro-mermaid .messageLine1 {
   stroke: var(--mermaid-line) !important;
+  stroke-width: 1.5px;
 }
 
-.mermaid .messageText {
+.mermaid .messageText,
+.astro-mermaid .messageText {
+  fill: var(--sl-color-text) !important;
+  font-size: 12px !important;
+}
+
+.mermaid .note,
+.astro-mermaid .note {
+  fill: var(--mermaid-note) !important;
+  stroke: var(--mermaid-line) !important;
+  rx: 8px !important;
+  ry: 8px !important;
+}
+
+/* Sequence diagram labels */
+.mermaid .actor text,
+.mermaid .sequenceNumber,
+.astro-mermaid .actor text,
+.astro-mermaid .sequenceNumber {
+  fill: var(--mermaid-primary-text) !important;
+}
+
+/* Sequence diagram loop/alt boxes */
+.mermaid .loopLine,
+.mermaid .labelBox,
+.astro-mermaid .loopLine,
+.astro-mermaid .labelBox {
+  stroke: var(--mermaid-line) !important;
+  fill: var(--sl-color-bg-nav) !important;
+}
+
+.mermaid .loopText,
+.mermaid .labelText,
+.astro-mermaid .loopText,
+.astro-mermaid .labelText {
   fill: var(--sl-color-text) !important;
 }
 
-.mermaid .note {
-  fill: var(--mermaid-note) !important;
+/* Activation boxes */
+.mermaid .activation0,
+.mermaid .activation1,
+.mermaid .activation2,
+.astro-mermaid .activation0,
+.astro-mermaid .activation1,
+.astro-mermaid .activation2 {
+  fill: var(--mermaid-secondary) !important;
   stroke: var(--mermaid-line) !important;
 }
 
@@ -246,13 +301,19 @@ pre.mermaid,
   }
 }
 
-/* Hint text for clickable diagrams */
-.mermaid::after {
+/* Hint text for clickable diagrams - positioned at bottom center */
+.mermaid::after,
+.astro-mermaid::after {
   content: "Click to expand";
-  display: block;
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--sl-color-text-accent);
-  margin-top: 0.5rem;
-  opacity: 0.7;
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: var(--sl-color-gray-4);
+  background: var(--sl-color-bg-nav);
+  padding: 0.2rem 0.75rem;
+  border-radius: 1rem;
+  opacity: 0.8;
+  pointer-events: none;
 }

@@ -25,13 +25,14 @@ export default defineConfig({
           tag: 'script',
           content: `
             function initMermaidZoom() {
-              const diagrams = document.querySelectorAll('.mermaid');
+              // Select all mermaid containers (both .mermaid and astro-mermaid wrapper)
+              const diagrams = document.querySelectorAll('.mermaid, .astro-mermaid, pre.mermaid');
               let modal = document.getElementById('mermaid-modal');
               if (!modal) {
                 modal = document.createElement('div');
                 modal.id = 'mermaid-modal';
                 modal.className = 'mermaid-modal';
-                modal.innerHTML = '<button class="mermaid-modal-close" aria-label="Close">&times;</button><div class="mermaid-content"></div>';
+                modal.innerHTML = '<button class="mermaid-modal-close" aria-label="Close">×</button><div class="mermaid-content"></div>';
                 document.body.appendChild(modal);
                 modal.addEventListener('click', (e) => {
                   if (e.target === modal || e.target.classList.contains('mermaid-modal-close')) {
@@ -50,21 +51,47 @@ export default defineConfig({
                 if (diagram.dataset.zoomEnabled) return;
                 diagram.dataset.zoomEnabled = 'true';
                 diagram.addEventListener('click', () => {
-                  const svg = diagram.querySelector('svg');
+                  // Try multiple ways to find the SVG
+                  let svg = diagram.querySelector('svg');
+                  if (!svg) {
+                    // Check if SVG is a sibling or nearby
+                    svg = diagram.parentElement?.querySelector('svg');
+                  }
+                  if (!svg) {
+                    // Check if diagram itself contains SVG markup
+                    const svgMatch = diagram.innerHTML.match(/<svg[\\s\\S]*<\\/svg>/i);
+                    if (svgMatch) {
+                      modal.querySelector('.mermaid-content').innerHTML = svgMatch[0];
+                      modal.classList.add('active');
+                      document.body.style.overflow = 'hidden';
+                      return;
+                    }
+                  }
                   if (svg) {
-                    modal.querySelector('.mermaid-content').innerHTML = svg.outerHTML;
+                    // Clone to avoid reference issues
+                    const svgClone = svg.cloneNode(true);
+                    // Remove any size constraints for the modal view
+                    svgClone.style.maxWidth = 'none';
+                    svgClone.style.width = 'auto';
+                    svgClone.style.height = 'auto';
+                    modal.querySelector('.mermaid-content').innerHTML = '';
+                    modal.querySelector('.mermaid-content').appendChild(svgClone);
                     modal.classList.add('active');
                     document.body.style.overflow = 'hidden';
                   }
                 });
               });
             }
-            if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', () => setTimeout(initMermaidZoom, 500));
-            } else {
-              setTimeout(initMermaidZoom, 500);
+            // Longer delay to ensure Mermaid has fully rendered
+            function scheduleInit() {
+              setTimeout(initMermaidZoom, 1000);
             }
-            document.addEventListener('astro:page-load', () => setTimeout(initMermaidZoom, 500));
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', scheduleInit);
+            } else {
+              scheduleInit();
+            }
+            document.addEventListener('astro:page-load', scheduleInit);
           `,
         },
       ],
