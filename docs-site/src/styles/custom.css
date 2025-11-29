@@ -1,11 +1,14 @@
 /* Custom styles for Home Server Docs */
 /* Using Starlight's theming system - only override CSS variables */
 
-/* Light mode accent colors */
+/* Light mode accent colors + layout sizing */
 :root {
   --sl-color-accent-low: #c7d9f2;
   --sl-color-accent: #2563eb;
   --sl-color-accent-high: #1d4ed8;
+  /* Right sidebar (TOC) sizing - 15% of viewport */
+  --sl-sidebar-width: 15vw;
+  --sl-content-width: 60rem;
 }
 
 /* Dark mode - use Starlight's dark theme with custom accent */
@@ -313,28 +316,35 @@ pre.mermaid,
 }
 
 /* ============================================
-   Right Sidebar (On This Page) - Compact
+   Right Sidebar (On This Page) - Compact 15%
    ============================================ */
 
-/* Make the right sidebar much narrower */
-.right-sidebar {
-  width: 10rem !important;
+/* Target all right sidebar variations */
+.right-sidebar,
+.right-sidebar-container,
+aside.right-sidebar {
+  width: 15vw !important;
+  max-width: 15vw !important;
+  min-width: 10rem !important;
 }
 
-.right-sidebar-panel {
-  padding: 0.5rem !important;
+/* Make TOC text readable and properly wrapped */
+starlight-toc {
+  font-size: 0.8rem;
 }
 
-/* TOC links smaller */
 starlight-toc a {
-  font-size: 0.75rem !important;
+  padding: 0.25rem 0.5rem !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  line-height: 1.4 !important;
 }
 
-@media (min-width: 72rem) {
-  /* More content space */
-  .sl-container {
-    max-width: calc(100% - 10rem);
-  }
+/* "On this page" heading */
+.right-sidebar h2,
+starlight-toc h2 {
+  font-size: 0.85rem !important;
+  white-space: nowrap !important;
 }
 
 /* Hint text for clickable diagrams - positioned at bottom center */
