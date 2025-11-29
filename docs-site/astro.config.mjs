@@ -70,10 +70,21 @@ export default defineConfig({
                   if (svg) {
                     // Clone to avoid reference issues
                     const svgClone = svg.cloneNode(true);
-                    // Remove any size constraints for the modal view
-                    svgClone.style.maxWidth = 'none';
-                    svgClone.style.width = 'auto';
+                    // Remove hardcoded size attributes so CSS can control sizing
+                    svgClone.removeAttribute('width');
+                    svgClone.removeAttribute('height');
+                    svgClone.removeAttribute('style');
+                    // Set viewBox if not present (for proper scaling)
+                    if (!svgClone.getAttribute('viewBox')) {
+                      const bbox = svg.getBBox ? svg.getBBox() : null;
+                      if (bbox) {
+                        svgClone.setAttribute('viewBox', '0 0 ' + (bbox.width + bbox.x) + ' ' + (bbox.height + bbox.y));
+                      }
+                    }
+                    // Apply scaling styles
+                    svgClone.style.width = '100%';
                     svgClone.style.height = 'auto';
+                    svgClone.style.maxHeight = '80vh';
                     modal.querySelector('.mermaid-content').innerHTML = '';
                     modal.querySelector('.mermaid-content').appendChild(svgClone);
                     modal.classList.add('active');
