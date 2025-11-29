@@ -35,6 +35,9 @@ jobs:
         working-directory: docs-site
         run: npm install
 
+      - name: Install Playwright system dependencies
+        run: sudo npx playwright install-deps chromium
+
       - name: Install Playwright browsers (for Mermaid rendering)
         working-directory: docs-site
         run: npx playwright install chromium
