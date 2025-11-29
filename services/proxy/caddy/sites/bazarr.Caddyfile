@@ -1,0 +1,14 @@
+# Bazarr - Automatic Subtitles
+# Access: bazarr.mykyta-ryasny.dev
+bazarr.mykyta-ryasny.dev {
+    import cf_tls
+
+    # Authelia SSO Authentication
+    import authelia_auth
+
+    # Intercept logout and redirect to Authelia logout with return URL
+    @logout path /logout
+    redir @logout auth.mykyta-ryasny.dev/logout?rd=bazarr.mykyta-ryasny.dev 302
+
+    reverse_proxy bazarr:6767
+}

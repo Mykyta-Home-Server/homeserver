@@ -2,8 +2,8 @@
 # All media-related subdomains with authentication
 
 # qBittorrent - Torrent download client
-# Access: https://torrent.mykyta-ryasny.dev
-https://torrent.mykyta-ryasny.dev {
+# Access: torrent.mykyta-ryasny.dev
+torrent.mykyta-ryasny.dev {
     # Use Cloudflare Origin Certificate
     import cf_tls
 
@@ -22,9 +22,9 @@ https://torrent.mykyta-ryasny.dev {
 }
 
 # Jellyfin - Media streaming server
-# Access: https://streaming.mykyta-ryasny.dev
+# Access: streaming.mykyta-ryasny.dev
 # NOTE: No Authelia auth - Jellyfin has its own authentication via LDAP
-https://streaming.mykyta-ryasny.dev {
+streaming.mykyta-ryasny.dev {
     import cf_tls
 
     # No Authelia - users go directly to Jellyfin login (uses LDAP)
@@ -33,8 +33,8 @@ https://streaming.mykyta-ryasny.dev {
 }
 
 # Radarr - Movie automation
-# Access: https://movies.mykyta-ryasny.dev
-https://movies.mykyta-ryasny.dev {
+# Access: movies.mykyta-ryasny.dev
+movies.mykyta-ryasny.dev {
     import cf_tls
 
     # Authelia SSO Authentication
@@ -42,14 +42,14 @@ https://movies.mykyta-ryasny.dev {
 
     # Intercept logout and redirect to Authelia logout with return URL
     @logout path /logout
-    redir @logout https://auth.mykyta-ryasny.dev/logout?rd=https://movies.mykyta-ryasny.dev 302
+    redir @logout auth.mykyta-ryasny.dev/logout?rd=movies.mykyta-ryasny.dev 302
 
     reverse_proxy radarr:7878
 }
 
 # Sonarr - TV show automation
-# Access: https://tv.mykyta-ryasny.dev
-https://tv.mykyta-ryasny.dev {
+# Access: tv.mykyta-ryasny.dev
+tv.mykyta-ryasny.dev {
     import cf_tls
 
     # Authelia SSO Authentication
@@ -57,14 +57,14 @@ https://tv.mykyta-ryasny.dev {
 
     # Intercept logout and redirect to Authelia logout with return URL
     @logout path /logout
-    redir @logout https://auth.mykyta-ryasny.dev/logout?rd=https://tv.mykyta-ryasny.dev 302
+    redir @logout auth.mykyta-ryasny.dev/logout?rd=tv.mykyta-ryasny.dev 302
 
     reverse_proxy sonarr:8989
 }
 
 # Prowlarr - Indexer manager
-# Access: https://indexers.mykyta-ryasny.dev
-https://indexers.mykyta-ryasny.dev {
+# Access: indexers.mykyta-ryasny.dev
+indexers.mykyta-ryasny.dev {
     import cf_tls
 
     # Authelia SSO Authentication
@@ -72,15 +72,15 @@ https://indexers.mykyta-ryasny.dev {
 
     # Intercept logout and redirect to Authelia logout with return URL
     @logout path /logout
-    redir @logout https://auth.mykyta-ryasny.dev/logout?rd=https://indexers.mykyta-ryasny.dev 302
+    redir @logout auth.mykyta-ryasny.dev/logout?rd=indexers.mykyta-ryasny.dev 302
 
     reverse_proxy prowlarr:9696
 }
 
 # Jellyseerr - Request management interface
-# Access: https://requests.mykyta-ryasny.dev
+# Access: requests.mykyta-ryasny.dev
 # NOTE: No Authelia auth - Jellyseerr uses Jellyfin authentication (which uses LDAP)
-https://requests.mykyta-ryasny.dev {
+requests.mykyta-ryasny.dev {
     import cf_tls
 
     # No Authelia - users authenticate via Jellyfin (uses LDAP)

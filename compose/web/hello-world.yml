@@ -1,0 +1,40 @@
+# ============================================================================
+# Hello World - Simple Test Application
+# ============================================================================
+# Simple nginx-based test page
+# Profile: web, all
+# Networks: internal (accessed via Caddy reverse proxy)
+# ============================================================================
+
+services:
+  hello-world:
+    profiles: ["web", "all"]
+    image: nginx:alpine
+    container_name: hello-world
+    restart: unless-stopped
+
+    # Volumes
+    volumes:
+      - ../../services/web/hello-world/index.html:/usr/share/nginx/html/index.html:ro
+
+    # Networks - internal only (accessed via Caddy)
+    networks:
+      - internal
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=web"
+      - "com.homeserver.description=Simple test application"
+      - "logging=promtail"

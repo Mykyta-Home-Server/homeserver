@@ -1,0 +1,45 @@
+# ============================================================================
+# Sonarr - TV Show Collection Manager
+# ============================================================================
+# Profile: media, all
+# Networks: internal
+# ============================================================================
+
+services:
+  sonarr:
+    profiles: ["media", "all"]
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+
+    # Environment
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+
+    # Volumes
+    volumes:
+      - ../../services/media/sonarr/config:/config
+      - ../../data/media:/data/media
+
+    # Networks
+    networks:
+      - internal
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8989/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=media"
+      - "com.homeserver.description=TV show collection manager"

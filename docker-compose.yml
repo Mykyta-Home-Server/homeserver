@@ -1,7 +1,7 @@
 # ============================================================================
 # Home Server - Docker Compose Configuration
 # ============================================================================
-# Services organized by category in compose/ directory
+# Services organized by category in compose/ subdirectories
 #
 # Environment variables loaded from .env file
 #
@@ -19,7 +19,8 @@
 # PROFILES:
 #   --profile web         : Web applications (portal, hello-world)
 #   --profile media       : Media stack (Jellyfin, Sonarr, Radarr, etc.)
-#   --profile monitoring  : Monitoring (Grafana, Loki, Promtail, Uptime Kuma)
+#   --profile monitoring  : Monitoring (Grafana, Loki, Promtail)
+#   --profile maintenance : Dockerized cron jobs (backup, cleanup)
 #   --profile cicd        : GitHub Actions runner
 #   --profile all         : Everything
 #
@@ -35,14 +36,56 @@
 # ============================================================================
 
 include:
-  # Network definitions (must be first)
-  - compose/networks.yml
+  # =========================================================================
+  # Network Definitions (must be first)
+  # =========================================================================
+  - compose/_networks.yml
 
-  # Core services (always run - no profile needed)
-  - compose/infrastructure.yml  # caddy, cloudflared, github-runner (cicd profile)
-  - compose/auth.yml            # All authentication services
+  # =========================================================================
+  # Infrastructure - Core services that always run
+  # =========================================================================
+  - compose/infrastructure/proxy.yml           # Caddy reverse proxy
+  - compose/infrastructure/tunnel.yml          # Cloudflare Tunnel
 
-  # Optional services (require profiles)
-  - compose/web.yml             # Web applications (profile: web, all)
-  - compose/media.yml           # Media stack (profile: media, all)
-  - compose/monitoring.yml      # Monitoring stack (profile: monitoring, all)
+  # =========================================================================
+  # CI/CD - GitHub Actions runner (profile: cicd, all)
+  # =========================================================================
+  - compose/ci/github-runner.yml               # Self-hosted runner
+
+  # =========================================================================
+  # Authentication Stack - Always runs
+  # =========================================================================
+  - compose/auth/postgres.yml                  # PostgreSQL for Authelia
+  - compose/auth/redis.yml                     # Redis for sessions
+  - compose/auth/authelia.yml                  # SSO authentication
+  - compose/auth/ldap.yml                      # OpenLDAP + phpLDAPadmin
+  - compose/auth/user-management.yml           # User management API
+
+  # =========================================================================
+  # Media Stack (profile: media, all)
+  # =========================================================================
+  - compose/media/qbittorrent.yml              # Download client
+  - compose/media/jellyfin.yml                 # Media server
+  - compose/media/radarr.yml                   # Movie management
+  - compose/media/sonarr.yml                   # TV show management
+  - compose/media/prowlarr.yml                 # Indexer management
+  - compose/media/jellyseerr.yml               # Request management
+  - compose/media/flaresolverr.yml             # Cloudflare bypass for indexers
+  - compose/media/bazarr.yml                   # Automatic subtitles
+  - compose/media/recyclarr.yml                # TRaSH Guides quality sync
+
+  # =========================================================================
+  # Monitoring Stack (profile: monitoring, all)
+  # =========================================================================
+  - compose/monitoring/stack.yml               # Loki, Promtail, Grafana
+
+  # =========================================================================
+  # Maintenance (profile: maintenance, all)
+  # =========================================================================
+  - compose/maintenance/cron.yml               # Dockerized cron jobs
+
+  # =========================================================================
+  # Web Applications (profile: web, all)
+  # =========================================================================
+  - compose/web/portal.yml                     # Angular home dashboard
+  - compose/web/hello-world.yml                # Test application

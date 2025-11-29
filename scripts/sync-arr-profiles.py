@@ -6,12 +6,25 @@ This script copies custom formats (like H.264 preference) from Radarr to Sonarr
 
 import requests
 import json
+import os
+import sys
 
-# Configuration
-RADARR_URL = "http://radarr:7878"
-RADARR_API_KEY = "38a79d85c88b47588f8dc78731a1c88e"
-SONARR_URL = "http://sonarr:8989"
-SONARR_API_KEY = "332bfd98ac754e11adde9f98dd839bb3"
+# Configuration from environment variables
+RADARR_URL = os.getenv("RADARR_URL", "http://radarr:7878")
+RADARR_API_KEY = os.getenv("RADARR_API_KEY", "")
+SONARR_URL = os.getenv("SONARR_URL", "http://sonarr:8989")
+SONARR_API_KEY = os.getenv("SONARR_API_KEY", "")
+
+# Check if API keys are set
+if not RADARR_API_KEY or not SONARR_API_KEY:
+    print("ERROR: API keys not set")
+    print("\nPlease set the following environment variables:")
+    print("  export RADARR_API_KEY='your-radarr-api-key'")
+    print("  export SONARR_API_KEY='your-sonarr-api-key'")
+    print("\nTo find your API keys:")
+    print("  - Radarr: Settings → General → Security → API Key")
+    print("  - Sonarr: Settings → General → Security → API Key")
+    sys.exit(1)
 
 def get_radarr_custom_formats():
     """Get all custom formats from Radarr"""

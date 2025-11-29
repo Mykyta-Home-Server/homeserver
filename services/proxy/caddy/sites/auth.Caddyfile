@@ -14,7 +14,7 @@
 #       redirect loops (Authelia can't authenticate itself!)
 # ============================================================================
 
-https://auth.mykyta-ryasny.dev {
+auth.mykyta-ryasny.dev {
     # Use Cloudflare origin certificate for HTTPS
     import cf_tls
 

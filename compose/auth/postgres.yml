@@ -1,0 +1,64 @@
+# ============================================================================
+# PostgreSQL - Authentication Database
+# ============================================================================
+# Used by: Authelia
+# Networks: internal (database should NOT be on proxy network)
+# ============================================================================
+
+services:
+  postgres-auth:
+    image: postgres:16-alpine
+    container_name: postgres-auth
+    restart: unless-stopped
+
+    # Environment variables
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+
+    # Docker secrets
+    secrets:
+      - postgres_password
+
+    # Volumes
+    volumes:
+      - ../../services/auth/postgres/data:/var/lib/postgresql/data
+
+    # Networks - ONLY internal (databases should NOT be on proxy network)
+    networks:
+      - internal
+
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=auth"
+      - "com.homeserver.description=PostgreSQL database for Authelia"
+
+# ============================================================================
+# Docker Secrets
+# ============================================================================
+secrets:
+  postgres_password:
+    file: ../../secrets/postgres_password.txt

@@ -1,0 +1,37 @@
+# ============================================================================
+# Cloudflare Tunnel - Secure External Access
+# ============================================================================
+# Zero exposed ports - all traffic routes through Cloudflare
+# Networks: proxy (connects to Caddy)
+# ============================================================================
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+
+    # Command
+    command: tunnel --config /etc/cloudflared/config.yml run
+
+    # Volumes
+    volumes:
+      - ../../services/tunnel/cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      - ../../services/tunnel/cloudflared/credentials.json:/etc/cloudflared/credentials.json:ro
+
+    # Networks - only proxy (connects to Caddy)
+    networks:
+      - proxy
+
+    # Depends on
+    depends_on:
+      - caddy
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=infrastructure"
+      - "com.homeserver.description=Cloudflare Tunnel for secure external access"

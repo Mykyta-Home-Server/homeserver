@@ -1,0 +1,49 @@
+# ============================================================================
+# Prowlarr - Indexer Manager
+# ============================================================================
+# Profile: media, all
+# Networks: internal
+# ============================================================================
+
+services:
+  prowlarr:
+    profiles: ["media", "all"]
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+
+    # Environment
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+
+    # Use Cloudflare DNS to bypass ISP blocks on torrent sites
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+
+    # Volumes
+    volumes:
+      - ../../services/media/prowlarr/config:/config
+
+    # Networks
+    networks:
+      - internal
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9696/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=media"
+      - "com.homeserver.description=Indexer manager for Sonarr and Radarr"

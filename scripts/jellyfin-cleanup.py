@@ -14,32 +14,61 @@ from pathlib import Path
 # Configuration
 JELLYFIN_URL = os.getenv('JELLYFIN_URL', 'http://jellyfin:8096')
 API_KEY = os.getenv('JELLYFIN_API_KEY', '')
+ADMIN_USERNAME = os.getenv('JELLYFIN_ADMIN_USERNAME', '')
+ADMIN_PASSWORD = os.getenv('JELLYFIN_ADMIN_PASSWORD', '')
 
-# Check if API key is set
-if not API_KEY:
-    print("ERROR: JELLYFIN_API_KEY environment variable not set")
-    print("\nTo create an API key:")
-    print("1. Go to: https://streaming.mykyta-ryasny.dev")
-    print("2. Log in as admin")
-    print("3. Go to: Dashboard → Advanced → API Keys")
-    print("4. Click: '+ New API Key'")
-    print("5. Name: 'Cleanup Script'")
-    print("6. Copy the key")
-    print("\nThen run:")
-    print("  export JELLYFIN_API_KEY='your-api-key-here'")
-    print("  python3 /opt/homeserver/scripts/jellyfin-cleanup.py")
+# Headers for API requests (will be set after authentication)
+headers = {}
+
+def authenticate():
+    """Authenticate with Jellyfin using username/password or API key"""
+    global headers
+
+    # Try admin username/password first
+    if ADMIN_USERNAME and ADMIN_PASSWORD:
+        try:
+            auth_response = requests.post(
+                f'{JELLYFIN_URL}/Users/AuthenticateByName',
+                json={
+                    'Username': ADMIN_USERNAME,
+                    'Pw': ADMIN_PASSWORD
+                },
+                headers={'X-Emby-Authorization': 'MediaBrowser Client="Cleanup Script", Device="Docker", DeviceId="maintenance-cron", Version="1.0.0"'}
+            )
+            auth_response.raise_for_status()
+            auth_data = auth_response.json()
+            access_token = auth_data.get('AccessToken')
+
+            if access_token:
+                headers['X-Emby-Token'] = access_token
+                print(f"✓ Authenticated as admin user: {ADMIN_USERNAME}")
+                return True
+        except Exception as e:
+            print(f"Failed to authenticate with username/password: {e}")
+
+    # Fallback to API key
+    if API_KEY:
+        headers['X-Emby-Token'] = API_KEY
+        print("✓ Using API key authentication")
+        return True
+
+    print("ERROR: No authentication method available")
+    print("\nPlease set either:")
+    print("  JELLYFIN_ADMIN_USERNAME and JELLYFIN_ADMIN_PASSWORD")
+    print("  OR")
+    print("  JELLYFIN_API_KEY")
     sys.exit(1)
 
-# Headers for API requests
-headers = {
-    'X-Emby-Token': API_KEY
-}
-
 def check_file_exists(file_path):
-    """Check if file exists inside Jellyfin container"""
+    """Check if file exists on mounted media volume"""
     try:
-        result = os.system(f'docker exec jellyfin test -f "{file_path}" 2>/dev/null')
-        return result == 0
+        # Convert Jellyfin internal path to mounted path
+        # Jellyfin sees: /media/tv/... or /media/movies/...
+        # We have mounted: /data/media/...
+        if file_path.startswith('/media/'):
+            local_path = file_path.replace('/media/', '/data/media/', 1)
+            return os.path.exists(local_path)
+        return True  # Assume exists if path format is unexpected
     except Exception as e:
         print(f"Error checking file: {e}")
         return True  # Assume exists to avoid accidental deletion
@@ -90,21 +119,71 @@ def get_all_items():
         print(f"Error getting items from Jellyfin: {e}")
         sys.exit(1)
 
-def delete_item(item_id, item_name):
-    """Delete an item from Jellyfin"""
+def refresh_library(library_id, library_name):
+    """Refresh library metadata to detect missing files"""
     try:
-        response = requests.delete(
-            f'{JELLYFIN_URL}/Items/{item_id}',
-            headers=headers
+        # Use the Refresh API with scan for new and updated files
+        response = requests.post(
+            f'{JELLYFIN_URL}/Items/{library_id}/Refresh',
+            headers=headers,
+            params={
+                'Recursive': 'true',
+                'ImageRefreshMode': 'Default',
+                'MetadataRefreshMode': 'Default',
+                'ReplaceAllImages': 'false',
+                'RegenerateTrickplay': 'false',
+                'ReplaceAllMetadata': 'false'
+            }
         )
-        return response.status_code in [200, 204]
-    except Exception as e:
-        print(f"Error deleting {item_name}: {e}")
+
+        if response.status_code in [200, 204]:
+            return True
+
+        # Log the failure reason
+        print(f"      REFRESH failed: HTTP {response.status_code}")
+        if response.text:
+            print(f"      Response: {response.text[:200]}")
+
         return False
+    except Exception as e:
+        print(f"      Error refreshing {library_name}: {e}")
+        return False
+
+def get_libraries():
+    """Get all media libraries"""
+    try:
+        # Get all users first
+        users = get_all_users()
+        if not users:
+            print("No users found")
+            return []
+
+        # Use first user to get libraries
+        user_id = users[0]['Id']
+
+        response = requests.get(
+            f'{JELLYFIN_URL}/Users/{user_id}/Items',
+            headers=headers,
+            params={
+                'Recursive': 'false',
+                'IncludeItemTypes': 'CollectionFolder'
+            }
+        )
+        response.raise_for_status()
+
+        data = response.json()
+        return data.get('Items', [])
+
+    except Exception as e:
+        print(f"Error getting libraries from Jellyfin: {e}")
+        return []
 
 def main():
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Jellyfin cleanup...")
     print(f"Jellyfin URL: {JELLYFIN_URL}")
+
+    # Authenticate first
+    authenticate()
 
     # Get all items
     print("Fetching items from Jellyfin...")
@@ -136,23 +215,53 @@ def main():
             print(f"  Missing: {item_name} ({item_type})")
             print(f"           Path: {item_path}")
 
-    # Show summary and confirm deletion
+    # Show summary and trigger library refresh
     if not missing_items:
         print("\n✓ No missing items found. Database is clean!")
         return
 
     print(f"\nFound {len(missing_items)} missing items.")
-    print("\nDeleting missing items from Jellyfin database...")
 
+    # Get unique libraries that contain missing items
+    libraries_to_refresh = set()
     for item in missing_items:
-        if delete_item(item['id'], item['name']):
-            print(f"  ✓ Deleted: {item['name']}")
-            deleted_count += 1
+        # Extract library from path (format: /media/movies/... or /media/tv/...)
+        path = item['path']
+        if path.startswith('/media/'):
+            library_type = path.split('/')[2] if len(path.split('/')) > 2 else None
+            if library_type:
+                libraries_to_refresh.add(library_type)
+
+    print(f"\n🔄 Refreshing libraries to remove missing items...")
+
+    # Get all libraries from Jellyfin
+    libraries = get_libraries()
+
+    refreshed_count = 0
+    failed_count = 0
+
+    for library in libraries:
+        library_id = library.get('Id')
+        library_name = library.get('Name', 'Unknown')
+
+        # Refresh all libraries (simpler approach)
+        # Jellyfin will automatically remove items with missing files
+        if refresh_library(library_id, library_name):
+            print(f"   ✓ Refreshed: {library_name}")
+            refreshed_count += 1
         else:
-            print(f"  ✗ Failed to delete: {item['name']}")
+            print(f"   ✗ Failed to refresh: {library_name}")
+            failed_count += 1
+
+    # Summary
+    if refreshed_count > 0:
+        print(f"\n✓ Successfully refreshed {refreshed_count} library(ies)")
+        print("   Jellyfin will automatically remove items with missing files during the scan")
+
+    if failed_count > 0:
+        print(f"\n⚠️  Failed to refresh {failed_count} library(ies)")
 
     print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Cleanup complete.")
-    print(f"Deleted {deleted_count} of {len(missing_items)} missing items.")
 
 if __name__ == '__main__':
     main()

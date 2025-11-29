@@ -1,0 +1,46 @@
+# ============================================================================
+# Bazarr - Automatic Subtitle Downloader
+# ============================================================================
+# Downloads subtitles automatically for Sonarr and Radarr media
+# Profile: media, all
+# Networks: internal
+# ============================================================================
+
+services:
+  bazarr:
+    profiles: ["media", "all"]
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+
+    # Environment
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+
+    # Volumes
+    volumes:
+      - ../../services/media/bazarr/config:/config
+      - ../../data/media:/data/media
+
+    # Networks
+    networks:
+      - internal
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6767/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=media"
+      - "com.homeserver.description=Automatic subtitle downloader"

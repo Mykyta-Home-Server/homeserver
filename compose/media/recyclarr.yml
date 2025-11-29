@@ -1,0 +1,36 @@
+# ============================================================================
+# Recyclarr - TRaSH Guides Quality Profile Sync
+# ============================================================================
+# Automatically syncs quality profiles from TRaSH Guides
+# Profile: media, all
+# Networks: internal
+# ============================================================================
+
+services:
+  recyclarr:
+    profiles: ["media", "all"]
+    image: ghcr.io/recyclarr/recyclarr:latest
+    container_name: recyclarr
+    restart: "no"
+
+    # Environment
+    environment:
+      - TZ=Europe/Madrid
+      - RECYCLARR_CREATE_CONFIG=false
+
+    # Volumes
+    volumes:
+      - ../../services/media/recyclarr/config:/config
+
+    # Networks
+    networks:
+      - internal
+
+    # Run sync once and exit
+    # To run manually: docker compose --profile media run --rm recyclarr sync
+    # Or add to cron for scheduled runs
+
+    # Labels
+    labels:
+      - "com.homeserver.group=media"
+      - "com.homeserver.description=TRaSH Guides quality profile sync"

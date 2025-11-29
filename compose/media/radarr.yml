@@ -1,0 +1,47 @@
+# ============================================================================
+# Radarr - Movie Collection Manager
+# ============================================================================
+# Profile: media, all
+# Networks: internal
+# ============================================================================
+
+services:
+  radarr:
+    profiles: ["media", "all"]
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+
+    # Environment
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+      - QBITTORRENT_URL=http://qbittorrent:8080
+
+    # Volumes
+    volumes:
+      - ../../services/media/radarr/config:/config
+      - ../../data/media:/data/media
+      - ../../scripts:/scripts:ro
+
+    # Networks
+    networks:
+      - internal
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7878/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=media"
+      - "com.homeserver.description=Movie collection manager"

@@ -1,0 +1,36 @@
+# ============================================================================
+# Portal - Angular Home Dashboard
+# ============================================================================
+# Main home dashboard application
+# Profile: web, all
+# Networks: internal (accessed via Caddy reverse proxy)
+# ============================================================================
+
+services:
+  portal:
+    profiles: ["web", "all"]
+    image: ghcr.io/mykyta-home-server/homeserver-portal:latest
+    container_name: portal
+    restart: unless-stopped
+
+    # Networks - internal only (accessed via Caddy)
+    networks:
+      - internal
+
+    # Health check - check nginx is serving the Angular app
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=web"
+      - "com.homeserver.description=Angular home dashboard"
+      - "logging=promtail"

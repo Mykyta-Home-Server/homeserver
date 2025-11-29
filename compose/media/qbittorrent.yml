@@ -1,0 +1,56 @@
+# ============================================================================
+# qBittorrent - Torrent Download Client
+# ============================================================================
+# Profile: media, all
+# Networks: internal
+# ============================================================================
+
+services:
+  qbittorrent:
+    profiles: ["media", "all"]
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+
+    # Environment
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+      - WEBUI_PORT=8080
+
+    # Volumes
+    volumes:
+      - ../../services/media/qbittorrent/config:/config
+      - ../../data/media:/data/media
+
+    # Networks
+    networks:
+      - internal
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v2/app/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Resource limits (prevent resource exhaustion)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=media"
+      - "com.homeserver.description=Torrent download client"

@@ -1,0 +1,37 @@
+# ============================================================================
+# FlareSolverr - Cloudflare Bypass Proxy
+# ============================================================================
+# Bypasses Cloudflare protection for torrent indexers
+# Profile: media, all
+# Networks: internal
+# ============================================================================
+
+services:
+  flaresolverr:
+    profiles: ["media", "all"]
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+
+    # Environment
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - TZ=Europe/Madrid
+
+    # Networks
+    networks:
+      - internal
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8191/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Labels
+    labels:
+      - "com.homeserver.group=media"
+      - "com.homeserver.description=Cloudflare bypass proxy for Prowlarr"

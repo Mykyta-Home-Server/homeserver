@@ -17,8 +17,15 @@ BACKUP_NAME="homeserver_backup_${TIMESTAMP}.tar.gz"
 RETENTION_DAYS=30
 
 # Logging
+# When running in Docker, logs go to stdout (captured by Promtail)
+# When running manually, logs also saved to file
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "${BACKUP_DIR}/backup.log"
+    local msg="[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    echo "$msg"
+    # Only write to log file if not in Docker (check for /.dockerenv)
+    if [ ! -f /.dockerenv ]; then
+        echo "$msg" >> "${BACKUP_DIR}/backup.log"
+    fi
 }
 
 log "================================"

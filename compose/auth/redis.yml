@@ -1,0 +1,51 @@
+# ============================================================================
+# Redis - Session Storage and Cache
+# ============================================================================
+# Used by: Authelia, User Management API
+# Networks: internal (database should NOT be on proxy network)
+# ============================================================================
+
+services:
+  redis-auth:
+    image: redis:7-alpine
+    container_name: redis-auth
+    restart: unless-stopped
+
+    # Command - enable persistence with password authentication
+    command: sh -c "redis-server --appendonly yes --requirepass $$(cat /run/secrets/redis_password)"
+
+    # Docker secrets
+    secrets:
+      - redis_password
+
+    # Volumes
+    volumes:
+      - ../../services/auth/redis/data:/data
+
+    # Networks - ONLY internal (databases should NOT be on proxy network)
+    networks:
+      - internal
+
+    # Health check (with password authentication)
+    healthcheck:
+      test: ["CMD", "sh", "-c", "redis-cli -a $$(cat /run/secrets/redis_password) ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=auth"
+      - "com.homeserver.description=Redis cache for Authelia sessions and user management"
+
+# ============================================================================
+# Docker Secrets
+# ============================================================================
+secrets:
+  redis_password:
+    file: ../../secrets/redis_password.txt

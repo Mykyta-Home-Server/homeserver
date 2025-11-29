@@ -1,0 +1,47 @@
+# ============================================================================
+# Caddy - Reverse Proxy with Automatic HTTPS
+# ============================================================================
+# ONLY service that exposes ports to the host
+# Networks: proxy (Cloudflared), internal (backend services)
+# ============================================================================
+
+services:
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+
+    # Ports - ONLY service that should expose ports
+    ports:
+      - "80:80"    # HTTP (redirects to HTTPS)
+      - "443:443"  # HTTPS
+
+    # Volumes
+    volumes:
+      - ../../services/proxy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../../services/proxy/caddy/sites:/etc/caddy/sites:ro
+      - ../../services/proxy/caddy/data:/data
+      - ../../services/proxy/caddy/config:/config
+      - ../../services/proxy/caddy/certs:/etc/caddy/certs:ro
+
+    # Networks - connects proxy and internal
+    networks:
+      - proxy      # External-facing (Cloudflared connects here)
+      - internal   # Backend services (auth, media, web)
+
+    # Health check - check if Caddy process is running
+    healthcheck:
+      test: ["CMD", "sh", "-c", "pgrep caddy || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=infrastructure"
+      - "com.homeserver.description=Caddy reverse proxy with automatic HTTPS"

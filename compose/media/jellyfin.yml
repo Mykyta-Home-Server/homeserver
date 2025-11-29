@@ -1,0 +1,56 @@
+# ============================================================================
+# Jellyfin - Media Streaming Server
+# ============================================================================
+# Profile: media, all
+# Networks: internal
+# ============================================================================
+
+services:
+  jellyfin:
+    profiles: ["media", "all"]
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+
+    # Environment
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+
+    # Volumes
+    volumes:
+      - ../../services/media/jellyfin/config:/config
+      - ../../services/media/jellyfin/cache:/cache
+      - ../../data/media:/data/media:ro
+
+    # Networks
+    networks:
+      - internal
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Resource limits (heavy transcoding workload)
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=media"
+      - "com.homeserver.description=Media streaming server"

@@ -6,7 +6,7 @@
 # ============================================================================
 
 # Main domain
-https://mykyta-ryasny.dev {
+mykyta-ryasny.dev {
     # Import Cloudflare Origin Certificate configuration
     import cf_tls
 
@@ -15,10 +15,10 @@ https://mykyta-ryasny.dev {
 }
 
 # WWW subdomain - redirect to main domain
-https://www.mykyta-ryasny.dev {
+www.mykyta-ryasny.dev {
     # Import Cloudflare Origin Certificate configuration
     import cf_tls
 
     # Redirect to non-www version
-    redir https://mykyta-ryasny.dev{uri}
+    redir mykyta-ryasny.dev{uri}
 }

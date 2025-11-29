@@ -1,131 +1,145 @@
-# User Documentation
+# Documentation Index
 
-This folder contains all user-facing documentation for setting up and maintaining the home server.
+Welcome to the Home Server documentation! This directory contains all user-facing guides and references.
 
-## 📚 Documentation Files
+## 📚 Quick Start
 
-### Core Guides (Comprehensive)
+New to the project? Start here:
+1. [Quick Reference](reference/QUICK_REFERENCE.md) - Essential commands cheat sheet
+2. [Docker Guide](guides/DOCKER_GUIDE.md) - Complete Docker reference
+3. [Adding Services](guides/ADDING_SERVICES.md) - How to add new services
 
-- **[DOCKER_GUIDE.md](DOCKER_GUIDE.md)** - Complete Docker reference
-  - Part 1: Installation & Setup
-  - Part 2: Quick Commands Reference
-  - Part 3: Recovery Procedures
-  - Part 4: Troubleshooting
+## 📖 Guides
 
-- **[MONITORING_GUIDE.md](MONITORING_GUIDE.md)** - Monitoring stack complete guide
-  - Architecture deep dive (Loki, Promtail, Grafana)
-  - Configuration explanations
-  - Deployment steps
-  - LogQL Quick Reference (Appendix)
+Step-by-step tutorials for common tasks:
 
-### System Setup Guides
+| Guide | Description |
+|-------|-------------|
+| [Docker Guide](guides/DOCKER_GUIDE.md) | Complete Docker reference, commands, and troubleshooting |
+| [Adding Services](guides/ADDING_SERVICES.md) | Step-by-step guide to adding new services |
+| [Monitoring Guide](guides/MONITORING_GUIDE.md) | Monitoring stack setup, LogQL queries, dashboards |
+| [Migration Guide](guides/MIGRATION_GUIDE.md) | VM to physical server migration |
+| [LDAP Guide](guides/LDAP_GUIDE.md) | Complete LDAP user and group management |
 
-- **[ZSH_SETUP_SOLUTION.md](ZSH_SETUP_SOLUTION.md)** - ZSH shell configuration guide
-  - Oh My Zsh installation
-  - Plugin setup
-  - VS Code integration
-  - Troubleshooting
+## 📑 Reference
 
-- **[QOL_TOOLS_GUIDE.md](QOL_TOOLS_GUIDE.md)** - Quality of Life tools reference
-  - Tool descriptions and use cases
-  - Command examples
-  - Configuration tips
-  - Quick reference tables
+Quick references and cheat sheets:
 
-### Service & Infrastructure Guides
+| Reference | Description |
+|-----------|-------------|
+| [Quick Reference](reference/QUICK_REFERENCE.md) | Essential commands cheat sheet |
+| [QoL Tools Guide](reference/QOL_TOOLS_GUIDE.md) | Productivity tools (bat, lazydocker, btop, etc.) |
+| [Service Profiles](reference/SERVICE_PROFILES.md) | Docker Compose profiles reference |
+| [Scripts Reference](reference/SCRIPTS.md) | All scripts documentation |
+| [Maintenance Cron](reference/MAINTENANCE_CRON.md) | Dockerized cron jobs (Grafana integration) |
 
-- **[adding-services.md](adding-services.md)** - Complete guide for adding new Docker services
-  - Step-by-step tutorial
-  - Docker Compose configuration
-  - Caddy reverse proxy setup
-  - Cloudflare Tunnel configuration
-  - Examples and troubleshooting
+## ⚙️ Setup
 
-- **[GITHUB_RUNNER_SETUP.md](GITHUB_RUNNER_SETUP.md)** - GitHub Actions self-hosted runner guide
-  - Runner setup and configuration
-  - Docker-in-Docker implementation
-  - CI/CD pipeline integration
-  - Troubleshooting and maintenance
+Initial setup and configuration:
 
-- **[SERVICE_PROFILES.md](SERVICE_PROFILES.md)** - Service management with Docker Compose profiles
-  - Profile definitions and usage
-  - Selective service deployment
-  - Environment-specific configurations
+| Setup Guide | Description |
+|-------------|-------------|
+| [ZSH Setup](setup/ZSH_SETUP.md) | Shell configuration (Zsh + Starship) |
+| [GitHub Runner Setup](setup/GITHUB_RUNNER_SETUP.md) | CI/CD self-hosted runner setup |
 
-- **[migration-guide.md](migration-guide.md)** - VM to physical server migration guide
-  - Pre-migration checklist
-  - Backup procedures
-  - Physical server setup
-  - Restoration steps
-  - Post-migration verification
+## 📁 Directory Structure
 
-### Quick References
+```
+docs/
+├── README.md                      # This file
+│
+├── guides/                        # How-to guides
+│   ├── DOCKER_GUIDE.md
+│   ├── MONITORING_GUIDE.md
+│   ├── ADDING_SERVICES.md
+│   ├── MIGRATION_GUIDE.md
+│   └── LDAP_GUIDE.md
+│
+├── reference/                     # Quick references
+│   ├── QUICK_REFERENCE.md
+│   ├── QOL_TOOLS_GUIDE.md
+│   ├── SERVICE_PROFILES.md
+│   ├── SCRIPTS.md
+│   └── MAINTENANCE_CRON.md
+│
+├── setup/                         # Initial setup
+│   ├── ZSH_SETUP.md
+│   └── GITHUB_RUNNER_SETUP.md
+│
+└── archive/                       # Archived/deprecated docs
+    ├── auth-guides/              # Old LDAP guides (consolidated)
+    └── deprecated-webhook-approach/
+```
 
-- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Essential commands and information
-  - Common operations
-  - Quick troubleshooting
-  - Network information
-  - System details
+## 🤖 For Claude (AI Assistant)
 
-### Setup Scripts
+Claude-specific documentation is in `/.claude/`:
+- [Architecture](../.claude/architecture.md) - System design and data flows
+- [Technical Specs](../.claude/technical_specs.md) - Hardware, software stack details
+- [API Documentation](../.claude/api_documentation.md) - All API references
 
-- **[setup-quality-of-life.sh](setup-quality-of-life.sh)** - Automated QoL tools installation
-  - Installs ZSH, Oh My Zsh, and productivity tools
-  - Run with: `bash setup-quality-of-life.sh`
+## 🔍 Finding Information
 
-## 🎯 Purpose
+### I want to...
 
-These documents are designed to help you:
-- Set up the home server from scratch
-- Understand each component and why it's used
-- Troubleshoot common issues independently
-- Reference commands quickly during work
+**...add a new service**
+→ [Adding Services Guide](guides/ADDING_SERVICES.md)
 
-## 📖 How to Use This Documentation
+**...understand Docker commands**
+→ [Docker Guide](guides/DOCKER_GUIDE.md)
 
-1. **First Time Setup**: Read guides in this order:
-   - [DOCKER_GUIDE.md](DOCKER_GUIDE.md) - Install Docker
-   - [ZSH_SETUP_SOLUTION.md](ZSH_SETUP_SOLUTION.md) - Setup shell
-   - [QOL_TOOLS_GUIDE.md](QOL_TOOLS_GUIDE.md) - Install productivity tools
+**...check service logs**
+→ [Monitoring Guide](guides/MONITORING_GUIDE.md) + [Quick Reference](reference/QUICK_REFERENCE.md)
 
-2. **Adding New Services**: Follow this guide:
-   - [adding-services.md](adding-services.md) (complete step-by-step tutorial)
+**...set up LDAP/SSO**
+→ [LDAP Guide](guides/LDAP_GUIDE.md)
 
-3. **Setting Up Monitoring**: Follow this guide:
-   - [MONITORING_GUIDE.md](MONITORING_GUIDE.md) (Loki + Grafana stack)
+**...use quality of life tools**
+→ [QoL Tools Guide](reference/QOL_TOOLS_GUIDE.md)
 
-4. **Daily Work**: Keep these open for quick reference:
-   - [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - Quick commands
-   - [DOCKER_GUIDE.md](DOCKER_GUIDE.md) Part 2 - Docker commands
+**...run a backup**
+→ [Scripts Reference](reference/SCRIPTS.md)
 
-5. **Migrating to Physical Server**: When ready:
-   - [migration-guide.md](migration-guide.md) (complete migration process)
+**...migrate to new hardware**
+→ [Migration Guide](guides/MIGRATION_GUIDE.md)
 
-6. **Troubleshooting**: Each guide has a dedicated troubleshooting section
+## 📝 Contributing to Documentation
 
-## 📋 Documentation Standards
+When updating documentation:
 
-All documentation in this folder follows established standards:
-- **Naming**: ALL_CAPS for guides, lowercase-with-hyphens for technical docs
-- **Structure**: Overview → Main Content → Troubleshooting → References
-- **Updates**: Each file includes "Last Updated" date
-- **Cross-references**: Relative links to related documentation
+1. **Follow naming conventions:**
+   - Guides: `UPPER_SNAKE_CASE.md`
+   - Keep related content in appropriate subdirectories
 
-For complete standards, see [CLAUDE.md](../CLAUDE.md) "Documentation Standards" section.
+2. **Update this index** when adding new documents
 
-## 🔗 Related Documentation
+3. **Include "Last Updated" date** at the bottom of each guide
 
-- **Session Notes**: See [../sessions/](../sessions/) for project progress and session summaries
-- **Claude Instructions**: See [../CLAUDE.md](../CLAUDE.md) for AI assistant configuration
-- **Architecture Docs**: See [../.claude/](../.claude/) for system architecture and technical specs
-- **Service-Specific Docs**: See individual service folders (e.g., `../services/proxy/caddy/README.md`)
-- **Archived Documentation**: See [archive/](archive/) for deprecated approaches and historical documentation
+4. **Test all commands** before documenting them
 
-## 📦 Archive
+5. **Link to other docs** instead of duplicating content
 
-The [archive/](archive/) directory contains deprecated documentation for reference:
-- **deprecated-webhook-approach/** - Old webhook-based deployment system (replaced by GitHub Actions runner)
+## ⚡ Quick Commands
+
+```bash
+# View services status
+docker compose ps
+
+# Check logs
+docker compose logs -f <service>
+
+# Restart a service
+docker compose restart <service>
+
+# Start with profiles
+docker compose --profile media --profile monitoring up -d
+
+# Full backup
+/opt/homeserver/scripts/backup.sh
+```
+
+For more commands, see [Quick Reference](reference/QUICK_REFERENCE.md).
 
 ---
 
-**Last Updated**: 2025-11-25
+**Last Updated:** 2025-11-27

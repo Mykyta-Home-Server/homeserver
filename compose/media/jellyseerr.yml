@@ -1,0 +1,53 @@
+# ============================================================================
+# Jellyseerr - Media Request Management
+# ============================================================================
+# Profile: media, all
+# Networks: internal
+# Dependencies: jellyfin, radarr, sonarr
+# ============================================================================
+
+services:
+  jellyseerr:
+    profiles: ["media", "all"]
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    restart: unless-stopped
+
+    # Environment
+    environment:
+      - LOG_LEVEL=info
+      - TZ=Europe/Madrid
+
+    # Volumes
+    volumes:
+      - ../../services/media/jellyseerr/config:/app/config
+
+    # Networks
+    networks:
+      - internal
+
+    # Dependencies
+    depends_on:
+      jellyfin:
+        condition: service_healthy
+      radarr:
+        condition: service_healthy
+      sonarr:
+        condition: service_healthy
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5055/api/v1/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+    # Labels
+    labels:
+      - "com.homeserver.group=media"
+      - "com.homeserver.description=Media request management"

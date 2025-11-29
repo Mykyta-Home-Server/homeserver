@@ -1,5 +1,5 @@
 # Home Portal - Angular SPA (Docker container)
-https://home.mykyta-ryasny.dev {
+home.mykyta-ryasny.dev {
     import cf_tls
 
     # Public API endpoints (no Authelia auth - API validates tokens internally)
@@ -12,6 +12,10 @@ https://home.mykyta-ryasny.dev {
     @user_info path /api/me
     handle @user_info {
         import authelia_auth
+        # Prevent browser caching of API responses
+        header Cache-Control "no-store, no-cache, must-revalidate, private"
+        header Pragma "no-cache"
+        header Expires "0"
         reverse_proxy user-management:3000 {
             # Forward Authelia headers to backend
             header_up Remote-User {http.request.header.Remote-User}

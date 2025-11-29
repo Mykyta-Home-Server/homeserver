@@ -1,0 +1,82 @@
+# ============================================================================
+# Docker Compose Snippets - Reusable Configurations
+# ============================================================================
+# Common configurations that can be extended using YAML anchors
+# Usage: services.myservice extends snippets.base-service
+# ============================================================================
+
+x-snippets:
+  # ==========================================================================
+  # Base Service - Common settings for all services
+  # ==========================================================================
+  base-service: &base-service
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - "logging=promtail"
+
+  # ==========================================================================
+  # Health Check Patterns
+  # ==========================================================================
+  healthcheck-http: &healthcheck-http
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 10s
+
+  healthcheck-process: &healthcheck-process
+    interval: 60s
+    timeout: 10s
+    retries: 3
+    start_period: 10s
+
+  # ==========================================================================
+  # Network Patterns
+  # ==========================================================================
+  networks-internal-only: &networks-internal-only
+    networks:
+      - internal
+
+  networks-with-proxy: &networks-with-proxy
+    networks:
+      - internal
+      - proxy
+
+  networks-with-monitoring: &networks-with-monitoring
+    networks:
+      - internal
+      - monitoring
+
+  # ==========================================================================
+  # Resource Limits
+  # ==========================================================================
+  resources-light: &resources-light
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+  resources-medium: &resources-medium
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  resources-heavy: &resources-heavy
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 1G

@@ -26,8 +26,8 @@ services:
 
     # Volumes
     volumes:
-      - ../services/monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
-      - ../services/monitoring/loki/data:/loki
+      - ../../services/monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - ../../services/monitoring/loki/data:/loki
 
     # Command
     command: -config.file=/etc/loki/local-config.yaml
@@ -73,10 +73,10 @@ services:
 
     # Volumes
     volumes:
-      - ../services/monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - ../../services/monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - ../services/monitoring/promtail/positions:/tmp/positions
+      - ../../services/monitoring/promtail/positions:/tmp/positions
 
     # Command
     command: -config.file=/etc/promtail/config.yml
@@ -128,9 +128,9 @@ services:
 
     # Volumes
     volumes:
-      - ../services/monitoring/grafana/data:/var/lib/grafana
-      - ../services/monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
-      - ../services/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../../services/monitoring/grafana/data:/var/lib/grafana
+      - ../../services/monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ../../services/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
 
     # Environment variables
     environment:

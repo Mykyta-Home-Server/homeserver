@@ -1,0 +1,24 @@
+# ============================================================================
+# Maintenance Cron - Crontab Configuration
+# ============================================================================
+# Scheduled tasks running in maintenance-cron container
+# All output goes to stdout/stderr → captured by Docker → Promtail → Loki
+# ============================================================================
+
+# Daily backup at 3 AM
+0 3 * * * echo "[CRON] Starting backup..." >> /var/log/cron.log 2>&1 && /scripts/backup.sh >> /var/log/cron.log 2>&1 && echo "[CRON] Backup complete" >> /var/log/cron.log 2>&1
+
+# Jellyfin cleanup every 5 minutes
+*/5 * * * * echo "[CRON] Starting Jellyfin cleanup..." >> /var/log/cron.log 2>&1 && python3 /scripts/jellyfin-cleanup.py >> /var/log/cron.log 2>&1 && echo "[CRON] Jellyfin cleanup complete" >> /var/log/cron.log 2>&1
+
+# Jellyseerr cleanup daily at 4 AM
+0 4 * * * echo "[CRON] Starting Jellyseerr cleanup..." >> /var/log/cron.log 2>&1 && python3 /scripts/jellyseerr-cleanup.py >> /var/log/cron.log 2>&1 && echo "[CRON] Jellyseerr cleanup complete" >> /var/log/cron.log 2>&1
+
+# Media cleanup every 15 minutes - sync Radarr/Sonarr with Jellyseerr (source of truth)
+*/15 * * * * echo "[CRON] Starting media cleanup..." >> /var/log/cron.log 2>&1 && python3 /scripts/media-cleanup.py >> /var/log/cron.log 2>&1 && echo "[CRON] Media cleanup complete" >> /var/log/cron.log 2>&1
+
+# ============================================================================
+# Logs are automatically captured by:
+# Docker → Promtail → Loki → Grafana
+# No need for separate .log files!
+# ============================================================================

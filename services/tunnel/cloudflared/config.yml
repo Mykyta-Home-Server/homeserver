@@ -36,6 +36,11 @@ ingress:
     originRequest:
       noTLSVerify: true
       originServerName: requests.mykyta-ryasny.dev
+  - hostname: bazarr.mykyta-ryasny.dev
+    service: https://caddy:443
+    originRequest:
+      noTLSVerify: true
+      originServerName: bazarr.mykyta-ryasny.dev
 
   # Monitoring - Grafana dashboard
   - hostname: monitor.mykyta-ryasny.dev

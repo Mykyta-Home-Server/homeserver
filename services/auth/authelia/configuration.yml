@@ -183,11 +183,12 @@ access_control:
         - ["group:admins"]
 
     # ========================================================================
-    # Media Management - Admin Only (Radarr, Sonarr)
+    # Media Management - Admin Only (Radarr, Sonarr, Bazarr)
     # ========================================================================
     - domain:
         - "movies.mykyta-ryasny.dev"       # Radarr
         - "tv.mykyta-ryasny.dev"           # Sonarr
+        - "bazarr.mykyta-ryasny.dev"       # Bazarr (subtitles)
       policy: one_factor
       subject:
         - ["group:admins"]
