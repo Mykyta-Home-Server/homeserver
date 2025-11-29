@@ -1,14 +1,11 @@
 /* Custom styles for Home Server Docs */
 /* Using Starlight's theming system - only override CSS variables */
 
-/* Light mode accent colors + layout sizing */
+/* Light mode accent colors */
 :root {
   --sl-color-accent-low: #c7d9f2;
   --sl-color-accent: #2563eb;
   --sl-color-accent-high: #1d4ed8;
-  /* Right sidebar (TOC) sizing - 15% of viewport */
-  --sl-sidebar-width: 15vw;
-  --sl-content-width: 60rem;
 }
 
 /* Dark mode - use Starlight's dark theme with custom accent */
@@ -316,16 +313,26 @@ pre.mermaid,
 }
 
 /* ============================================
-   Right Sidebar (On This Page) - Compact 15%
+   Layout: Right Sidebar Compact + Full Content
    ============================================ */
 
-/* Target all right sidebar variations */
-.right-sidebar,
-.right-sidebar-container,
-aside.right-sidebar {
-  width: 15vw !important;
-  max-width: 15vw !important;
-  min-width: 10rem !important;
+/* Override Starlight's sidebar width calculation */
+@media (min-width: 72rem) {
+  :root {
+    --sl-sidebar-width: 12rem;
+  }
+
+  /* Make main content take all available space */
+  .main-pane {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Right sidebar fixed width */
+  .right-sidebar-container {
+    width: var(--sl-sidebar-width) !important;
+    flex-shrink: 0 !important;
+  }
 }
 
 /* Make TOC text readable and properly wrapped */
