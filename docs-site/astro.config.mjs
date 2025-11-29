@@ -14,13 +14,9 @@ export default defineConfig({
         dark: './src/assets/logo-dark.svg',
         replacesTitle: false,
       },
-      social: [
-        {
-          icon: 'github',
-          label: 'GitHub',
-          href: 'https://github.com/mykyta-ryasny/homeserver',
-        },
-      ],
+      social: {
+        github: 'https://github.com/mykyta-ryasny/homeserver',
+      },
       customCss: ['./src/styles/custom.css'],
       sidebar: [
         {
