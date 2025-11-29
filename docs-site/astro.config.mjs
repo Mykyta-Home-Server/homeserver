@@ -20,6 +20,54 @@ export default defineConfig({
         github: 'https://github.com/mykyta-ryasny/homeserver',
       },
       customCss: ['./src/styles/custom.css'],
+      head: [
+        {
+          tag: 'script',
+          content: `
+            function initMermaidZoom() {
+              const diagrams = document.querySelectorAll('.mermaid');
+              let modal = document.getElementById('mermaid-modal');
+              if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'mermaid-modal';
+                modal.className = 'mermaid-modal';
+                modal.innerHTML = '<button class="mermaid-modal-close" aria-label="Close">&times;</button><div class="mermaid-content"></div>';
+                document.body.appendChild(modal);
+                modal.addEventListener('click', (e) => {
+                  if (e.target === modal || e.target.classList.contains('mermaid-modal-close')) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                  }
+                });
+                document.addEventListener('keydown', (e) => {
+                  if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                  }
+                });
+              }
+              diagrams.forEach((diagram) => {
+                if (diagram.dataset.zoomEnabled) return;
+                diagram.dataset.zoomEnabled = 'true';
+                diagram.addEventListener('click', () => {
+                  const svg = diagram.querySelector('svg');
+                  if (svg) {
+                    modal.querySelector('.mermaid-content').innerHTML = svg.outerHTML;
+                    modal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                  }
+                });
+              });
+            }
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', () => setTimeout(initMermaidZoom, 500));
+            } else {
+              setTimeout(initMermaidZoom, 500);
+            }
+            document.addEventListener('astro:page-load', () => setTimeout(initMermaidZoom, 500));
+          `,
+        },
+      ],
       sidebar: [
         {
           label: 'Getting Started',

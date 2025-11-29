@@ -19,3 +19,240 @@
 .sl-markdown-content pre {
   border-radius: 0.5rem;
 }
+
+/* ============================================
+   Mermaid Diagram Styling
+   ============================================ */
+
+/* Container styling - make diagrams larger and centered */
+.mermaid,
+pre.mermaid,
+.sl-markdown-content .mermaid {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  background: var(--sl-color-bg-nav);
+  border-radius: 1rem;
+  border: 1px solid var(--sl-color-hairline);
+  cursor: zoom-in;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mermaid:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Make SVG responsive and larger */
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+  min-height: 200px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Click-to-expand modal overlay */
+.mermaid-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  cursor: zoom-out;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+.mermaid-modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mermaid-modal .mermaid-content {
+  max-width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
+  background: var(--sl-color-bg);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.mermaid-modal .mermaid-content svg {
+  max-width: none;
+  width: auto;
+  height: auto;
+  max-height: 85vh;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Close button for modal */
+.mermaid-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  font-size: 2rem;
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.mermaid-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   Mermaid Pastel Colors & Rounded Nodes
+   ============================================ */
+
+/* Flowchart nodes - pastel backgrounds with rounded corners */
+.mermaid .node rect,
+.mermaid .node polygon,
+.mermaid .node circle,
+.mermaid .node ellipse {
+  rx: 12px;
+  ry: 12px;
+  stroke-width: 2px;
+}
+
+/* Pastel color palette for light mode */
+:root {
+  --mermaid-primary: #a8d5ff;
+  --mermaid-primary-text: #1a365d;
+  --mermaid-secondary: #c3f0ca;
+  --mermaid-secondary-text: #1a4d2e;
+  --mermaid-tertiary: #ffd9a8;
+  --mermaid-tertiary-text: #5c3d00;
+  --mermaid-note: #ffe4f3;
+  --mermaid-note-text: #831843;
+  --mermaid-line: #94a3b8;
+}
+
+/* Pastel color palette for dark mode */
+:root[data-theme='dark'] {
+  --mermaid-primary: #1e4976;
+  --mermaid-primary-text: #93c5fd;
+  --mermaid-secondary: #1a4d2e;
+  --mermaid-secondary-text: #86efac;
+  --mermaid-tertiary: #5c3d00;
+  --mermaid-tertiary-text: #fcd34d;
+  --mermaid-note: #4a1d36;
+  --mermaid-note-text: #f9a8d4;
+  --mermaid-line: #64748b;
+}
+
+/* Apply pastel colors to nodes */
+.mermaid .node.default > rect,
+.mermaid .node.default > polygon {
+  fill: var(--mermaid-primary) !important;
+  stroke: var(--mermaid-line) !important;
+}
+
+.mermaid .nodeLabel,
+.mermaid .node .label {
+  color: var(--mermaid-primary-text) !important;
+  fill: var(--mermaid-primary-text) !important;
+}
+
+/* Edge/arrow styling */
+.mermaid .edgePath path.path,
+.mermaid .flowchart-link {
+  stroke: var(--mermaid-line) !important;
+  stroke-width: 2px;
+}
+
+.mermaid marker path {
+  fill: var(--mermaid-line) !important;
+}
+
+/* Edge labels */
+.mermaid .edgeLabel {
+  background: var(--sl-color-bg) !important;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Subgraph styling */
+.mermaid .cluster rect {
+  fill: var(--mermaid-note) !important;
+  stroke: var(--mermaid-line) !important;
+  rx: 16px !important;
+  ry: 16px !important;
+}
+
+.mermaid .cluster .nodeLabel {
+  color: var(--mermaid-note-text) !important;
+}
+
+/* Sequence diagram specific */
+.mermaid .actor {
+  fill: var(--mermaid-primary) !important;
+  stroke: var(--mermaid-line) !important;
+}
+
+.mermaid .actor-line {
+  stroke: var(--mermaid-line) !important;
+}
+
+.mermaid .messageLine0,
+.mermaid .messageLine1 {
+  stroke: var(--mermaid-line) !important;
+}
+
+.mermaid .messageText {
+  fill: var(--sl-color-text) !important;
+}
+
+.mermaid .note {
+  fill: var(--mermaid-note) !important;
+  stroke: var(--mermaid-line) !important;
+}
+
+/* ============================================
+   Right Sidebar (On This Page) - Compact
+   ============================================ */
+
+/* Make the right sidebar narrower */
+@media (min-width: 72rem) {
+  :root {
+    --sl-sidebar-width: 18rem;
+  }
+
+  .right-sidebar {
+    width: 14rem;
+  }
+
+  /* Give more space to content */
+  .main-pane {
+    max-width: calc(100% - 14rem);
+  }
+}
+
+/* Hint text for clickable diagrams */
+.mermaid::after {
+  content: "Click to expand";
+  display: block;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--sl-color-text-accent);
+  margin-top: 0.5rem;
+  opacity: 0.7;
+}
