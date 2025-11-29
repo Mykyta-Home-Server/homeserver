@@ -313,7 +313,7 @@ pre.mermaid,
 }
 
 /* ============================================
-   Layout: Right Sidebar Compact + Full Content
+   Layout: Right Sidebar Compact + Centered Content
    ============================================ */
 
 /* Override Starlight's sidebar width calculation */
@@ -322,10 +322,10 @@ pre.mermaid,
     --sl-sidebar-width: 12rem;
   }
 
-  /* Make main content take all available space */
+  /* Center main content and limit max width for readability */
   .main-pane {
-    width: 100% !important;
-    max-width: none !important;
+    max-width: 65rem !important;
+    margin-inline: auto !important;
   }
 
   /* Right sidebar fixed width */
