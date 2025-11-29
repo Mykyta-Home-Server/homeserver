@@ -85,21 +85,23 @@ Automatically loads all `.caddy` files from the `sites/` directory.
 
 ## Service Configuration Template
 
-Basic structure for `sites/your-service.caddy`:
+Basic structure for `sites/your-service.Caddyfile`:
 
 ```caddy
 # Service description and metadata
-https://subdomain.mykyta-ryasny.dev {
+subdomain.mykyta-ryasny.dev {
     import cf_tls
     reverse_proxy container-name:PORT
 }
 ```
 
+**Note:** No `https://` prefix needed - Caddy handles HTTPS automatically with the `cf_tls` snippet.
+
 ## Common Patterns
 
 ### Simple Reverse Proxy
 ```caddy
-https://plex.mykyta-ryasny.dev {
+plex.mykyta-ryasny.dev {
     import cf_tls
     reverse_proxy plex:32400
 }
@@ -107,7 +109,7 @@ https://plex.mykyta-ryasny.dev {
 
 ### With Custom Headers
 ```caddy
-https://jellyfin.mykyta-ryasny.dev {
+jellyfin.mykyta-ryasny.dev {
     import cf_tls
 
     header {
@@ -120,7 +122,7 @@ https://jellyfin.mykyta-ryasny.dev {
 
 ### With WebSocket Support
 ```caddy
-https://console.mykyta-ryasny.dev {
+console.mykyta-ryasny.dev {
     import cf_tls
 
     reverse_proxy minecraft:8080 {
@@ -132,7 +134,7 @@ https://console.mykyta-ryasny.dev {
 
 ### WWW Redirect
 ```caddy
-https://www.mykyta-ryasny.dev {
+www.mykyta-ryasny.dev {
     import cf_tls
     redir https://mykyta-ryasny.dev{uri}
 }

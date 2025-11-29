@@ -15,15 +15,16 @@ These rules were learned from troubleshooting sessions!
 </Aside>
 
 ### Caddyfile Rules
-- **Always use `https://` prefix** in site blocks
+- Use domain name directly (no `https://` prefix needed - Caddy handles TLS automatically)
 - Use `.Caddyfile` extension for syntax highlighting
+- Always `import cf_tls` for Cloudflare Origin Certificate
 
 ```caddy
-# ✅ Correct
-https://myservice.mykyta-ryasny.dev {
-
-# ❌ Wrong
+# ✅ Correct - Caddy auto-handles HTTPS
 myservice.mykyta-ryasny.dev {
+    import cf_tls
+    reverse_proxy myservice:8080
+}
 ```
 
 ### Cloudflare DNS Rules
@@ -90,7 +91,7 @@ myservice.mykyta-ryasny.dev {
    Create `services/proxy/caddy/sites/myservice.Caddyfile`:
 
    ```caddy
-   https://myservice.mykyta-ryasny.dev {
+   myservice.mykyta-ryasny.dev {
        import cf_tls
        import authelia_auth
 
@@ -167,5 +168,5 @@ curl -I https://myservice.mykyta-ryasny.dev
 - Check Cloudflare DNS settings
 
 ### ERR_TOO_MANY_REDIRECTS
-- Missing `https://` prefix in Caddyfile
-- Check Cloudflare SSL mode is "Full"
+- Check Cloudflare SSL mode is "Full" (not "Flexible")
+- Ensure `import cf_tls` is in your Caddyfile
