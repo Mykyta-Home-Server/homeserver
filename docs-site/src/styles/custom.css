@@ -129,13 +129,18 @@ pre.mermaid,
 
 /* ============================================
    Mermaid Pastel Colors & Rounded Nodes
+   Applied to both page and modal SVGs
    ============================================ */
 
 /* Flowchart nodes - pastel backgrounds with rounded corners */
 .mermaid .node rect,
 .mermaid .node polygon,
 .mermaid .node circle,
-.mermaid .node ellipse {
+.mermaid .node ellipse,
+.mermaid-modal .node rect,
+.mermaid-modal .node polygon,
+.mermaid-modal .node circle,
+.mermaid-modal .node ellipse {
   rx: 12px;
   ry: 12px;
   stroke-width: 2px;
@@ -167,52 +172,63 @@ pre.mermaid,
   --mermaid-line: #64748b;
 }
 
-/* Apply pastel colors to nodes */
+/* Apply pastel colors to nodes - include modal selectors */
 .mermaid .node.default > rect,
-.mermaid .node.default > polygon {
+.mermaid .node.default > polygon,
+.mermaid-modal .node.default > rect,
+.mermaid-modal .node.default > polygon {
   fill: var(--mermaid-primary) !important;
   stroke: var(--mermaid-line) !important;
 }
 
 .mermaid .nodeLabel,
-.mermaid .node .label {
+.mermaid .node .label,
+.mermaid-modal .nodeLabel,
+.mermaid-modal .node .label {
   color: var(--mermaid-primary-text) !important;
   fill: var(--mermaid-primary-text) !important;
 }
 
 /* Edge/arrow styling */
 .mermaid .edgePath path.path,
-.mermaid .flowchart-link {
+.mermaid .flowchart-link,
+.mermaid-modal .edgePath path.path,
+.mermaid-modal .flowchart-link {
   stroke: var(--mermaid-line) !important;
   stroke-width: 2px;
 }
 
-.mermaid marker path {
+.mermaid marker path,
+.mermaid-modal marker path {
   fill: var(--mermaid-line) !important;
 }
 
 /* Edge labels */
-.mermaid .edgeLabel {
+.mermaid .edgeLabel,
+.mermaid-modal .edgeLabel {
   background: var(--sl-color-bg) !important;
   border-radius: 0.5rem;
   padding: 0.25rem 0.5rem;
 }
 
 /* Subgraph styling */
-.mermaid .cluster rect {
+.mermaid .cluster rect,
+.mermaid-modal .cluster rect {
   fill: var(--mermaid-note) !important;
   stroke: var(--mermaid-line) !important;
   rx: 16px !important;
   ry: 16px !important;
 }
 
-.mermaid .cluster .nodeLabel {
+.mermaid .cluster .nodeLabel,
+.mermaid-modal .cluster .nodeLabel {
   color: var(--mermaid-note-text) !important;
 }
 
 /* Sequence diagram specific */
 .mermaid .actor,
-.astro-mermaid .actor {
+.astro-mermaid .actor,
+.mermaid-modal .actor {
   fill: var(--mermaid-primary) !important;
   stroke: var(--mermaid-line) !important;
   rx: 8px !important;
@@ -220,7 +236,8 @@ pre.mermaid,
 }
 
 .mermaid .actor-line,
-.astro-mermaid .actor-line {
+.astro-mermaid .actor-line,
+.mermaid-modal .actor-line {
   stroke: var(--mermaid-line) !important;
   stroke-dasharray: 4, 4;
 }
@@ -228,19 +245,23 @@ pre.mermaid,
 .mermaid .messageLine0,
 .mermaid .messageLine1,
 .astro-mermaid .messageLine0,
-.astro-mermaid .messageLine1 {
+.astro-mermaid .messageLine1,
+.mermaid-modal .messageLine0,
+.mermaid-modal .messageLine1 {
   stroke: var(--mermaid-line) !important;
   stroke-width: 1.5px;
 }
 
 .mermaid .messageText,
-.astro-mermaid .messageText {
+.astro-mermaid .messageText,
+.mermaid-modal .messageText {
   fill: var(--sl-color-text) !important;
   font-size: 12px !important;
 }
 
 .mermaid .note,
-.astro-mermaid .note {
+.astro-mermaid .note,
+.mermaid-modal .note {
   fill: var(--mermaid-note) !important;
   stroke: var(--mermaid-line) !important;
   rx: 8px !important;
@@ -251,7 +272,9 @@ pre.mermaid,
 .mermaid .actor text,
 .mermaid .sequenceNumber,
 .astro-mermaid .actor text,
-.astro-mermaid .sequenceNumber {
+.astro-mermaid .sequenceNumber,
+.mermaid-modal .actor text,
+.mermaid-modal .sequenceNumber {
   fill: var(--mermaid-primary-text) !important;
 }
 
@@ -259,7 +282,9 @@ pre.mermaid,
 .mermaid .loopLine,
 .mermaid .labelBox,
 .astro-mermaid .loopLine,
-.astro-mermaid .labelBox {
+.astro-mermaid .labelBox,
+.mermaid-modal .loopLine,
+.mermaid-modal .labelBox {
   stroke: var(--mermaid-line) !important;
   fill: var(--sl-color-bg-nav) !important;
 }
@@ -267,7 +292,9 @@ pre.mermaid,
 .mermaid .loopText,
 .mermaid .labelText,
 .astro-mermaid .loopText,
-.astro-mermaid .labelText {
+.astro-mermaid .labelText,
+.mermaid-modal .loopText,
+.mermaid-modal .labelText {
   fill: var(--sl-color-text) !important;
 }
 
@@ -277,7 +304,10 @@ pre.mermaid,
 .mermaid .activation2,
 .astro-mermaid .activation0,
 .astro-mermaid .activation1,
-.astro-mermaid .activation2 {
+.astro-mermaid .activation2,
+.mermaid-modal .activation0,
+.mermaid-modal .activation1,
+.mermaid-modal .activation2 {
   fill: var(--mermaid-secondary) !important;
   stroke: var(--mermaid-line) !important;
 }
@@ -286,19 +316,24 @@ pre.mermaid,
    Right Sidebar (On This Page) - Compact
    ============================================ */
 
-/* Make the right sidebar narrower */
+/* Make the right sidebar much narrower */
+.right-sidebar {
+  width: 10rem !important;
+}
+
+.right-sidebar-panel {
+  padding: 0.5rem !important;
+}
+
+/* TOC links smaller */
+starlight-toc a {
+  font-size: 0.75rem !important;
+}
+
 @media (min-width: 72rem) {
-  :root {
-    --sl-sidebar-width: 18rem;
-  }
-
-  .right-sidebar {
-    width: 14rem;
-  }
-
-  /* Give more space to content */
-  .main-pane {
-    max-width: calc(100% - 14rem);
+  /* More content space */
+  .sl-container {
+    max-width: calc(100% - 10rem);
   }
 }
 

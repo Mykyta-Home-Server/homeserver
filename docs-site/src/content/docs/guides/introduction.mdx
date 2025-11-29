@@ -12,31 +12,47 @@ Welcome to the **Home Server** documentation! This project is a personal learnin
 The entire infrastructure runs through a secure Cloudflare Tunnel with **zero exposed ports** on the home network.
 
 ```mermaid
-flowchart TB
-    User([👤 User]) --> CF[☁️ Cloudflare]
-    CF --> CFD[cloudflared]
-    CFD --> Caddy[🔒 Caddy]
-
-    Caddy --> Auth & Media & Mon
-
-    subgraph Auth["🔐 Auth"]
-        Authelia[Authelia]
-        Authelia --- DB[(PG + Redis)]
-        Authelia --- LDAP[(LDAP)]
+flowchart LR
+    subgraph Internet["☁️ Internet"]
+        User([👤 User])
+        CF[Cloudflare<br/>DNS + DDoS]
     end
 
-    subgraph Media["📺 Media"]
-        JF[Jellyfin]
-        Arr[Sonarr/Radarr]
-        QB[qBittorrent]
-        JF --- Arr --- QB
+    subgraph Server["🏠 Home Server"]
+        subgraph Proxy["🌐 Proxy"]
+            CFD[cloudflared]
+            Caddy[🔒 Caddy]
+        end
+
+        subgraph Services["📦 Services"]
+            subgraph Auth["🔐 Auth"]
+                Authelia[Authelia SSO]
+                PG[(PostgreSQL)]
+                Redis[(Redis)]
+                LDAP[(OpenLDAP)]
+            end
+
+            subgraph Media["📺 Media"]
+                JF[Jellyfin]
+                JS[Jellyseerr]
+                Sonarr[Sonarr]
+                Radarr[Radarr]
+                Prowlarr[Prowlarr]
+                QB[qBittorrent]
+                Bazarr[Bazarr]
+            end
+
+            subgraph Mon["📊 Monitoring"]
+                Grafana[Grafana]
+                Loki[Loki]
+                Promtail[Promtail]
+            end
+        end
     end
 
-    subgraph Mon["📊 Monitor"]
-        Grafana[Grafana]
-        Loki[Loki]
-        Grafana --- Loki
-    end
+    User --> CF --> CFD --> Caddy
+    Caddy --> Authelia & JF & Grafana
+    Authelia --> PG & Redis & LDAP
 
     style CF fill:#f6821f,color:#fff
     style Caddy fill:#00a86b,color:#fff
@@ -69,30 +85,41 @@ The server currently runs **24 containers** across multiple service categories:
 The complete workflow from requesting content to streaming:
 
 ```mermaid
-flowchart TB
-    User([👤 User]) -->|Request| JS[Jellyseerr]
+flowchart LR
+    subgraph Request["📱 Request"]
+        User([👤 User])
+        JS[🎬 Jellyseerr]
+        User -->|Request| JS
+    end
 
-    JS --> Radarr & Sonarr
-
-    subgraph Manage["📋 *arr Stack"]
+    subgraph Search["🔍 Search & Manage"]
         Radarr[🎥 Radarr]
         Sonarr[📺 Sonarr]
         Prowlarr[🔍 Prowlarr]
-        Radarr & Sonarr --> Prowlarr
-        Prowlarr --> Indexers[(Indexers)]
+        Indexers[(Indexers)]
+        Radarr & Sonarr --> Prowlarr --> Indexers
     end
 
-    Radarr & Sonarr -->|Send| QB[⬇️ qBittorrent]
-
-    QB -->|Done| Process
+    subgraph Download["⬇️ Download"]
+        QB[qBittorrent]
+        FS[FlareSolverr]
+    end
 
     subgraph Process["⚙️ Process"]
-        Import[Import/Rename]
-        Bazarr[💬 Subtitles]
-        Import --> Bazarr
+        Import[Import & Rename]
+        Bazarr[💬 Bazarr<br/>Subtitles]
     end
 
-    Process --> JF[📺 Jellyfin] --> Devices([📱💻📺])
+    subgraph Stream["📺 Stream"]
+        JF[Jellyfin]
+        Devices([📱💻📺])
+    end
+
+    JS -->|Movie| Radarr
+    JS -->|TV Show| Sonarr
+    Radarr & Sonarr --> QB
+    FS -.-> Prowlarr
+    QB --> Import --> Bazarr --> JF --> Devices
 
     style JS fill:#1a73e8,color:#fff
     style JF fill:#00a4dc,color:#fff
@@ -105,23 +132,30 @@ Single Sign-On across all services using LDAP:
 
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant C as Caddy
-    participant A as Authelia
-    participant S as Service
+    participant User as 👤 User
+    participant Browser as 🌐 Browser
+    participant Caddy as 🔒 Caddy
+    participant Authelia as 🛡️ Authelia
+    participant LDAP as 📁 LDAP
+    participant Service as 📺 Service
 
-    U->>C: Request
-    C->>A: Auth Check
-    alt Not Logged In
-        A-->>U: Login Page
-        U->>A: Credentials
-        A->>A: LDAP Verify
-        A-->>U: Session Cookie
+    User->>Browser: Access service.domain.com
+    Browser->>Caddy: HTTPS Request
+    Caddy->>Authelia: Forward Auth Check
+
+    alt Not Authenticated
+        Authelia-->>Browser: Redirect to Login
+        User->>Authelia: Enter Credentials
+        Authelia->>LDAP: Validate User
+        LDAP-->>Authelia: User Valid
+        Authelia-->>Browser: Set Session Cookie
+        Browser->>Caddy: Retry with Cookie
     end
-    C->>A: Verify
-    A-->>C: OK + Headers
-    C->>S: Forward
-    S-->>U: Response
+
+    Caddy->>Authelia: Verify Session
+    Authelia-->>Caddy: Session Valid + Headers
+    Caddy->>Service: Forward Request + Auth Headers
+    Service-->>Browser: Response
 ```
 
 ## Docker Network Architecture
@@ -129,29 +163,52 @@ sequenceDiagram
 Services are isolated into purpose-specific networks:
 
 ```mermaid
-flowchart LR
-    subgraph proxy["🌐 proxy"]
-        Caddy[Caddy] --- CFD[cloudflared]
+flowchart TB
+    subgraph proxy["🌐 proxy network"]
+        direction LR
+        Caddy[Caddy]
+        CFD[cloudflared]
+        Caddy --- CFD
     end
 
-    subgraph auth["🔐 auth"]
-        Auth[Authelia] --- DB[(PG/Redis/LDAP)]
+    subgraph auth["🔐 auth network"]
+        direction LR
+        Authelia[Authelia]
+        PG[(PostgreSQL)]
+        Redis[(Redis)]
+        LDAP[(OpenLDAP)]
+        Authelia --- PG & Redis & LDAP
     end
 
-    subgraph media["📺 media"]
-        JF[Jellyfin] --- Arr[*arr suite] --- QB[qBit]
+    subgraph media["📺 media network"]
+        direction LR
+        JF[Jellyfin]
+        JS[Jellyseerr]
+        Radarr[Radarr]
+        Sonarr[Sonarr]
+        Prowlarr[Prowlarr]
+        QB[qBittorrent]
+        Bazarr[Bazarr]
+        JS --- JF
+        Radarr & Sonarr --- Prowlarr
+        Radarr & Sonarr --- QB
+        Bazarr --- Radarr & Sonarr
     end
 
-    subgraph mon["📊 monitor"]
-        Graf[Grafana] --- Loki[Loki]
+    subgraph monitoring["📊 monitoring network"]
+        direction LR
+        Grafana[Grafana]
+        Loki[Loki]
+        Promtail[Promtail]
+        Promtail --- Loki --- Grafana
     end
 
-    Caddy --> auth & media & mon
+    Caddy --> Authelia & JF & Grafana & Radarr
 
     style proxy fill:#e3f2fd
     style auth fill:#fce4ec
     style media fill:#e8f5e9
-    style mon fill:#fff3e0
+    style monitoring fill:#fff3e0
 ```
 
 ## Key Features
