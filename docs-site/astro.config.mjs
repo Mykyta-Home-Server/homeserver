@@ -25,77 +25,58 @@ export default defineConfig({
           tag: 'script',
           content: `
             function initMermaidZoom() {
-              // Select all mermaid containers (both .mermaid and astro-mermaid wrapper)
-              const diagrams = document.querySelectorAll('.mermaid, .astro-mermaid, pre.mermaid');
-              let modal = document.getElementById('mermaid-modal');
-              if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'mermaid-modal';
-                modal.className = 'mermaid-modal';
-                modal.innerHTML = '<button class="mermaid-modal-close" aria-label="Close">×</button><div class="mermaid-content"></div>';
-                document.body.appendChild(modal);
-                modal.addEventListener('click', (e) => {
-                  if (e.target === modal || e.target.classList.contains('mermaid-modal-close')) {
-                    modal.classList.remove('active');
-                    document.body.style.overflow = '';
-                  }
-                });
-                document.addEventListener('keydown', (e) => {
-                  if (e.key === 'Escape' && modal.classList.contains('active')) {
-                    modal.classList.remove('active');
-                    document.body.style.overflow = '';
-                  }
-                });
-              }
-              diagrams.forEach((diagram) => {
-                if (diagram.dataset.zoomEnabled) return;
-                diagram.dataset.zoomEnabled = 'true';
-                diagram.addEventListener('click', () => {
-                  // Try multiple ways to find the SVG
-                  let svg = diagram.querySelector('svg');
-                  if (!svg) {
-                    // Check if SVG is a sibling or nearby
-                    svg = diagram.parentElement?.querySelector('svg');
-                  }
-                  if (!svg) {
-                    // Check if diagram itself contains SVG markup
-                    const svgMatch = diagram.innerHTML.match(/<svg[\\s\\S]*<\\/svg>/i);
-                    if (svgMatch) {
-                      modal.querySelector('.mermaid-content').innerHTML = svgMatch[0];
-                      modal.classList.add('active');
-                      document.body.style.overflow = 'hidden';
-                      return;
+              // Find all SVGs inside mermaid containers
+              const svgs = document.querySelectorAll('.mermaid svg, .astro-mermaid svg, pre.mermaid svg');
+
+              svgs.forEach((svg) => {
+                const container = svg.closest('.mermaid, .astro-mermaid, pre.mermaid');
+                if (!container || container.dataset.zoomEnabled) return;
+                container.dataset.zoomEnabled = 'true';
+
+                container.addEventListener('click', () => {
+                  // Get fresh reference to SVG on each click
+                  const currentSvg = container.querySelector('svg');
+                  if (!currentSvg) return;
+
+                  // Create modal fresh each time to avoid caching
+                  let modal = document.getElementById('mermaid-modal');
+                  if (modal) modal.remove();
+
+                  modal = document.createElement('div');
+                  modal.id = 'mermaid-modal';
+                  modal.className = 'mermaid-modal active';
+                  modal.innerHTML = '<button class="mermaid-modal-close" aria-label="Close">×</button><div class="mermaid-content"></div>';
+
+                  // Clone current SVG
+                  const svgClone = currentSvg.cloneNode(true);
+                  svgClone.removeAttribute('width');
+                  svgClone.removeAttribute('height');
+                  svgClone.style.cssText = 'width:100%;height:auto;max-height:80vh;';
+
+                  modal.querySelector('.mermaid-content').appendChild(svgClone);
+                  document.body.appendChild(modal);
+                  document.body.style.overflow = 'hidden';
+
+                  // Close handlers
+                  modal.addEventListener('click', (e) => {
+                    if (e.target === modal || e.target.classList.contains('mermaid-modal-close')) {
+                      modal.remove();
+                      document.body.style.overflow = '';
                     }
-                  }
-                  if (svg) {
-                    // Clone to avoid reference issues
-                    const svgClone = svg.cloneNode(true);
-                    // Remove hardcoded size attributes so CSS can control sizing
-                    svgClone.removeAttribute('width');
-                    svgClone.removeAttribute('height');
-                    svgClone.removeAttribute('style');
-                    // Set viewBox if not present (for proper scaling)
-                    if (!svgClone.getAttribute('viewBox')) {
-                      const bbox = svg.getBBox ? svg.getBBox() : null;
-                      if (bbox) {
-                        svgClone.setAttribute('viewBox', '0 0 ' + (bbox.width + bbox.x) + ' ' + (bbox.height + bbox.y));
-                      }
+                  });
+                  document.addEventListener('keydown', function closeOnEsc(e) {
+                    if (e.key === 'Escape') {
+                      modal.remove();
+                      document.body.style.overflow = '';
+                      document.removeEventListener('keydown', closeOnEsc);
                     }
-                    // Apply scaling styles
-                    svgClone.style.width = '100%';
-                    svgClone.style.height = 'auto';
-                    svgClone.style.maxHeight = '80vh';
-                    modal.querySelector('.mermaid-content').innerHTML = '';
-                    modal.querySelector('.mermaid-content').appendChild(svgClone);
-                    modal.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                  }
+                  });
                 });
               });
             }
-            // Longer delay to ensure Mermaid has fully rendered
+
             function scheduleInit() {
-              setTimeout(initMermaidZoom, 1000);
+              setTimeout(initMermaidZoom, 1500);
             }
             if (document.readyState === 'loading') {
               document.addEventListener('DOMContentLoaded', scheduleInit);
