@@ -1,16 +1,14 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import tailwind from '@astrojs/tailwind';
-import rehypeMermaid from 'rehype-mermaid';
+import starlightMermaid from 'starlight-mermaid';
 
 export default defineConfig({
   site: 'https://mykyta-ryasny.github.io',
   base: '/homeserver',
-  markdown: {
-    rehypePlugins: [[rehypeMermaid, { strategy: 'img-svg' }]],
-  },
   integrations: [
     starlight({
+      plugins: [starlightMermaid()],
       title: 'Home Server Docs',
       description: 'Documentation for personal home server with AI-powered automation',
       logo: {
