@@ -1,0 +1,253 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "gridPos": { "h": 2, "w": 6, "x": 0, "y": 0 },
+      "id": 50,
+      "options": { "content": "### [🌐 Infrastructure](/d/infrastructure)", "mode": "markdown" },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "gridPos": { "h": 2, "w": 6, "x": 6, "y": 0 },
+      "id": 51,
+      "options": { "content": "### [📺 Media Stack](/d/media-stack)", "mode": "markdown" },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "gridPos": { "h": 2, "w": 6, "x": 12, "y": 0 },
+      "id": 52,
+      "options": { "content": "### [🔐 Authentication](/d/authentication)", "mode": "markdown" },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "gridPos": { "h": 2, "w": 6, "x": 18, "y": 0 },
+      "id": 53,
+      "options": { "content": "### [⚙️ Operations](/d/operations)", "mode": "markdown" },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 2 },
+      "id": 100,
+      "panels": [],
+      "title": "🌐 Proxy & Tunnel",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "description": "Log activity in last 5 min. UP = generating logs, DOWN = no recent logs",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [
+            { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
+            { "options": { "from": 1, "to": 999999, "result": { "color": "green", "index": 1, "text": "UP" } }, "type": "range" }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 3 },
+      "id": 1,
+      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"caddy\"}[5m]))", "legendFormat": "Caddy", "refId": "A" }],
+      "title": "🔒 Caddy Proxy",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "description": "Log activity in last 5 min. UP = generating logs, DOWN = no recent logs",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [
+            { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
+            { "options": { "from": 1, "to": 999999, "result": { "color": "green", "index": 1, "text": "UP" } }, "type": "range" }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 3 },
+      "id": 2,
+      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"cloudflared\"}[5m]))", "legendFormat": "Tunnel", "refId": "A" }],
+      "title": "☁️ Cloudflare Tunnel",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "description": "Number of error log lines from Caddy in the last hour",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 5 }, { "color": "red", "value": 20 }] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 3 },
+      "id": 3,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"caddy\"} |~ \"(?i)error\" [1h]))", "legendFormat": "Errors", "refId": "A" }],
+      "title": "⚠️ Proxy Errors (1h)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "description": "Total log lines from Caddy proxy in last hour (indicates traffic volume)",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 3 },
+      "id": 4,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"caddy\"}[1h]))", "legendFormat": "Requests", "refId": "A" }],
+      "title": "📊 Total Log Lines (1h)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "description": "Rate of log lines per second from infrastructure services",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
+      "id": 5,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "right", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(rate({container=\"caddy\"} [5m]))", "legendFormat": "Caddy", "refId": "A" },
+        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(rate({container=\"cloudflared\"} [5m]))", "legendFormat": "Tunnel", "refId": "B" }
+      ],
+      "title": "📈 Log Rate (logs/sec)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "description": "Distribution of log levels from Caddy (requires JSON log format)",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 100,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "normal" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 7 },
+      "id": 6,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum by (level) (count_over_time({container=\"caddy\"} | json | level != \"\" [10m]))", "legendFormat": "{{level}}", "refId": "A" }],
+      "title": "📊 Log Levels Over Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "description": "Live logs from infrastructure services, filtered by log level dropdown",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 15 },
+      "id": 7,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "{container=~\"caddy|cloudflared\"} |~ \"$log_level\"", "refId": "A" }],
+      "title": "📜 Live Logs",
+      "type": "logs"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["homeserver", "infrastructure"],
+  "templating": {
+    "list": [
+      {
+        "current": { "selected": true, "text": "All Logs", "value": ".*" },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Log Level",
+        "multi": false,
+        "name": "log_level",
+        "options": [
+          { "selected": true, "text": "All Logs", "value": ".*" },
+          { "selected": false, "text": "Errors & Warnings", "value": "(?i)error|warning|fail" },
+          { "selected": false, "text": "Errors Only", "value": "(?i)error|fail" },
+          { "selected": false, "text": "Warnings Only", "value": "(?i)warning|warn" }
+        ],
+        "query": "All Logs : .*, Errors & Warnings : (?i)error|warning|fail, Errors Only : (?i)error|fail, Warnings Only : (?i)warning|warn",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "🌐 Infrastructure",
+  "uid": "infrastructure",
+  "version": 1
+}

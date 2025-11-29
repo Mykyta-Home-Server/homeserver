@@ -35,6 +35,10 @@ jobs:
         working-directory: docs-site
         run: npm install
 
+      - name: Install Playwright browsers (for Mermaid rendering)
+        working-directory: docs-site
+        run: npx playwright install chromium
+
       - name: Build Astro site
         working-directory: docs-site
         run: npm run build
