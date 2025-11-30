@@ -68,41 +68,38 @@ The complete workflow from requesting content to streaming:
 
 ```mermaid
 flowchart TB
-    User([User])
-    Jellyseerr[Jellyseerr]
-    Radarr[Radarr]
+    User@{ shape: circle, label: "User" }
+    Jellyseerr@{ shape: rect, label: "Jellyseerr" }
+    Radarr@{ shape: rect, label: "Radarr" }
 
-    Sonarr[Sonarr]
-    Prowlarr[Prowlarr]
-    qBit[qBittorrent]
+    Sonarr@{ shape: rect, label: "Sonarr" }
+    Prowlarr@{ shape: rect, label: "Prowlarr" }
+    qBit@{ shape: rect, label: "qBittorrent" }
 
-    Flare[FlareSolverr]
-    Bazarr[Bazarr]
-    Jellyfin[Jellyfin]
+    Flare@{ shape: hex, label: "FlareSolverr" }
+    Bazarr@{ shape: rect, label: "Bazarr" }
+    Jellyfin@{ shape: cyl, label: "Jellyfin" }
 
     User --> Jellyseerr
-    Jellyseerr --> Radarr
-    Jellyseerr --> Sonarr
-    Radarr --> Prowlarr
-    Sonarr --> Prowlarr
-    Radarr --> qBit
-    Sonarr --> qBit
+    Jellyseerr --> Radarr & Sonarr
+    Radarr & Sonarr --> Prowlarr
+    Radarr & Sonarr --> qBit
     Flare -.-> Prowlarr
     qBit --> Bazarr
     Bazarr --> Jellyfin
     Jellyfin --> User
 
-    classDef request fill:#dbeafe,stroke:#2563eb,color:#1e40af
-    classDef search fill:#fef3c7,stroke:#d97706,color:#92400e
-    classDef download fill:#d1fae5,stroke:#059669,color:#065f46
-    classDef subtitle fill:#fce7f3,stroke:#db2777,color:#9d174d
-    classDef stream fill:#e0e7ff,stroke:#4f46e5,color:#3730a3
+    classDef userStyle fill:#dbeafe,stroke:#2563eb,stroke-width:2px
+    classDef processStyle fill:#fef3c7,stroke:#d97706,stroke-width:2px
+    classDef downloadStyle fill:#d1fae5,stroke:#059669,stroke-width:2px
+    classDef subtitleStyle fill:#fce7f3,stroke:#db2777,stroke-width:2px
+    classDef streamStyle fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px
 
-    class User,Jellyseerr request
-    class Radarr,Sonarr,Prowlarr,Flare search
-    class qBit download
-    class Bazarr subtitle
-    class Jellyfin stream
+    class User userStyle
+    class Jellyseerr,Radarr,Sonarr,Prowlarr processStyle
+    class qBit downloadStyle
+    class Bazarr,Flare subtitleStyle
+    class Jellyfin streamStyle
 ```
 
 ## Authentication Flow
@@ -110,29 +107,20 @@ flowchart TB
 Single Sign-On across all services using LDAP:
 
 ```mermaid
-flowchart TB
-    User([User])
-    Caddy[Caddy]
+sequenceDiagram
+    actor User
+    participant Caddy
+    participant Authelia
+    participant LDAP as OpenLDAP
+    participant Service
 
-    Authelia[Authelia]
-    LDAP[(LDAP)]
-
-    Service[Service]
-
-    User -->|Request| Caddy
-    Caddy -->|Check| Authelia
-    Authelia -->|Verify| LDAP
-    LDAP -->|Valid| Authelia
-    Authelia -->|Allow| Caddy
-    Caddy -->|Forward| Service
-
-    classDef client fill:#dbeafe,stroke:#2563eb,color:#1e40af
-    classDef auth fill:#fce7f3,stroke:#db2777,color:#9d174d
-    classDef backend fill:#d1fae5,stroke:#059669,color:#065f46
-
-    class User client
-    class Caddy,Authelia,LDAP auth
-    class Service backend
+    User->>Caddy: 1. Request Protected Resource
+    Caddy->>Authelia: 2. Verify Session
+    Authelia->>LDAP: 3. Validate Credentials
+    LDAP-->>Authelia: 4. User + Groups
+    Authelia-->>Caddy: 5. Grant Session
+    Caddy->>Service: 6. Forward Request
+    Service-->>User: 7. Return Content
 ```
 
 ## Docker Network Architecture
@@ -140,49 +128,51 @@ flowchart TB
 Services are isolated into purpose-specific networks:
 
 ```mermaid
-flowchart LR
-    subgraph proxy[Proxy]
-        direction TB
-        CF[Cloudflared]
-        Caddy[Caddy]
+flowchart TB
+    subgraph proxy["`**Proxy Network**`"]
+        direction LR
+        CF@{ shape: cloud, label: "Cloudflared" }
+        Caddy@{ shape: rect, label: "Caddy" }
     end
 
-    subgraph auth[Auth]
-        direction TB
-        Authelia[Authelia]
-        PG[(Postgres)]
-        Redis[(Redis)]
-        LDAP[(LDAP)]
+    subgraph auth["`**Auth Network**`"]
+        direction LR
+        Authelia@{ shape: rect, label: "Authelia" }
+        PG@{ shape: cyl, label: "PostgreSQL" }
+        Redis@{ shape: cyl, label: "Redis" }
+        LDAP@{ shape: cyl, label: "OpenLDAP" }
     end
 
-    subgraph media[Media]
-        direction TB
-        row1[Jellyfin | Jellyseerr]
-        row2[Radarr | Sonarr]
-        row3[Prowlarr | qBit | Bazarr]
+    subgraph media["`**Media Network**`"]
+        direction LR
+        JF@{ shape: cyl, label: "Jellyfin" }
+        JS@{ shape: rect, label: "Jellyseerr" }
+        RD@{ shape: rect, label: "Radarr" }
+        SN@{ shape: rect, label: "Sonarr" }
+        PW@{ shape: rect, label: "Prowlarr" }
+        QB@{ shape: rect, label: "qBit" }
+        BZ@{ shape: rect, label: "Bazarr" }
     end
 
-    subgraph monitor[Monitoring]
-        direction TB
-        PT[Promtail]
-        Loki[Loki]
-        Graf[Grafana]
+    subgraph monitor["`**Monitoring Network**`"]
+        direction LR
+        PT@{ shape: rect, label: "Promtail" }
+        Loki@{ shape: cyl, label: "Loki" }
+        Graf@{ shape: rect, label: "Grafana" }
     end
 
     CF --> Caddy
-    Caddy --> auth
-    Caddy --> media
-    Caddy --> monitor
+    Caddy ==> auth & media & monitor
 
-    classDef proxyNet fill:#dbeafe,stroke:#2563eb,color:#1e40af
-    classDef authNet fill:#fce7f3,stroke:#db2777,color:#9d174d
-    classDef mediaNet fill:#d1fae5,stroke:#059669,color:#065f46
-    classDef monitorNet fill:#fed7aa,stroke:#ea580c,color:#9a3412
+    classDef proxyStyle fill:#dbeafe,stroke:#2563eb,stroke-width:2px
+    classDef authStyle fill:#fce7f3,stroke:#db2777,stroke-width:2px
+    classDef mediaStyle fill:#d1fae5,stroke:#059669,stroke-width:2px
+    classDef monitorStyle fill:#fed7aa,stroke:#ea580c,stroke-width:2px
 
-    class CF,Caddy proxyNet
-    class Authelia,PG,Redis,LDAP authNet
-    class row1,row2,row3 mediaNet
-    class PT,Loki,Graf monitorNet
+    class CF,Caddy proxyStyle
+    class Authelia,PG,Redis,LDAP authStyle
+    class JF,JS,RD,SN,PW,QB,BZ mediaStyle
+    class PT,Loki,Graf monitorStyle
 ```
 
 ## Key Features

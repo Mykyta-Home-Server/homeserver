@@ -11,26 +11,30 @@ Centralized logging with Grafana, Loki, and Promtail for complete observability 
 
 ```mermaid
 flowchart TB
-    subgraph containers[Containers]
-        C1[Jellyfin]
-        C2[Radarr]
-        C3[Sonarr]
-        C4[...]
+    subgraph containers["`**Containers**`"]
+        direction LR
+        C1@{ shape: rect, label: "Jellyfin" }
+        C2@{ shape: rect, label: "Radarr" }
+        C3@{ shape: rect, label: "Sonarr" }
+        C4@{ shape: rect, label: "..." }
     end
 
-    subgraph collection[Collection]
-        Socket[Socket]
-        Promtail[Promtail]
+    subgraph collection["`**Collection**`"]
+        direction LR
+        Socket@{ shape: hex, label: "Docker Socket" }
+        Promtail@{ shape: rect, label: "Promtail" }
     end
 
-    subgraph storage[Storage]
-        Loki[Loki]
-        Data[(DB)]
+    subgraph storage["`**Storage**`"]
+        direction LR
+        Loki@{ shape: rect, label: "Loki" }
+        Data@{ shape: cyl, label: "Database" }
     end
 
-    subgraph viz[Display]
-        Grafana[Grafana]
-        User([User])
+    subgraph viz["`**Visualization**`"]
+        direction LR
+        User@{ shape: circle, label: "User" }
+        Grafana@{ shape: rect, label: "Grafana" }
     end
 
     containers --> Socket
@@ -40,10 +44,10 @@ flowchart TB
     User --> Grafana
     Grafana --> Loki
 
-    classDef containerStyle fill:#e3f2fd,stroke:#2196f3,color:#1565c0
-    classDef collectionStyle fill:#d1fae5,stroke:#059669,color:#065f46
-    classDef storageStyle fill:#fed7aa,stroke:#ea580c,color:#9a3412
-    classDef vizStyle fill:#fce7f3,stroke:#db2777,color:#9d174d
+    classDef containerStyle fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    classDef collectionStyle fill:#d1fae5,stroke:#059669,stroke-width:2px
+    classDef storageStyle fill:#fed7aa,stroke:#ea580c,stroke-width:2px
+    classDef vizStyle fill:#fce7f3,stroke:#db2777,stroke-width:2px
 
     class C1,C2,C3,C4 containerStyle
     class Socket,Promtail collectionStyle
@@ -71,12 +75,12 @@ Grafana is protected by Authelia SSO. Login with your LDAP credentials.
 
 ```mermaid
 flowchart LR
-    Container[Container]
-    Docker[Docker]
-    Promtail[Promtail]
-    Loki[Loki]
-    Grafana[Grafana]
-    User([User])
+    Container@{ shape: rect, label: "Container" }
+    Docker@{ shape: hex, label: "Docker Engine" }
+    Promtail@{ shape: rect, label: "Promtail" }
+    Loki@{ shape: cyl, label: "Loki" }
+    Grafana@{ shape: rect, label: "Grafana" }
+    User@{ shape: circle, label: "User" }
 
     Container --> Docker
     Docker --> Promtail
@@ -84,11 +88,11 @@ flowchart LR
     Grafana --> Loki
     Grafana --> User
 
-    classDef container fill:#e3f2fd,stroke:#2196f3,color:#1565c0
-    classDef docker fill:#0db7ed,stroke:#0db7ed,color:#fff
-    classDef promtail fill:#d1fae5,stroke:#059669,color:#065f46
-    classDef loki fill:#fed7aa,stroke:#ea580c,color:#9a3412
-    classDef grafana fill:#fce7f3,stroke:#db2777,color:#9d174d
+    classDef container fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    classDef docker fill:#0db7ed,stroke:#0a7ea3,stroke-width:2px
+    classDef promtail fill:#d1fae5,stroke:#059669,stroke-width:2px
+    classDef loki fill:#fed7aa,stroke:#ea580c,stroke-width:2px
+    classDef grafana fill:#fce7f3,stroke:#db2777,stroke-width:2px
 
     class Container container
     class Docker docker
@@ -153,18 +157,20 @@ Promtail automatically extracts labels from Docker metadata:
 
 ```mermaid
 flowchart LR
-    subgraph docker[Docker]
-        D1[container_name]
-        D2[service]
-        D3[project]
-        D4[labels]
+    subgraph docker["`**Docker Metadata**`"]
+        direction TB
+        D1@{ shape: tag, label: "container_name" }
+        D2@{ shape: tag, label: "service" }
+        D3@{ shape: tag, label: "project" }
+        D4@{ shape: tag, label: "labels" }
     end
 
-    subgraph loki[Loki]
-        L1[container]
-        L2[service]
-        L3[project]
-        L4[group]
+    subgraph loki["`**Loki Labels**`"]
+        direction TB
+        L1@{ shape: tag, label: "container" }
+        L2@{ shape: tag, label: "service" }
+        L3@{ shape: tag, label: "project" }
+        L4@{ shape: tag, label: "group" }
     end
 
     D1 --> L1
@@ -172,8 +178,8 @@ flowchart LR
     D3 --> L3
     D4 --> L4
 
-    classDef dockerStyle fill:#e3f2fd,stroke:#0db7ed,color:#1565c0
-    classDef lokiStyle fill:#fed7aa,stroke:#ea580c,color:#9a3412
+    classDef dockerStyle fill:#e3f2fd,stroke:#0db7ed,stroke-width:2px
+    classDef lokiStyle fill:#fed7aa,stroke:#ea580c,stroke-width:2px
 
     class D1,D2,D3,D4 dockerStyle
     class L1,L2,L3,L4 lokiStyle
