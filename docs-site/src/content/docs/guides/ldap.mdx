@@ -11,38 +11,38 @@ Unified authentication with OpenLDAP across all services. One username and passw
 
 ```mermaid
 flowchart TB
-    subgraph mgmt[Management Layer]
-        phpLDAP[phpLDAPadmin<br/>Web UI]
+    subgraph mgmt[Management]
+        phpLDAP[phpLDAPadmin]
     end
 
-    subgraph ldap[LDAP Directory]
-        LDAP[(OpenLDAP<br/>Users + Groups)]
+    subgraph ldap[Directory]
+        LDAP[(OpenLDAP)]
     end
 
-    subgraph sso[SSO Stack]
+    subgraph sso[SSO]
         Authelia[Authelia]
-        PG[(PostgreSQL)]
+        PG[(Postgres)]
         Redis[(Redis)]
     end
 
-    subgraph direct[Direct Auth]
+    subgraph direct[Direct]
         Jellyfin[Jellyfin]
         Jellyseerr[Jellyseerr]
     end
 
-    subgraph protected[SSO Protected]
+    subgraph protected[Protected]
         Grafana[Grafana]
-        Arr[*arr Stack<br/>Radarr/Sonarr/Prowlarr]
-        qBit[qBittorrent]
+        Arr[*arr]
+        qBit[qBit]
     end
 
-    phpLDAP -->|Manage| LDAP
-    LDAP -->|Validate| Authelia
-    LDAP -->|Validate| Jellyfin
+    phpLDAP --> LDAP
+    LDAP --> Authelia
+    LDAP --> Jellyfin
     Authelia --- PG
     Authelia --- Redis
     Jellyfin --> Jellyseerr
-    Authelia -->|Protect| protected
+    Authelia --> protected
 
     classDef mgmtStyle fill:#9c27b0,stroke:#7b1fa2,color:#fff
     classDef ldapStyle fill:#4caf50,stroke:#388e3c,color:#fff
@@ -151,12 +151,12 @@ flowchart TB
     Authelia[Authelia]
     LDAP[(LDAP)]
 
-    User -->|1. Request| Service
-    Service -->|2. Verify| Authelia
-    Authelia -->|3. Check| LDAP
-    LDAP -->|4. Valid| Authelia
-    Authelia -->|5. Grant| Service
-    Service -->|6. Access| User
+    User --> Service
+    Service --> Authelia
+    Authelia --> LDAP
+    LDAP --> Authelia
+    Authelia --> Service
+    Service --> User
 
     classDef user fill:#dbeafe,stroke:#2563eb,color:#1e40af
     classDef svc fill:#d1fae5,stroke:#059669,color:#065f46
@@ -213,26 +213,26 @@ Group membership determines which services users can access:
 
 ```mermaid
 flowchart LR
-    subgraph groups[LDAP Groups]
-        Admins[cn=admins]
-        Family[cn=family]
+    subgraph groups[Groups]
+        Admins[admins]
+        Family[family]
     end
 
-    subgraph admin[Admin Only Services]
+    subgraph admin[Admin Only]
         Grafana[Grafana]
-        Arr[*arr Stack]
-        qBit[qBittorrent]
-        phpLDAP[phpLDAPadmin]
+        Arr[*arr]
+        qBit[qBit]
+        phpLDAP[phpLDAP]
     end
 
-    subgraph media[Media Services]
+    subgraph media[Media]
         Jellyfin[Jellyfin]
         Jellyseerr[Jellyseerr]
     end
 
-    Admins -->|Full Access| admin
-    Admins -->|Full Access| media
-    Family -->|View Only| media
+    Admins --> admin
+    Admins --> media
+    Family --> media
 
     classDef groupStyle fill:#9c27b0,stroke:#7b1fa2,color:#fff
     classDef adminStyle fill:#ffcdd2,stroke:#f44336,color:#b71c1c

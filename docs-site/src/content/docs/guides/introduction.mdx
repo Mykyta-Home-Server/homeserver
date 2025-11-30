@@ -76,21 +76,21 @@ flowchart TB
     Prowlarr[Prowlarr]
     qBit[qBittorrent]
 
-    FlareSolverr[FlareSolverr]
+    Flare[FlareSolverr]
     Bazarr[Bazarr]
     Jellyfin[Jellyfin]
 
-    User -->|Request| Jellyseerr
+    User --> Jellyseerr
     Jellyseerr --> Radarr
     Jellyseerr --> Sonarr
-    Radarr -->|Search| Prowlarr
-    Sonarr -->|Search| Prowlarr
-    Radarr -->|Download| qBit
-    Sonarr -->|Download| qBit
-    FlareSolverr -.->|Bypass CF| Prowlarr
-    qBit -->|Import| Bazarr
-    Bazarr -->|Add Subs| Jellyfin
-    Jellyfin -->|Stream| User
+    Radarr --> Prowlarr
+    Sonarr --> Prowlarr
+    Radarr --> qBit
+    Sonarr --> qBit
+    Flare -.-> Prowlarr
+    qBit --> Bazarr
+    Bazarr --> Jellyfin
+    Jellyfin --> User
 
     classDef request fill:#dbeafe,stroke:#2563eb,color:#1e40af
     classDef search fill:#fef3c7,stroke:#d97706,color:#92400e
@@ -99,7 +99,7 @@ flowchart TB
     classDef stream fill:#e0e7ff,stroke:#4f46e5,color:#3730a3
 
     class User,Jellyseerr request
-    class Radarr,Sonarr,Prowlarr,FlareSolverr search
+    class Radarr,Sonarr,Prowlarr,Flare search
     class qBit download
     class Bazarr subtitle
     class Jellyfin stream
@@ -112,19 +112,19 @@ Single Sign-On across all services using LDAP:
 ```mermaid
 flowchart TB
     User([User])
-    Caddy[Caddy Proxy]
+    Caddy[Caddy]
 
-    Authelia[Authelia SSO]
-    LDAP[(OpenLDAP)]
+    Authelia[Authelia]
+    LDAP[(LDAP)]
 
-    Service[Protected Service]
+    Service[Service]
 
-    User -->|1. Request| Caddy
-    Caddy -->|2. Check Auth| Authelia
-    Authelia -->|3. Verify| LDAP
-    LDAP -->|4. Credentials OK| Authelia
-    Authelia -->|5. Grant Session| Caddy
-    Caddy -->|6. Forward| Service
+    User -->|Request| Caddy
+    Caddy -->|Check| Authelia
+    Authelia -->|Verify| LDAP
+    LDAP -->|Valid| Authelia
+    Authelia -->|Allow| Caddy
+    Caddy -->|Forward| Service
 
     classDef client fill:#dbeafe,stroke:#2563eb,color:#1e40af
     classDef auth fill:#fce7f3,stroke:#db2777,color:#9d174d
@@ -140,44 +140,39 @@ flowchart TB
 Services are isolated into purpose-specific networks:
 
 ```mermaid
-flowchart TB
-    subgraph proxy[Proxy Network]
-        CF[Cloudflared<br/>Tunnel]
-        Caddy[Caddy<br/>Reverse Proxy]
-        CF --> Caddy
+flowchart LR
+    subgraph proxy[Proxy]
+        direction TB
+        CF[Cloudflared]
+        Caddy[Caddy]
     end
 
-    subgraph auth[Auth Network]
-        Authelia[Authelia<br/>SSO]
-        PG[(PostgreSQL)]
+    subgraph auth[Auth]
+        direction TB
+        Authelia[Authelia]
+        PG[(Postgres)]
         Redis[(Redis)]
-        LDAP[(OpenLDAP)]
-        Authelia --- PG
-        Authelia --- Redis
-        Authelia --- LDAP
+        LDAP[(LDAP)]
     end
 
-    subgraph media[Media Network]
-        J[Jellyfin]
-        Req[Jellyseerr]
-        R[Radarr]
-        S[Sonarr]
-        P[Prowlarr]
-        Q[qBit]
-        B[Bazarr]
+    subgraph media[Media]
+        direction TB
+        row1[Jellyfin | Jellyseerr]
+        row2[Radarr | Sonarr]
+        row3[Prowlarr | qBit | Bazarr]
     end
 
-    subgraph monitoring[Monitoring Network]
+    subgraph monitor[Monitoring]
+        direction TB
         PT[Promtail]
         Loki[Loki]
         Graf[Grafana]
-        PT --> Loki
-        Loki --> Graf
     end
 
-    Caddy ==>|Routes| auth
-    Caddy ==>|Routes| media
-    Caddy ==>|Routes| monitoring
+    CF --> Caddy
+    Caddy --> auth
+    Caddy --> media
+    Caddy --> monitor
 
     classDef proxyNet fill:#dbeafe,stroke:#2563eb,color:#1e40af
     classDef authNet fill:#fce7f3,stroke:#db2777,color:#9d174d
@@ -186,7 +181,7 @@ flowchart TB
 
     class CF,Caddy proxyNet
     class Authelia,PG,Redis,LDAP authNet
-    class J,Req,R,S,P,Q,B mediaNet
+    class row1,row2,row3 mediaNet
     class PT,Loki,Graf monitorNet
 ```
 
