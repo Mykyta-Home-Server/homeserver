@@ -11,57 +11,50 @@ Unified authentication with OpenLDAP across all services. One username and passw
 
 ```mermaid
 flowchart TB
-    subgraph Management
-        phpLDAP[phpLDAPadmin]
+    subgraph mgmt[Management Layer]
+        phpLDAP[phpLDAPadmin<br/>Web UI]
     end
 
-    subgraph LDAP[OpenLDAP Directory]
-        direction LR
-        Users[(ou=users)]
-        Groups[(ou=groups)]
+    subgraph ldap[LDAP Directory]
+        LDAP[(OpenLDAP<br/>Users + Groups)]
     end
 
-    subgraph SSO[Single Sign-On]
-        direction LR
+    subgraph sso[SSO Stack]
         Authelia[Authelia]
         PG[(PostgreSQL)]
         Redis[(Redis)]
     end
 
-    subgraph Direct[Direct LDAP Auth]
-        direction LR
+    subgraph direct[Direct Auth]
         Jellyfin[Jellyfin]
         Jellyseerr[Jellyseerr]
     end
 
-    subgraph Protected[SSO Protected]
-        direction LR
+    subgraph protected[SSO Protected]
         Grafana[Grafana]
-        Radarr[Radarr]
-        Sonarr[Sonarr]
-        Prowlarr[Prowlarr]
+        Arr[*arr Stack<br/>Radarr/Sonarr/Prowlarr]
         qBit[qBittorrent]
     end
 
-    phpLDAP --> LDAP
-    LDAP --> Authelia
-    Authelia --> PG
-    Authelia --> Redis
-    LDAP --> Jellyfin
+    phpLDAP -->|Manage| LDAP
+    LDAP -->|Validate| Authelia
+    LDAP -->|Validate| Jellyfin
+    Authelia --- PG
+    Authelia --- Redis
     Jellyfin --> Jellyseerr
-    Authelia --> Protected
+    Authelia -->|Protect| protected
 
-    classDef mgmt fill:#9c27b0,stroke:#7b1fa2,color:#fff
-    classDef ldap fill:#4caf50,stroke:#388e3c,color:#fff
-    classDef sso fill:#2196f3,stroke:#1976d2,color:#fff
-    classDef direct fill:#d1fae5,stroke:#059669,color:#065f46
-    classDef protected fill:#dbeafe,stroke:#2563eb,color:#1e40af
+    classDef mgmtStyle fill:#9c27b0,stroke:#7b1fa2,color:#fff
+    classDef ldapStyle fill:#4caf50,stroke:#388e3c,color:#fff
+    classDef ssoStyle fill:#2196f3,stroke:#1976d2,color:#fff
+    classDef directStyle fill:#d1fae5,stroke:#059669,color:#065f46
+    classDef protectedStyle fill:#dbeafe,stroke:#2563eb,color:#1e40af
 
-    class phpLDAP mgmt
-    class Users,Groups ldap
-    class Authelia,PG,Redis sso
-    class Jellyfin,Jellyseerr direct
-    class Grafana,Radarr,Sonarr,Prowlarr,qBit protected
+    class phpLDAP mgmtStyle
+    class LDAP ldapStyle
+    class Authelia,PG,Redis ssoStyle
+    class Jellyfin,Jellyseerr directStyle
+    class Grafana,Arr,qBit protectedStyle
 ```
 
 ## Directory Structure
@@ -71,30 +64,35 @@ The LDAP directory is organized with separate organizational units for users and
 ```mermaid
 flowchart TB
     Root[dc=mykyta-ryasny,dc=dev]
+    Users[ou=users]
+    Groups[ou=groups]
 
-    Root --> Users[ou=users]
-    Root --> Groups[ou=groups]
+    Admin[uid=admin]
+    User1[uid=user1]
+    UserN[uid=...]
 
-    Users --> Admin[uid=admin]
-    Users --> User1[uid=user1]
-    Users --> UserN[uid=...]
+    Admins[cn=admins]
+    Family[cn=family]
 
-    Groups --> Admins[cn=admins]
-    Groups --> Family[cn=family]
+    Root --> Users
+    Root --> Groups
+    Users --> Admin
+    Users --> User1
+    Users --> UserN
+    Groups --> Admins
+    Groups --> Family
 
-    Admins -.-> Admin
-    Family -.-> Admin
-    Family -.-> User1
+    Admins -.->|member| Admin
+    Family -.->|member| Admin
+    Family -.->|member| User1
 
     classDef root fill:#4caf50,stroke:#388e3c,color:#fff
-    classDef users fill:#2196f3,stroke:#1976d2,color:#fff
-    classDef groups fill:#ff9800,stroke:#f57c00,color:#fff
+    classDef ou fill:#2196f3,stroke:#1976d2,color:#fff
     classDef user fill:#e3f2fd,stroke:#2196f3,color:#1565c0
     classDef group fill:#fff3e0,stroke:#ff9800,color:#e65100
 
     class Root root
-    class Users users
-    class Groups groups
+    class Users,Groups ou
     class Admin,User1,UserN user
     class Admins,Family group
 ```
@@ -146,13 +144,19 @@ EOF
 ## Authentication Flow
 
 ```mermaid
-flowchart LR
-    User([User]) --> Service[Service]
-    Service --> Authelia[Authelia]
-    Authelia --> LDAP[(LDAP)]
-    LDAP --> Authelia
-    Authelia --> Service
-    Service --> User
+flowchart TB
+    User([User])
+    Service[Service]
+
+    Authelia[Authelia]
+    LDAP[(LDAP)]
+
+    User -->|1. Request| Service
+    Service -->|2. Verify| Authelia
+    Authelia -->|3. Check| LDAP
+    LDAP -->|4. Valid| Authelia
+    Authelia -->|5. Grant| Service
+    Service -->|6. Access| User
 
     classDef user fill:#dbeafe,stroke:#2563eb,color:#1e40af
     classDef svc fill:#d1fae5,stroke:#059669,color:#065f46
@@ -209,36 +213,34 @@ Group membership determines which services users can access:
 
 ```mermaid
 flowchart LR
-    subgraph Groups
+    subgraph groups[LDAP Groups]
         Admins[cn=admins]
         Family[cn=family]
     end
 
-    subgraph AdminServices[Admin Only]
+    subgraph admin[Admin Only Services]
         Grafana[Grafana]
-        Radarr[Radarr]
-        Sonarr[Sonarr]
-        Prowlarr[Prowlarr]
+        Arr[*arr Stack]
         qBit[qBittorrent]
         phpLDAP[phpLDAPadmin]
     end
 
-    subgraph FamilyServices[Family Access]
+    subgraph media[Media Services]
         Jellyfin[Jellyfin]
         Jellyseerr[Jellyseerr]
     end
 
-    Admins --> AdminServices
-    Admins --> FamilyServices
-    Family --> FamilyServices
+    Admins -->|Full Access| admin
+    Admins -->|Full Access| media
+    Family -->|View Only| media
 
-    classDef groups fill:#9c27b0,stroke:#7b1fa2,color:#fff
-    classDef admin fill:#ffcdd2,stroke:#f44336,color:#b71c1c
-    classDef family fill:#c8e6c9,stroke:#4caf50,color:#1b5e20
+    classDef groupStyle fill:#9c27b0,stroke:#7b1fa2,color:#fff
+    classDef adminStyle fill:#ffcdd2,stroke:#f44336,color:#b71c1c
+    classDef mediaStyle fill:#c8e6c9,stroke:#4caf50,color:#1b5e20
 
-    class Admins,Family groups
-    class Grafana,Radarr,Sonarr,Prowlarr,qBit,phpLDAP admin
-    class Jellyfin,Jellyseerr family
+    class Admins,Family groupStyle
+    class Grafana,Arr,qBit,phpLDAP adminStyle
+    class Jellyfin,Jellyseerr mediaStyle
 ```
 
 | Group | Access Level |

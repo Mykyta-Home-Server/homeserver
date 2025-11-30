@@ -68,64 +68,41 @@ The complete workflow from requesting content to streaming:
 
 ```mermaid
 flowchart TB
-    subgraph row1[" "]
-        direction LR
-        subgraph Request
-            User([User])
-            Jellyseerr[Jellyseerr]
-        end
+    User([User])
+    Jellyseerr[Jellyseerr]
+    Radarr[Radarr]
 
-        subgraph Search
-            Radarr[Radarr]
-            Sonarr[Sonarr]
-            Prowlarr[Prowlarr]
-        end
+    Sonarr[Sonarr]
+    Prowlarr[Prowlarr]
+    qBit[qBittorrent]
 
-        subgraph Download
-            qBit[qBittorrent]
-            Flare[FlareSolverr]
-        end
-    end
+    FlareSolverr[FlareSolverr]
+    Bazarr[Bazarr]
+    Jellyfin[Jellyfin]
 
-    subgraph row2[" "]
-        direction LR
-        subgraph Process
-            Import[Import]
-            Bazarr[Bazarr]
-        end
-
-        subgraph Stream
-            Jellyfin[Jellyfin]
-            Devices([Devices])
-        end
-    end
-
-    User --> Jellyseerr
+    User -->|Request| Jellyseerr
     Jellyseerr --> Radarr
     Jellyseerr --> Sonarr
-    Radarr --> Prowlarr
-    Sonarr --> Prowlarr
-    Radarr --> qBit
-    Sonarr --> qBit
-    Flare -.-> Prowlarr
-    qBit --> Import
-    Import --> Bazarr
-    Bazarr --> Jellyfin
-    Jellyfin --> Devices
+    Radarr -->|Search| Prowlarr
+    Sonarr -->|Search| Prowlarr
+    Radarr -->|Download| qBit
+    Sonarr -->|Download| qBit
+    FlareSolverr -.->|Bypass CF| Prowlarr
+    qBit -->|Import| Bazarr
+    Bazarr -->|Add Subs| Jellyfin
+    Jellyfin -->|Stream| User
 
     classDef request fill:#dbeafe,stroke:#2563eb,color:#1e40af
     classDef search fill:#fef3c7,stroke:#d97706,color:#92400e
     classDef download fill:#d1fae5,stroke:#059669,color:#065f46
-    classDef process fill:#fce7f3,stroke:#db2777,color:#9d174d
+    classDef subtitle fill:#fce7f3,stroke:#db2777,color:#9d174d
     classDef stream fill:#e0e7ff,stroke:#4f46e5,color:#3730a3
-    classDef invisible fill:none,stroke:none
 
     class User,Jellyseerr request
-    class Radarr,Sonarr,Prowlarr search
-    class qBit,Flare download
-    class Import,Bazarr process
-    class Jellyfin,Devices stream
-    class row1,row2 invisible
+    class Radarr,Sonarr,Prowlarr,FlareSolverr search
+    class qBit download
+    class Bazarr subtitle
+    class Jellyfin stream
 ```
 
 ## Authentication Flow
@@ -133,36 +110,27 @@ flowchart TB
 Single Sign-On across all services using LDAP:
 
 ```mermaid
-flowchart LR
-    subgraph Client
-        User([User])
-        Browser[Browser]
-    end
+flowchart TB
+    User([User])
+    Caddy[Caddy Proxy]
 
-    subgraph Auth[Auth Layer]
-        Caddy[Caddy]
-        Authelia[Authelia]
-        LDAP[(LDAP)]
-    end
+    Authelia[Authelia SSO]
+    LDAP[(OpenLDAP)]
 
-    subgraph Backend
-        Service[Service]
-    end
+    Service[Protected Service]
 
-    User --> Browser
-    Browser --> Caddy
-    Caddy --> Authelia
-    Authelia --> LDAP
-    LDAP --> Authelia
-    Authelia --> Caddy
-    Caddy --> Service
-    Service --> Browser
+    User -->|1. Request| Caddy
+    Caddy -->|2. Check Auth| Authelia
+    Authelia -->|3. Verify| LDAP
+    LDAP -->|4. Credentials OK| Authelia
+    Authelia -->|5. Grant Session| Caddy
+    Caddy -->|6. Forward| Service
 
     classDef client fill:#dbeafe,stroke:#2563eb,color:#1e40af
     classDef auth fill:#fce7f3,stroke:#db2777,color:#9d174d
     classDef backend fill:#d1fae5,stroke:#059669,color:#065f46
 
-    class User,Browser client
+    class User client
     class Caddy,Authelia,LDAP auth
     class Service backend
 ```
@@ -174,50 +142,52 @@ Services are isolated into purpose-specific networks:
 ```mermaid
 flowchart TB
     subgraph proxy[Proxy Network]
-        direction LR
-        cloudflared[cloudflared] --> Caddy[Caddy]
+        CF[Cloudflared<br/>Tunnel]
+        Caddy[Caddy<br/>Reverse Proxy]
+        CF --> Caddy
     end
 
     subgraph auth[Auth Network]
-        direction LR
-        Authelia[Authelia]
-        PostgreSQL[(PostgreSQL)]
+        Authelia[Authelia<br/>SSO]
+        PG[(PostgreSQL)]
         Redis[(Redis)]
-        OpenLDAP[(OpenLDAP)]
-        Authelia --> PostgreSQL
-        Authelia --> Redis
-        Authelia --> OpenLDAP
+        LDAP[(OpenLDAP)]
+        Authelia --- PG
+        Authelia --- Redis
+        Authelia --- LDAP
     end
 
     subgraph media[Media Network]
-        direction LR
-        Jellyfin[Jellyfin]
-        Jellyseerr[Jellyseerr]
-        Radarr[Radarr]
-        Sonarr[Sonarr]
-        Prowlarr[Prowlarr]
-        qBit[qBittorrent]
-        Bazarr[Bazarr]
+        J[Jellyfin]
+        Req[Jellyseerr]
+        R[Radarr]
+        S[Sonarr]
+        P[Prowlarr]
+        Q[qBit]
+        B[Bazarr]
     end
 
     subgraph monitoring[Monitoring Network]
-        direction LR
-        Promtail[Promtail] --> Loki[Loki] --> Grafana[Grafana]
+        PT[Promtail]
+        Loki[Loki]
+        Graf[Grafana]
+        PT --> Loki
+        Loki --> Graf
     end
 
-    Caddy --> auth
-    Caddy --> media
-    Caddy --> monitoring
+    Caddy ==>|Routes| auth
+    Caddy ==>|Routes| media
+    Caddy ==>|Routes| monitoring
 
     classDef proxyNet fill:#dbeafe,stroke:#2563eb,color:#1e40af
     classDef authNet fill:#fce7f3,stroke:#db2777,color:#9d174d
     classDef mediaNet fill:#d1fae5,stroke:#059669,color:#065f46
     classDef monitorNet fill:#fed7aa,stroke:#ea580c,color:#9a3412
 
-    class cloudflared,Caddy proxyNet
-    class Authelia,PostgreSQL,Redis,OpenLDAP authNet
-    class Jellyfin,Jellyseerr,Radarr,Sonarr,Prowlarr,qBit,Bazarr mediaNet
-    class Grafana,Loki,Promtail monitorNet
+    class CF,Caddy proxyNet
+    class Authelia,PG,Redis,LDAP authNet
+    class J,Req,R,S,P,Q,B mediaNet
+    class PT,Loki,Graf monitorNet
 ```
 
 ## Key Features
