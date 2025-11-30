@@ -12,81 +12,35 @@ Welcome to the **Home Server** documentation! This project is a personal learnin
 The entire infrastructure runs through a secure Cloudflare Tunnel with **zero exposed ports** on the home network.
 
 ```mermaid
-flowchart TB
-    %% Define consistent color classes
-    classDef internet fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
-    classDef proxy fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e40af
-    classDef auth fill:#fce7f3,stroke:#db2777,stroke-width:2px,color:#9d174d
-    classDef media fill:#d1fae5,stroke:#059669,stroke-width:2px,color:#065f46
-    classDef monitor fill:#fed7aa,stroke:#ea580c,stroke-width:2px,color:#9a3412
-    classDef database fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px,color:#3730a3
+architecture-beta
+    group internet(cloud)[Internet]
+    group server(server)[Home Server]
+    group proxy(server)[Proxy] in server
+    group services(server)[Services] in server
 
-    %% Internet Layer
-    subgraph Internet[Internet]
-        User([User])
-        Cloudflare[Cloudflare DNS]
-    end
+    service user(internet)[User] in internet
+    service cf(cloud)[Cloudflare] in internet
 
-    %% Proxy Layer
-    subgraph Proxy[Reverse Proxy]
-        direction LR
-        Tunnel[cloudflared]
-        Caddy[Caddy]
-    end
+    service tunnel(server)[cloudflared] in proxy
+    service caddy(server)[Caddy] in proxy
 
-    %% Services Grid
-    subgraph Services[Application Services]
-        direction TB
+    service authelia(server)[Authelia] in services
+    service postgres(database)[PostgreSQL] in services
+    service redis(database)[Redis] in services
+    service ldap(database)[OpenLDAP] in services
 
-        subgraph Auth[Authentication]
-            direction LR
-            Authelia[Authelia]
-            subgraph AuthData[Data Stores]
-                PostgreSQL[(PostgreSQL)]
-                Redis[(Redis)]
-                LDAP[(OpenLDAP)]
-            end
-        end
+    service jellyfin(server)[Jellyfin] in services
+    service grafana(server)[Grafana] in services
 
-        subgraph Media[Media Stack]
-            direction LR
-            Jellyfin[Jellyfin]
-            Jellyseerr[Jellyseerr]
-            Sonarr[Sonarr]
-            Radarr[Radarr]
-            Prowlarr[Prowlarr]
-            qBittorrent[qBittorrent]
-            Bazarr[Bazarr]
-        end
-
-        subgraph Monitoring[Monitoring]
-            direction LR
-            Grafana[Grafana]
-            Loki[Loki]
-            Promtail[Promtail]
-        end
-    end
-
-    %% Connections - Main Flow
-    User --> Cloudflare
-    Cloudflare --> Tunnel
-    Tunnel --> Caddy
-    Caddy --> Authelia
-    Caddy --> Jellyfin
-    Caddy --> Grafana
-
-    %% Auth connections
-    Authelia --> PostgreSQL
-    Authelia --> Redis
-    Authelia --> LDAP
-
-    %% Apply styles
-    class User,Cloudflare internet
-    class Tunnel,Caddy proxy
-    class Authelia auth
-    class Jellyfin,Jellyseerr,Sonarr,Radarr,Prowlarr,qBittorrent,Bazarr media
-    class Grafana,Loki,Promtail monitor
-    class PostgreSQL,Redis,LDAP database
+    user:R --> L:cf
+    cf:R --> L:tunnel
+    tunnel:R --> L:caddy
+    caddy:B --> T:authelia
+    caddy:B --> T:jellyfin
+    caddy:B --> T:grafana
+    authelia:B --> T:postgres
+    authelia:B --> T:redis
+    authelia:B --> T:ldap
 ```
 
 ## Current Infrastructure
@@ -113,69 +67,58 @@ The server currently runs **24 containers** across multiple service categories:
 The complete workflow from requesting content to streaming:
 
 ```mermaid
-flowchart LR
-    %% Color classes
-    classDef request fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e40af
-    classDef search fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
-    classDef download fill:#d1fae5,stroke:#059669,stroke-width:2px,color:#065f46
-    classDef process fill:#fce7f3,stroke:#db2777,stroke-width:2px,color:#9d174d
-    classDef stream fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px,color:#3730a3
-    classDef external fill:#f3f4f6,stroke:#6b7280,stroke-width:1px,color:#374151
+block-beta
+    columns 5
 
-    %% Request Stage
-    subgraph Stage1[Request]
-        User([User])
-        Jellyseerr[Jellyseerr]
+    block:request:1
+        columns 1
+        r1["User"]
+        r2["Jellyseerr"]
     end
 
-    %% Search Stage
-    subgraph Stage2[Search]
-        Radarr[Radarr<br/>Movies]
-        Sonarr[Sonarr<br/>TV Shows]
-        Prowlarr[Prowlarr]
-        Indexers[(Indexers)]
+    block:search:1
+        columns 1
+        s1["Radarr"]
+        s2["Sonarr"]
+        s3["Prowlarr"]
     end
 
-    %% Download Stage
-    subgraph Stage3[Download]
-        qBittorrent[qBittorrent]
-        FlareSolverr[FlareSolverr]
+    block:download:1
+        columns 1
+        d1["qBittorrent"]
+        d2["FlareSolverr"]
     end
 
-    %% Process Stage
-    subgraph Stage4[Process]
-        Import[Import &<br/>Rename]
-        Bazarr[Bazarr<br/>Subtitles]
+    block:process:1
+        columns 1
+        p1["Import"]
+        p2["Bazarr"]
     end
 
-    %% Stream Stage
-    subgraph Stage5[Stream]
-        Jellyfin[Jellyfin]
-        Devices([Devices])
+    block:stream:1
+        columns 1
+        st1["Jellyfin"]
+        st2["Devices"]
     end
 
-    %% Flow connections
-    User --> Jellyseerr
-    Jellyseerr -->|Movie| Radarr
-    Jellyseerr -->|TV| Sonarr
-    Radarr --> Prowlarr
-    Sonarr --> Prowlarr
-    Prowlarr --> Indexers
-    FlareSolverr -.->|Bypass| Prowlarr
-    Radarr --> qBittorrent
-    Sonarr --> qBittorrent
-    qBittorrent --> Import
-    Import --> Bazarr
-    Bazarr --> Jellyfin
-    Jellyfin --> Devices
+    r1 --> r2
+    r2 --> s1
+    r2 --> s2
+    s1 --> s3
+    s2 --> s3
+    s1 --> d1
+    s2 --> d1
+    d2 -.-> s3
+    d1 --> p1
+    p1 --> p2
+    p2 --> st1
+    st1 --> st2
 
-    %% Apply styles
-    class User,Jellyseerr request
-    class Radarr,Sonarr,Prowlarr search
-    class qBittorrent,FlareSolverr download
-    class Import,Bazarr process
-    class Jellyfin,Devices stream
-    class Indexers external
+    style request fill:#dbeafe,stroke:#2563eb
+    style search fill:#fef3c7,stroke:#d97706
+    style download fill:#d1fae5,stroke:#059669
+    style process fill:#fce7f3,stroke:#db2777
+    style stream fill:#e0e7ff,stroke:#4f46e5
 ```
 
 ## Authentication Flow
@@ -183,31 +126,39 @@ flowchart LR
 Single Sign-On across all services using LDAP:
 
 ```mermaid
-sequenceDiagram
-    participant U as User
-    participant B as Browser
-    participant C as Caddy
-    participant A as Authelia
-    participant L as LDAP
-    participant S as Service
+block-beta
+    columns 3
 
-    U->>B: Access service.domain.com
-    B->>C: HTTPS Request
-    C->>A: Forward Auth Check
-
-    alt Not Authenticated
-        A-->>B: Redirect to Login
-        U->>A: Enter Credentials
-        A->>L: Validate User
-        L-->>A: User Valid
-        A-->>B: Set Session Cookie
-        B->>C: Retry with Cookie
+    block:user:1
+        columns 1
+        u1["User"]
+        u2["Browser"]
     end
 
-    C->>A: Verify Session
-    A-->>C: Session Valid
-    C->>S: Forward + Auth Headers
-    S-->>B: Response
+    block:auth:1
+        columns 1
+        a1["Caddy"]
+        a2["Authelia"]
+        a3["LDAP"]
+    end
+
+    block:backend:1
+        columns 1
+        b1["Service"]
+    end
+
+    u1 -- "1. Access URL" --> u2
+    u2 -- "2. HTTPS" --> a1
+    a1 -- "3. Auth Check" --> a2
+    a2 -- "4. Validate" --> a3
+    a3 -- "5. User OK" --> a2
+    a2 -- "6. Session" --> a1
+    a1 -- "7. Forward" --> b1
+    b1 -- "8. Response" --> u2
+
+    style user fill:#dbeafe,stroke:#2563eb
+    style auth fill:#fce7f3,stroke:#db2777
+    style backend fill:#d1fae5,stroke:#059669
 ```
 
 ## Docker Network Architecture
@@ -215,75 +166,56 @@ sequenceDiagram
 Services are isolated into purpose-specific networks:
 
 ```mermaid
-flowchart TB
-    %% Color classes for networks
-    classDef proxyNet fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e40af
-    classDef authNet fill:#fce7f3,stroke:#db2777,stroke-width:2px,color:#9d174d
-    classDef mediaNet fill:#d1fae5,stroke:#059669,stroke-width:2px,color:#065f46
-    classDef monitorNet fill:#fed7aa,stroke:#ea580c,stroke-width:2px,color:#9a3412
-    classDef database fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px,color:#3730a3
+block-beta
+    columns 4
 
-    %% Proxy Network
-    subgraph proxy[proxy]
-        direction LR
-        Caddy[Caddy]
-        cloudflared[cloudflared]
+    block:proxy:1
+        columns 1
+        p1["cloudflared"]
+        p2["Caddy"]
     end
 
-    %% Auth Network
-    subgraph auth[auth]
-        direction LR
-        Authelia[Authelia]
-        PostgreSQL[(PostgreSQL)]
-        Redis[(Redis)]
-        OpenLDAP[(OpenLDAP)]
+    block:auth:1
+        columns 1
+        a1["Authelia"]
+        a2[("PostgreSQL")]
+        a3[("Redis")]
+        a4[("OpenLDAP")]
     end
 
-    %% Media Network
-    subgraph media[media]
-        direction TB
-        subgraph media_row1[ ]
-            direction LR
-            Jellyfin[Jellyfin]
-            Jellyseerr[Jellyseerr]
-            Bazarr[Bazarr]
-        end
-        subgraph media_row2[ ]
-            direction LR
-            Radarr[Radarr]
-            Sonarr[Sonarr]
-            Prowlarr[Prowlarr]
-            qBittorrent[qBittorrent]
-        end
+    block:media:2
+        columns 4
+        m1["Jellyfin"]
+        m2["Jellyseerr"]
+        m3["Bazarr"]
+        m4["Radarr"]
+        m5["Sonarr"]
+        m6["Prowlarr"]
+        m7["qBittorrent"]
+        space
     end
 
-    %% Monitoring Network
-    subgraph monitoring[monitoring]
-        direction LR
-        Grafana[Grafana]
-        Loki[Loki]
-        Promtail[Promtail]
+    block:monitoring:1
+        columns 1
+        mon1["Grafana"]
+        mon2["Loki"]
+        mon3["Promtail"]
     end
 
-    %% Cross-network connections via Caddy
-    Caddy --> Authelia
-    Caddy --> Jellyfin
-    Caddy --> Grafana
+    p1 --> p2
+    p2 --> a1
+    p2 --> m1
+    p2 --> mon1
+    a1 --> a2
+    a1 --> a3
+    a1 --> a4
+    mon3 --> mon2
+    mon2 --> mon1
 
-    %% Internal connections
-    cloudflared --> Caddy
-    Authelia --> PostgreSQL
-    Authelia --> Redis
-    Authelia --> OpenLDAP
-    Promtail --> Loki
-    Loki --> Grafana
-
-    %% Apply styles
-    class Caddy,cloudflared proxyNet
-    class Authelia authNet
-    class Jellyfin,Jellyseerr,Radarr,Sonarr,Prowlarr,qBittorrent,Bazarr mediaNet
-    class Grafana,Loki,Promtail monitorNet
-    class PostgreSQL,Redis,OpenLDAP database
+    style proxy fill:#dbeafe,stroke:#2563eb
+    style auth fill:#fce7f3,stroke:#db2777
+    style media fill:#d1fae5,stroke:#059669
+    style monitoring fill:#fed7aa,stroke:#ea580c
 ```
 
 ## Key Features
