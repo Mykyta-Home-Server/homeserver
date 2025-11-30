@@ -10,66 +10,61 @@ Unified authentication with OpenLDAP across all services. One username and passw
 ## Authentication Architecture
 
 ```mermaid
-block-beta
-    columns 3
-
-    block:mgmt:1
-        columns 1
-        mg1["phpLDAPadmin"]
+flowchart TB
+    subgraph Management
+        phpLDAP[phpLDAPadmin]
     end
 
-    block:ldap:1
-        columns 1
-        l1[("ou=users")]
-        l2[("ou=groups")]
+    subgraph LDAP[OpenLDAP Directory]
+        Users[(ou=users)]
+        Groups[(ou=groups)]
     end
 
-    block:sso:1
-        columns 1
-        s1["Authelia"]
-        s2[("PostgreSQL")]
-        s3[("Redis")]
+    subgraph SSO[Single Sign-On]
+        Authelia[Authelia]
+        PG[(PostgreSQL)]
+        Redis[(Redis)]
     end
 
-    space:3
-
-    block:direct:1
-        columns 1
-        d1["Jellyfin"]
-        d2["Jellyseerr"]
+    subgraph Direct[Direct LDAP Auth]
+        Jellyfin[Jellyfin]
+        Jellyseerr[Jellyseerr]
     end
 
-    space:1
-
-    block:protected:1
-        columns 1
-        p1["Grafana"]
-        p2["Radarr"]
-        p3["Sonarr"]
-        p4["Prowlarr"]
-        p5["qBittorrent"]
+    subgraph Protected[SSO Protected]
+        Grafana[Grafana]
+        Radarr[Radarr]
+        Sonarr[Sonarr]
+        Prowlarr[Prowlarr]
+        qBit[qBittorrent]
     end
 
-    mg1 --> l1
-    mg1 --> l2
-    l1 --> s1
-    l2 --> s1
-    s1 --> s2
-    s1 --> s3
-    l1 --> d1
-    l2 --> d1
-    d1 --> d2
-    s1 --> p1
-    s1 --> p2
-    s1 --> p3
-    s1 --> p4
-    s1 --> p5
+    phpLDAP --> Users
+    phpLDAP --> Groups
+    Users --> Authelia
+    Groups --> Authelia
+    Authelia --> PG
+    Authelia --> Redis
+    Users --> Jellyfin
+    Groups --> Jellyfin
+    Jellyfin --> Jellyseerr
+    Authelia --> Grafana
+    Authelia --> Radarr
+    Authelia --> Sonarr
+    Authelia --> Prowlarr
+    Authelia --> qBit
 
-    style mgmt fill:#9c27b0,stroke:#7b1fa2
-    style ldap fill:#4caf50,stroke:#388e3c
-    style sso fill:#2196f3,stroke:#1976d2
-    style direct fill:#d1fae5,stroke:#059669
-    style protected fill:#dbeafe,stroke:#2563eb
+    classDef mgmt fill:#9c27b0,stroke:#7b1fa2,color:#fff
+    classDef ldap fill:#4caf50,stroke:#388e3c,color:#fff
+    classDef sso fill:#2196f3,stroke:#1976d2,color:#fff
+    classDef direct fill:#d1fae5,stroke:#059669,color:#065f46
+    classDef protected fill:#dbeafe,stroke:#2563eb,color:#1e40af
+
+    class phpLDAP mgmt
+    class Users,Groups ldap
+    class Authelia,PG,Redis sso
+    class Jellyfin,Jellyseerr direct
+    class Grafana,Radarr,Sonarr,Prowlarr,qBit protected
 ```
 
 ## Directory Structure
@@ -77,39 +72,34 @@ block-beta
 The LDAP directory is organized with separate organizational units for users and groups:
 
 ```mermaid
-block-beta
-    columns 3
+flowchart TB
+    Root[dc=mykyta-ryasny,dc=dev]
 
-    root["dc=mykyta-ryasny,dc=dev"]:3
+    Root --> Users[ou=users]
+    Root --> Groups[ou=groups]
 
-    space users["ou=users"] groups["ou=groups"]
+    Users --> Admin[uid=admin]
+    Users --> User1[uid=user1]
+    Users --> UserN[uid=...]
 
-    space:1
-    block:userlist:1
-        columns 1
-        u1["uid=admin"]
-        u2["uid=user1"]
-        u3["uid=..."]
-    end
-    block:grouplist:1
-        columns 1
-        g1["cn=admins"]
-        g2["cn=family"]
-    end
+    Groups --> Admins[cn=admins]
+    Groups --> Family[cn=family]
 
-    root --> users
-    root --> groups
-    users --> userlist
-    groups --> grouplist
-    g1 -.-> u1
-    g2 -.-> u1
-    g2 -.-> u2
+    Admins -.->|member| Admin
+    Family -.->|member| Admin
+    Family -.->|member| User1
 
-    style root fill:#4caf50,stroke:#388e3c
-    style users fill:#2196f3,stroke:#1976d2
-    style groups fill:#ff9800,stroke:#f57c00
-    style userlist fill:#e3f2fd,stroke:#2196f3
-    style grouplist fill:#fff3e0,stroke:#ff9800
+    classDef root fill:#4caf50,stroke:#388e3c,color:#fff
+    classDef users fill:#2196f3,stroke:#1976d2,color:#fff
+    classDef groups fill:#ff9800,stroke:#f57c00,color:#fff
+    classDef user fill:#e3f2fd,stroke:#2196f3,color:#1565c0
+    classDef group fill:#fff3e0,stroke:#ff9800,color:#e65100
+
+    class Root root
+    class Users users
+    class Groups groups
+    class Admin,User1,UserN user
+    class Admins,Family group
 ```
 
 **Base DN**: `dc=mykyta-ryasny,dc=dev`
@@ -159,38 +149,23 @@ EOF
 ## Authentication Flow
 
 ```mermaid
-block-beta
-    columns 4
+flowchart LR
+    User([User]) -->|1. Access| Service[Service]
+    Service -->|2. Auth check| Authelia[Authelia]
+    Authelia -->|3. Validate| LDAP[(LDAP)]
+    LDAP -->|4. User + Groups| Authelia
+    Authelia -->|5. Session cookie| Service
+    Service -->|6. Access granted| User
 
-    u["User"]:1
-    svc["Service"]:1
-    auth["Authelia"]:1
-    ldap[("LDAP")]:1
+    classDef user fill:#dbeafe,stroke:#2563eb,color:#1e40af
+    classDef svc fill:#d1fae5,stroke:#059669,color:#065f46
+    classDef auth fill:#fce7f3,stroke:#db2777,color:#9d174d
+    classDef ldap fill:#e0e7ff,stroke:#4f46e5,color:#3730a3
 
-    space:4
-
-    block:flow:4
-        columns 1
-        f1["1. User accesses service"]
-        f2["2. Service checks with Authelia"]
-        f3["3. Authelia validates against LDAP"]
-        f4["4. LDAP returns user + groups"]
-        f5["5. Authelia sets session cookie"]
-        f6["6. Service grants access with headers"]
-    end
-
-    u --> svc
-    svc --> auth
-    auth --> ldap
-    ldap --> auth
-    auth --> svc
-    svc --> u
-
-    style u fill:#dbeafe,stroke:#2563eb
-    style svc fill:#d1fae5,stroke:#059669
-    style auth fill:#fce7f3,stroke:#db2777
-    style ldap fill:#e0e7ff,stroke:#4f46e5
-    style flow fill:#f3f4f6,stroke:#6b7280
+    class User user
+    class Service svc
+    class Authelia auth
+    class LDAP ldap
 ```
 
 ## Authelia Integration
@@ -236,38 +211,37 @@ Jellyseerr authenticates through Jellyfin, not directly to LDAP. Users must exis
 Group membership determines which services users can access:
 
 ```mermaid
-block-beta
-    columns 3
-
-    block:groups:1
-        columns 1
-        g1["cn=admins"]
-        g2["cn=family"]
+flowchart LR
+    subgraph Groups
+        Admins[cn=admins]
+        Family[cn=family]
     end
 
-    block:admin:1
-        columns 1
-        a1["Grafana"]
-        a2["Radarr"]
-        a3["Sonarr"]
-        a4["Prowlarr"]
-        a5["qBittorrent"]
-        a6["phpLDAPadmin"]
+    subgraph AdminServices[Admin Only]
+        Grafana[Grafana]
+        Radarr[Radarr]
+        Sonarr[Sonarr]
+        Prowlarr[Prowlarr]
+        qBit[qBittorrent]
+        phpLDAP[phpLDAPadmin]
     end
 
-    block:family:1
-        columns 1
-        f1["Jellyfin"]
-        f2["Jellyseerr"]
+    subgraph FamilyServices[Family Access]
+        Jellyfin[Jellyfin]
+        Jellyseerr[Jellyseerr]
     end
 
-    g1 --> admin
-    g1 --> family
-    g2 --> family
+    Admins --> AdminServices
+    Admins --> FamilyServices
+    Family --> FamilyServices
 
-    style groups fill:#9c27b0,stroke:#7b1fa2
-    style admin fill:#ffcdd2,stroke:#f44336
-    style family fill:#c8e6c9,stroke:#4caf50
+    classDef groups fill:#9c27b0,stroke:#7b1fa2,color:#fff
+    classDef admin fill:#ffcdd2,stroke:#f44336,color:#b71c1c
+    classDef family fill:#c8e6c9,stroke:#4caf50,color:#1b5e20
+
+    class Admins,Family groups
+    class Grafana,Radarr,Sonarr,Prowlarr,qBit,phpLDAP admin
+    class Jellyfin,Jellyseerr family
 ```
 
 | Group | Access Level |

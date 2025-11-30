@@ -10,49 +10,48 @@ Centralized logging with Grafana, Loki, and Promtail for complete observability 
 ## Logging Architecture
 
 ```mermaid
-block-beta
-    columns 4
-
-    block:containers:1
-        columns 1
-        c1["Jellyfin"]
-        c2["Radarr"]
-        c3["Sonarr"]
-        c4["Caddy"]
-        c5["..."]
+flowchart LR
+    subgraph Containers[Docker Containers]
+        C1[Jellyfin]
+        C2[Radarr]
+        C3[Sonarr]
+        C4[Caddy]
+        C5[...]
     end
 
-    block:collection:1
-        columns 1
-        sock[/"Docker Socket"/]
-        prom["Promtail"]
+    subgraph Collection[Log Collection]
+        Socket[/Docker Socket/]
+        Promtail[Promtail]
     end
 
-    block:storage:1
-        columns 1
-        loki["Loki"]
-        tsdb[("Index")]
-        fs[("Chunks")]
+    subgraph Storage[Storage]
+        Loki[Loki]
+        Index[(Index)]
+        Chunks[(Chunks)]
     end
 
-    block:viz:1
-        columns 1
-        graf["Grafana"]
-        user(["User"])
+    subgraph Viz[Visualization]
+        Grafana[Grafana]
+        User([User])
     end
 
-    containers --> sock
-    sock --> prom
-    prom --> loki
-    loki --> tsdb
-    loki --> fs
-    user --> graf
-    graf --> loki
+    Containers --> Socket
+    Socket --> Promtail
+    Promtail --> Loki
+    Loki --> Index
+    Loki --> Chunks
+    User --> Grafana
+    Grafana --> Loki
 
-    style containers fill:#e3f2fd,stroke:#2196f3
-    style collection fill:#d1fae5,stroke:#059669
-    style storage fill:#fed7aa,stroke:#ea580c
-    style viz fill:#fce7f3,stroke:#db2777
+    classDef containers fill:#e3f2fd,stroke:#2196f3,color:#1565c0
+    classDef collection fill:#d1fae5,stroke:#059669,color:#065f46
+    classDef storage fill:#fed7aa,stroke:#ea580c,color:#9a3412
+    classDef viz fill:#fce7f3,stroke:#db2777,color:#9d174d
+
+    class C1,C2,C3,C4,C5 containers
+    class Socket,Promtail collection
+    class Loki,Index,Chunks storage
+    class Grafana,User viz
 ```
 
 ## Stack Overview
@@ -74,38 +73,24 @@ Grafana is protected by Authelia SSO. Login with your LDAP credentials.
 ## Log Flow
 
 ```mermaid
-block-beta
-    columns 5
+flowchart LR
+    Container[Container] -->|stdout/stderr| Docker[Docker]
+    Docker -->|log file| Promtail[Promtail]
+    Promtail -->|push logs| Loki[Loki]
+    Loki -->|query| Grafana[Grafana]
+    Grafana -->|display| User([User])
 
-    cont["Container"]:1
-    dock["Docker"]:1
-    prom["Promtail"]:1
-    loki["Loki"]:1
-    block:output:1
-        columns 1
-        graf["Grafana"]
-        user(["User"])
-    end
+    classDef container fill:#e3f2fd,stroke:#2196f3,color:#1565c0
+    classDef docker fill:#0db7ed,stroke:#0db7ed,color:#fff
+    classDef promtail fill:#d1fae5,stroke:#059669,color:#065f46
+    classDef loki fill:#fed7aa,stroke:#ea580c,color:#9a3412
+    classDef grafana fill:#fce7f3,stroke:#db2777,color:#9d174d
 
-    space:5
-
-    block:steps:5
-        columns 1
-        s1["1. Container writes to stdout/stderr"]
-        s2["2. Docker writes to log file"]
-        s3["3. Promtail reads via socket + extracts labels"]
-        s4["4. Promtail pushes log stream to Loki"]
-        s5["5. User queries via Grafana LogQL"]
-    end
-
-    cont --> dock --> prom --> loki --> graf --> user
-
-    style cont fill:#e3f2fd,stroke:#2196f3
-    style dock fill:#0db7ed,stroke:#0db7ed
-    style prom fill:#d1fae5,stroke:#059669
-    style loki fill:#fed7aa,stroke:#ea580c
-    style output fill:#fce7f3,stroke:#db2777
-    style steps fill:#f3f4f6,stroke:#6b7280
+    class Container container
+    class Docker docker
+    class Promtail promtail
+    class Loki loki
+    class Grafana,User grafana
 ```
 
 ## LogQL Queries
@@ -163,32 +148,31 @@ sum by (container) (rate({container!=""}[5m]))
 Promtail automatically extracts labels from Docker metadata:
 
 ```mermaid
-block-beta
-    columns 2
-
-    block:docker:1
-        columns 1
-        d1["container_name"]
-        d2["compose_service"]
-        d3["compose_project"]
-        d4["container_labels"]
+flowchart LR
+    subgraph Docker[Docker Metadata]
+        D1[container_name]
+        D2[compose_service]
+        D3[compose_project]
+        D4[container_labels]
     end
 
-    block:loki:1
-        columns 1
-        l1["container"]
-        l2["compose_service"]
-        l3["compose_project"]
-        l4["service_group"]
+    subgraph Loki[Loki Labels]
+        L1[container]
+        L2[compose_service]
+        L3[compose_project]
+        L4[service_group]
     end
 
-    d1 --> l1
-    d2 --> l2
-    d3 --> l3
-    d4 --> l4
+    D1 --> L1
+    D2 --> L2
+    D3 --> L3
+    D4 --> L4
 
-    style docker fill:#e3f2fd,stroke:#0db7ed
-    style loki fill:#fed7aa,stroke:#ea580c
+    classDef docker fill:#e3f2fd,stroke:#0db7ed,color:#1565c0
+    classDef loki fill:#fed7aa,stroke:#ea580c,color:#9a3412
+
+    class D1,D2,D3,D4 docker
+    class L1,L2,L3,L4 loki
 ```
 
 | Label | Description | Example |
