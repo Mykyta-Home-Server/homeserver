@@ -67,31 +67,37 @@ The server currently runs **24 containers** across multiple service categories:
 The complete workflow from requesting content to streaming:
 
 ```mermaid
-flowchart LR
-    subgraph Request
-        User([User])
-        Jellyseerr[Jellyseerr]
+flowchart TB
+    subgraph row1[" "]
+        direction LR
+        subgraph Request
+            User([User])
+            Jellyseerr[Jellyseerr]
+        end
+
+        subgraph Search
+            Radarr[Radarr]
+            Sonarr[Sonarr]
+            Prowlarr[Prowlarr]
+        end
+
+        subgraph Download
+            qBit[qBittorrent]
+            Flare[FlareSolverr]
+        end
     end
 
-    subgraph Search
-        Radarr[Radarr]
-        Sonarr[Sonarr]
-        Prowlarr[Prowlarr]
-    end
+    subgraph row2[" "]
+        direction LR
+        subgraph Process
+            Import[Import]
+            Bazarr[Bazarr]
+        end
 
-    subgraph Download
-        qBit[qBittorrent]
-        Flare[FlareSolverr]
-    end
-
-    subgraph Process
-        Import[Import]
-        Bazarr[Bazarr]
-    end
-
-    subgraph Stream
-        Jellyfin[Jellyfin]
-        Devices([Devices])
+        subgraph Stream
+            Jellyfin[Jellyfin]
+            Devices([Devices])
+        end
     end
 
     User --> Jellyseerr
@@ -112,12 +118,14 @@ flowchart LR
     classDef download fill:#d1fae5,stroke:#059669,color:#065f46
     classDef process fill:#fce7f3,stroke:#db2777,color:#9d174d
     classDef stream fill:#e0e7ff,stroke:#4f46e5,color:#3730a3
+    classDef invisible fill:none,stroke:none
 
     class User,Jellyseerr request
     class Radarr,Sonarr,Prowlarr search
     class qBit,Flare download
     class Import,Bazarr process
     class Jellyfin,Devices stream
+    class row1,row2 invisible
 ```
 
 ## Authentication Flow
@@ -141,14 +149,14 @@ flowchart LR
         Service[Service]
     end
 
-    User -->|1. Access| Browser
-    Browser -->|2. HTTPS| Caddy
-    Caddy -->|3. Check| Authelia
-    Authelia -->|4. Validate| LDAP
-    LDAP -->|5. OK| Authelia
-    Authelia -->|6. Session| Caddy
-    Caddy -->|7. Forward| Service
-    Service -->|8. Response| Browser
+    User --> Browser
+    Browser --> Caddy
+    Caddy --> Authelia
+    Authelia --> LDAP
+    LDAP --> Authelia
+    Authelia --> Caddy
+    Caddy --> Service
+    Service --> Browser
 
     classDef client fill:#dbeafe,stroke:#2563eb,color:#1e40af
     classDef auth fill:#fce7f3,stroke:#db2777,color:#9d174d
@@ -166,18 +174,23 @@ Services are isolated into purpose-specific networks:
 ```mermaid
 flowchart TB
     subgraph proxy[Proxy Network]
-        cloudflared[cloudflared]
-        Caddy[Caddy]
+        direction LR
+        cloudflared[cloudflared] --> Caddy[Caddy]
     end
 
     subgraph auth[Auth Network]
+        direction LR
         Authelia[Authelia]
         PostgreSQL[(PostgreSQL)]
         Redis[(Redis)]
         OpenLDAP[(OpenLDAP)]
+        Authelia --> PostgreSQL
+        Authelia --> Redis
+        Authelia --> OpenLDAP
     end
 
     subgraph media[Media Network]
+        direction LR
         Jellyfin[Jellyfin]
         Jellyseerr[Jellyseerr]
         Radarr[Radarr]
@@ -188,20 +201,13 @@ flowchart TB
     end
 
     subgraph monitoring[Monitoring Network]
-        Grafana[Grafana]
-        Loki[Loki]
-        Promtail[Promtail]
+        direction LR
+        Promtail[Promtail] --> Loki[Loki] --> Grafana[Grafana]
     end
 
-    cloudflared --> Caddy
-    Caddy --> Authelia
-    Caddy --> Jellyfin
-    Caddy --> Grafana
-    Authelia --> PostgreSQL
-    Authelia --> Redis
-    Authelia --> OpenLDAP
-    Promtail --> Loki
-    Loki --> Grafana
+    Caddy --> auth
+    Caddy --> media
+    Caddy --> monitoring
 
     classDef proxyNet fill:#dbeafe,stroke:#2563eb,color:#1e40af
     classDef authNet fill:#fce7f3,stroke:#db2777,color:#9d174d

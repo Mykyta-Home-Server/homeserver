@@ -74,11 +74,11 @@ Grafana is protected by Authelia SSO. Login with your LDAP credentials.
 
 ```mermaid
 flowchart LR
-    Container[Container] -->|stdout/stderr| Docker[Docker]
-    Docker -->|log file| Promtail[Promtail]
-    Promtail -->|push logs| Loki[Loki]
-    Loki -->|query| Grafana[Grafana]
-    Grafana -->|display| User([User])
+    Container[Container] --> Docker[Docker]
+    Docker --> Promtail[Promtail]
+    Promtail --> Loki[Loki]
+    Loki --> Grafana[Grafana]
+    Grafana --> User([User])
 
     classDef container fill:#e3f2fd,stroke:#2196f3,color:#1565c0
     classDef docker fill:#0db7ed,stroke:#0db7ed,color:#fff

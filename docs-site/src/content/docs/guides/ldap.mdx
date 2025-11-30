@@ -16,22 +16,26 @@ flowchart TB
     end
 
     subgraph LDAP[OpenLDAP Directory]
+        direction LR
         Users[(ou=users)]
         Groups[(ou=groups)]
     end
 
     subgraph SSO[Single Sign-On]
+        direction LR
         Authelia[Authelia]
         PG[(PostgreSQL)]
         Redis[(Redis)]
     end
 
     subgraph Direct[Direct LDAP Auth]
+        direction LR
         Jellyfin[Jellyfin]
         Jellyseerr[Jellyseerr]
     end
 
     subgraph Protected[SSO Protected]
+        direction LR
         Grafana[Grafana]
         Radarr[Radarr]
         Sonarr[Sonarr]
@@ -39,20 +43,13 @@ flowchart TB
         qBit[qBittorrent]
     end
 
-    phpLDAP --> Users
-    phpLDAP --> Groups
-    Users --> Authelia
-    Groups --> Authelia
+    phpLDAP --> LDAP
+    LDAP --> Authelia
     Authelia --> PG
     Authelia --> Redis
-    Users --> Jellyfin
-    Groups --> Jellyfin
+    LDAP --> Jellyfin
     Jellyfin --> Jellyseerr
-    Authelia --> Grafana
-    Authelia --> Radarr
-    Authelia --> Sonarr
-    Authelia --> Prowlarr
-    Authelia --> qBit
+    Authelia --> Protected
 
     classDef mgmt fill:#9c27b0,stroke:#7b1fa2,color:#fff
     classDef ldap fill:#4caf50,stroke:#388e3c,color:#fff
@@ -85,9 +82,9 @@ flowchart TB
     Groups --> Admins[cn=admins]
     Groups --> Family[cn=family]
 
-    Admins -.->|member| Admin
-    Family -.->|member| Admin
-    Family -.->|member| User1
+    Admins -.-> Admin
+    Family -.-> Admin
+    Family -.-> User1
 
     classDef root fill:#4caf50,stroke:#388e3c,color:#fff
     classDef users fill:#2196f3,stroke:#1976d2,color:#fff
@@ -150,12 +147,12 @@ EOF
 
 ```mermaid
 flowchart LR
-    User([User]) -->|1. Access| Service[Service]
-    Service -->|2. Auth check| Authelia[Authelia]
-    Authelia -->|3. Validate| LDAP[(LDAP)]
-    LDAP -->|4. User + Groups| Authelia
-    Authelia -->|5. Session cookie| Service
-    Service -->|6. Access granted| User
+    User([User]) --> Service[Service]
+    Service --> Authelia[Authelia]
+    Authelia --> LDAP[(LDAP)]
+    LDAP --> Authelia
+    Authelia --> Service
+    Service --> User
 
     classDef user fill:#dbeafe,stroke:#2563eb,color:#1e40af
     classDef svc fill:#d1fae5,stroke:#059669,color:#065f46
