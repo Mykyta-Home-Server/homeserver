@@ -1,8 +1,8 @@
 # Home Server PoC - Session Status & Notes
 
 **Last Updated:** 2025-11-30
-**Current Phase:** Documentation Enhancement - Mermaid Diagram Standards
-**Status:** 🟢 Production Infrastructure with Comprehensive Visual Documentation
+**Current Phase:** Portal Development & SSO Integration
+**Status:** 🟢 Production Infrastructure + Angular Portal in Development
 
 ---
 
@@ -2452,6 +2452,156 @@ docs-site/
 
 - Committed and pushed: "Fix modal styling, restore detailed diagrams, shrink sidebar"
 - Deployment via GitHub Actions to GitHub Pages (automatic on push to main)
+
+---
+
+## Session 14 - 2025-11-30: Angular Portal Development
+
+**Focus:** Build role-based dashboard portal with theme system and permission-based UI
+
+### Accomplishments
+
+1. **GitHub CLI Integration**
+   - Installed and authenticated `gh` CLI on server
+   - Can now access private repos: `homeserver-portal`, `user-management-api`
+   - Enables fetching/reviewing code without cloning locally
+
+2. **Tailwind v4 Dark Mode Setup**
+   - Learned Tailwind v4 uses `@import "tailwindcss"` (not `@tailwind` directives)
+   - `tailwind.config.js` is ignored in v4 - configuration done in CSS
+   - Added `@custom-variant dark (&:where(.dark, .dark *));` for class-based toggle
+   - Created CSS variables for theme colors in `styles.css`
+
+3. **Custom Theme Utility Classes (No Duplication Approach)**
+   - Created reusable classes: `bg-theme-primary`, `text-theme-primary`, `border-theme`, etc.
+   - Colors auto-switch between light/dark via CSS variables
+   - Single source of truth - change colors in one place
+
+4. **ThemeService with Angular Signals**
+   - Signal-based state management (`signal<Theme>`)
+   - Persists preference to localStorage
+   - Respects system preference as fallback
+   - Toggle adds/removes `dark` class on `<html>`
+
+5. **AuthService with Angular Signals**
+   - Reactive user state with signals and computed values
+   - `hasPermission()`, `isInGroup()`, `isAdmin()` methods
+   - Fetches user info from `/api/me` endpoint
+
+6. **Portal Components Built**
+   - `LayoutComponent` - Shell with header, sidebar, router outlet
+   - `HeaderComponent` - Logo (links to home), user info, theme toggle, logout
+   - `SidebarComponent` - Permission-based service sections
+   - `HomeComponent` - Welcome message and access info cards
+   - `NotFoundComponent` - 404 page with back button
+
+7. **Permission-Based UI**
+   - Sidebar sections filtered by permissions:
+     - `access:media` → Jellyfin, Jellyseerr
+     - `access:admin_tools` → Radarr, Sonarr, Prowlarr, qBittorrent, Bazarr
+     - `access:monitoring` → Grafana
+   - Admin badge shown in header for admin users
+
+8. **Mobile Navigation Design**
+   - Designed bottom navigation for mobile (Option C)
+   - Desktop: Traditional sidebar
+   - Mobile: Fixed bottom bar with icons + "More" menu for admin tools
+
+### Technical Details
+
+**Portal Stack:**
+- Angular 19 (standalone components)
+- Tailwind CSS v4
+- Signals for state management
+- No separate HTML files (inline templates)
+
+**Theme CSS Structure:**
+```css
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root { /* light mode variables */ }
+  .dark { /* dark mode variables */ }
+}
+
+@layer utilities {
+  .bg-theme-primary { background-color: var(--color-bg-primary); }
+  /* ... other utility classes */
+}
+```
+
+**Key Files Modified (in homeserver-portal repo):**
+- `src/styles.css` - Theme variables and utility classes
+- `src/app/core/services/auth.service.ts` - Signals-based auth
+- `src/app/core/services/theme.service.ts` - Theme toggle
+- `src/app/shared/components/layout/layout.component.ts`
+- `src/app/shared/components/header/header.component.ts`
+- `src/app/shared/components/sidebar/sidebar.component.ts`
+- `src/app/features/home/home.component.ts`
+- `src/app/features/not-found/not-found.component.ts`
+
+### Iframe Analysis for Service Embedding
+
+Checked `X-Frame-Options` headers for all services:
+
+| Service | Header | Embeddable? |
+|---------|--------|-------------|
+| Jellyfin | None | ✅ Yes |
+| Jellyseerr | None | ✅ Yes |
+| Radarr | DENY | ❌ No |
+| Sonarr | DENY | ❌ No |
+| Prowlarr | DENY | ❌ No |
+| qBittorrent | DENY | ❌ No |
+| Bazarr | DENY | ❌ No |
+| Grafana | SAMEORIGIN | ❌ No |
+
+Decision: Use links instead of iframes for now. Can strip headers in Caddy later if needed.
+
+### Session Sync Investigation
+
+**Current Setup:**
+- Jellyfin uses LDAP plugin (already configured with 3 users)
+- Jellyseerr uses Jellyfin for auth (`mediaServerLogin: true`)
+- Sessions are separate - logout doesn't sync
+
+**Better Solution Identified:**
+- Authelia OIDC integration for Jellyfin
+- Uses SSO plugin instead of LDAP plugin
+- Enables true single sign-on and logout sync
+- Documentation: https://www.authelia.com/integration/openid-connect/clients/jellyfin/
+
+### Next Session: OIDC Setup
+
+Planned tasks:
+1. Enable OIDC identity provider in Authelia config
+2. Install Jellyfin SSO plugin (replace LDAP plugin)
+3. Configure OIDC client for Jellyfin
+4. Create LDAP groups: `jellyfin-users`, `jellyfin-admins`
+5. Test SSO login flow
+6. Configure Jellyseerr to inherit Jellyfin OIDC
+
+### Key Learnings
+
+1. **Tailwind v4 Breaking Changes**
+   - `tailwind.config.js` no longer used by default
+   - Use `@custom-variant` in CSS for dark mode class strategy
+   - Use `@theme` directive for custom colors (or CSS variables directly)
+
+2. **Angular Signals Benefits**
+   - Cleaner than BehaviorSubject for simple state
+   - No `| async` pipe needed in templates
+   - `computed()` for derived values
+
+3. **Authelia Cookie Scope**
+   - Set on `.mykyta-ryasny.dev` (all subdomains)
+   - Enables SSO across services protected by Authelia
+   - But doesn't help with services that have their own auth (Jellyfin)
+
+### Git Status
+
+Portal branch: `feat/small_fixes_defaul_ui`
+Commits made during session for theme and layout implementation.
 
 ---
 
