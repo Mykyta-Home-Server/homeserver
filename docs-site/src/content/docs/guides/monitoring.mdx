@@ -12,11 +12,17 @@ Centralized logging with Grafana, Loki, and Promtail for complete observability 
 ```mermaid
 flowchart TB
     subgraph containers["`**Containers**`"]
-        direction LR
+        direction TB
+        row1_c[" "]
+        row2_c[" "]
         C1@{ shape: rect, label: "Jellyfin" }
         C2@{ shape: rect, label: "Radarr" }
         C3@{ shape: rect, label: "Sonarr" }
         C4@{ shape: rect, label: "..." }
+
+        row1_c ~~~ row2_c
+        C1 ~~~ C2
+        C3 ~~~ C4
     end
 
     subgraph collection["`**Collection**`"]
@@ -43,6 +49,9 @@ flowchart TB
     Loki --- Data
     User --> Grafana
     Grafana --> Loki
+
+    style row1_c fill:none,stroke:none
+    style row2_c fill:none,stroke:none
 
     classDef containerStyle fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
     classDef collectionStyle fill:#a7f3d0,stroke:#10b981,stroke-width:2px
@@ -156,46 +165,27 @@ sum by (container) (rate({container!=""}[5m]))
 Promtail automatically extracts labels from Docker metadata:
 
 ```mermaid
-flowchart TB
+flowchart LR
     subgraph docker["`**Docker Metadata**`"]
         direction TB
-        row1_d[" "]
-        row2_d[" "]
-
         D1@{ shape: stadium, label: "container_name" }
         D2@{ shape: stadium, label: "service" }
         D3@{ shape: stadium, label: "project" }
         D4@{ shape: stadium, label: "labels" }
-
-        row1_d ~~~ row2_d
-        D1 ~~~ D2
-        D3 ~~~ D4
     end
 
     subgraph loki["`**Loki Labels**`"]
         direction TB
-        row1_l[" "]
-        row2_l[" "]
-
         L1@{ shape: stadium, label: "container" }
         L2@{ shape: stadium, label: "service" }
         L3@{ shape: stadium, label: "project" }
         L4@{ shape: stadium, label: "group" }
-
-        row1_l ~~~ row2_l
-        L1 ~~~ L2
-        L3 ~~~ L4
     end
 
     D1 --> L1
     D2 --> L2
     D3 --> L3
     D4 --> L4
-
-    style row1_d fill:none,stroke:none
-    style row2_d fill:none,stroke:none
-    style row1_l fill:none,stroke:none
-    style row2_l fill:none,stroke:none
 
     classDef dockerStyle fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
     classDef lokiStyle fill:#fed7aa,stroke:#f97316,stroke-width:2px

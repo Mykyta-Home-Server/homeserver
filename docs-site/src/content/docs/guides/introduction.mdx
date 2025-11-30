@@ -136,15 +136,24 @@ flowchart TB
     end
 
     subgraph auth["`**Auth Network**`"]
-        direction LR
+        direction TB
+        row1_a[" "]
+        row2_a[" "]
         Authelia@{ shape: rect, label: "Authelia" }
         PG@{ shape: cyl, label: "PostgreSQL" }
         Redis@{ shape: cyl, label: "Redis" }
         LDAP@{ shape: cyl, label: "OpenLDAP" }
+
+        row1_a ~~~ row2_a
+        Authelia ~~~ PG
+        Redis ~~~ LDAP
     end
 
     subgraph media["`**Media Network**`"]
-        direction LR
+        direction TB
+        row1_m[" "]
+        row2_m[" "]
+        row3_m[" "]
         JF@{ shape: cyl, label: "Jellyfin" }
         JS@{ shape: rect, label: "Jellyseerr" }
         RD@{ shape: rect, label: "Radarr" }
@@ -152,6 +161,13 @@ flowchart TB
         PW@{ shape: rect, label: "Prowlarr" }
         QB@{ shape: rect, label: "qBit" }
         BZ@{ shape: rect, label: "Bazarr" }
+
+        row1_m ~~~ row2_m
+        row2_m ~~~ row3_m
+        JF ~~~ JS
+        RD ~~~ SN
+        PW ~~~ QB
+        BZ
     end
 
     subgraph monitor["`**Monitoring Network**`"]
@@ -163,6 +179,12 @@ flowchart TB
 
     CF --> Caddy
     Caddy ==> auth & media & monitor
+
+    style row1_a fill:none,stroke:none
+    style row2_a fill:none,stroke:none
+    style row1_m fill:none,stroke:none
+    style row2_m fill:none,stroke:none
+    style row3_m fill:none,stroke:none
 
     classDef proxyStyle fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
     classDef authStyle fill:#fce7f3,stroke:#ec4899,stroke-width:2px
