@@ -44,10 +44,10 @@ flowchart TB
     User --> Grafana
     Grafana --> Loki
 
-    classDef containerStyle fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
-    classDef collectionStyle fill:#d1fae5,stroke:#059669,stroke-width:2px
-    classDef storageStyle fill:#fed7aa,stroke:#ea580c,stroke-width:2px
-    classDef vizStyle fill:#fce7f3,stroke:#db2777,stroke-width:2px
+    classDef containerStyle fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    classDef collectionStyle fill:#a7f3d0,stroke:#10b981,stroke-width:2px
+    classDef storageStyle fill:#fed7aa,stroke:#f97316,stroke-width:2px
+    classDef vizStyle fill:#fce7f3,stroke:#ec4899,stroke-width:2px
 
     class C1,C2,C3,C4 containerStyle
     class Socket,Promtail collectionStyle
@@ -88,11 +88,11 @@ flowchart LR
     Grafana --> Loki
     Grafana --> User
 
-    classDef container fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
-    classDef docker fill:#0db7ed,stroke:#0a7ea3,stroke-width:2px
-    classDef promtail fill:#d1fae5,stroke:#059669,stroke-width:2px
-    classDef loki fill:#fed7aa,stroke:#ea580c,stroke-width:2px
-    classDef grafana fill:#fce7f3,stroke:#db2777,stroke-width:2px
+    classDef container fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    classDef docker fill:#bae6fd,stroke:#0ea5e9,stroke-width:2px
+    classDef promtail fill:#a7f3d0,stroke:#10b981,stroke-width:2px
+    classDef loki fill:#fed7aa,stroke:#f97316,stroke-width:2px
+    classDef grafana fill:#fce7f3,stroke:#ec4899,stroke-width:2px
 
     class Container container
     class Docker docker
@@ -156,21 +156,35 @@ sum by (container) (rate({container!=""}[5m]))
 Promtail automatically extracts labels from Docker metadata:
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph docker["`**Docker Metadata**`"]
         direction TB
-        D1@{ shape: tag, label: "container_name" }
-        D2@{ shape: tag, label: "service" }
-        D3@{ shape: tag, label: "project" }
-        D4@{ shape: tag, label: "labels" }
+        row1_d[" "]
+        row2_d[" "]
+
+        D1@{ shape: stadium, label: "container_name" }
+        D2@{ shape: stadium, label: "service" }
+        D3@{ shape: stadium, label: "project" }
+        D4@{ shape: stadium, label: "labels" }
+
+        row1_d ~~~ row2_d
+        D1 ~~~ D2
+        D3 ~~~ D4
     end
 
     subgraph loki["`**Loki Labels**`"]
         direction TB
-        L1@{ shape: tag, label: "container" }
-        L2@{ shape: tag, label: "service" }
-        L3@{ shape: tag, label: "project" }
-        L4@{ shape: tag, label: "group" }
+        row1_l[" "]
+        row2_l[" "]
+
+        L1@{ shape: stadium, label: "container" }
+        L2@{ shape: stadium, label: "service" }
+        L3@{ shape: stadium, label: "project" }
+        L4@{ shape: stadium, label: "group" }
+
+        row1_l ~~~ row2_l
+        L1 ~~~ L2
+        L3 ~~~ L4
     end
 
     D1 --> L1
@@ -178,8 +192,13 @@ flowchart LR
     D3 --> L3
     D4 --> L4
 
-    classDef dockerStyle fill:#e3f2fd,stroke:#0db7ed,stroke-width:2px
-    classDef lokiStyle fill:#fed7aa,stroke:#ea580c,stroke-width:2px
+    style row1_d fill:none,stroke:none
+    style row2_d fill:none,stroke:none
+    style row1_l fill:none,stroke:none
+    style row2_l fill:none,stroke:none
+
+    classDef dockerStyle fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    classDef lokiStyle fill:#fed7aa,stroke:#f97316,stroke-width:2px
 
     class D1,D2,D3,D4 dockerStyle
     class L1,L2,L3,L4 lokiStyle

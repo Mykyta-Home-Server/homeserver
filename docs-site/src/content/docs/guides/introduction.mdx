@@ -89,11 +89,11 @@ flowchart TB
     Bazarr --> Jellyfin
     Jellyfin --> User
 
-    classDef userStyle fill:#dbeafe,stroke:#2563eb,stroke-width:2px
-    classDef processStyle fill:#fef3c7,stroke:#d97706,stroke-width:2px
-    classDef downloadStyle fill:#d1fae5,stroke:#059669,stroke-width:2px
-    classDef subtitleStyle fill:#fce7f3,stroke:#db2777,stroke-width:2px
-    classDef streamStyle fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px
+    classDef userStyle fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    classDef processStyle fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
+    classDef downloadStyle fill:#a7f3d0,stroke:#10b981,stroke-width:2px
+    classDef subtitleStyle fill:#fce7f3,stroke:#ec4899,stroke-width:2px
+    classDef streamStyle fill:#e0e7ff,stroke:#8b5cf6,stroke-width:2px
 
     class User userStyle
     class Jellyseerr,Radarr,Sonarr,Prowlarr processStyle
@@ -164,10 +164,10 @@ flowchart TB
     CF --> Caddy
     Caddy ==> auth & media & monitor
 
-    classDef proxyStyle fill:#dbeafe,stroke:#2563eb,stroke-width:2px
-    classDef authStyle fill:#fce7f3,stroke:#db2777,stroke-width:2px
-    classDef mediaStyle fill:#d1fae5,stroke:#059669,stroke-width:2px
-    classDef monitorStyle fill:#fed7aa,stroke:#ea580c,stroke-width:2px
+    classDef proxyStyle fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    classDef authStyle fill:#fce7f3,stroke:#ec4899,stroke-width:2px
+    classDef mediaStyle fill:#a7f3d0,stroke:#10b981,stroke-width:2px
+    classDef monitorStyle fill:#fed7aa,stroke:#f97316,stroke-width:2px
 
     class CF,Caddy proxyStyle
     class Authelia,PG,Redis,LDAP authStyle

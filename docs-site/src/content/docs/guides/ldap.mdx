@@ -12,12 +12,10 @@ Unified authentication with OpenLDAP across all services. One username and passw
 ```mermaid
 flowchart TB
     subgraph mgmt["`**Management**`"]
-        direction LR
         phpLDAP@{ shape: rect, label: "phpLDAPadmin" }
     end
 
     subgraph ldap["`**Directory**`"]
-        direction LR
         LDAP@{ shape: cyl, label: "OpenLDAP" }
     end
 
@@ -47,11 +45,11 @@ flowchart TB
     Jellyfin --> Jellyseerr
     Authelia --> protected
 
-    classDef mgmtStyle fill:#9c27b0,stroke:#7b1fa2,stroke-width:2px
-    classDef ldapStyle fill:#4caf50,stroke:#388e3c,stroke-width:2px
-    classDef ssoStyle fill:#2196f3,stroke:#1976d2,stroke-width:2px
+    classDef mgmtStyle fill:#e9d5ff,stroke:#a855f7,stroke-width:2px
+    classDef ldapStyle fill:#a7f3d0,stroke:#10b981,stroke-width:2px
+    classDef ssoStyle fill:#bae6fd,stroke:#0ea5e9,stroke-width:2px
     classDef directStyle fill:#d1fae5,stroke:#059669,stroke-width:2px
-    classDef protectedStyle fill:#dbeafe,stroke:#2563eb,stroke-width:2px
+    classDef protectedStyle fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
 
     class phpLDAP mgmtStyle
     class LDAP ldapStyle
@@ -85,10 +83,10 @@ flowchart TB
     Admins -.-> Admin
     Family -.-> Admin & User1
 
-    classDef root fill:#4caf50,stroke:#388e3c,stroke-width:2px
-    classDef ou fill:#2196f3,stroke:#1976d2,stroke-width:2px
-    classDef user fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
-    classDef group fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    classDef root fill:#a7f3d0,stroke:#10b981,stroke-width:2px
+    classDef ou fill:#bae6fd,stroke:#0ea5e9,stroke-width:2px
+    classDef user fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    classDef group fill:#fed7aa,stroke:#f97316,stroke-width:2px
 
     class Root root
     class Users,Groups ou
@@ -200,19 +198,26 @@ Jellyseerr authenticates through Jellyfin, not directly to LDAP. Users must exis
 Group membership determines which services users can access:
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph groups["`**Groups**`"]
-        direction TB
+        direction LR
         Admins@{ shape: hex, label: "admins" }
         Family@{ shape: hex, label: "family" }
     end
 
     subgraph admin["`**Admin Only**`"]
-        direction LR
+        direction TB
+        row1_admin[" "]
+        row2_admin[" "]
+
         Grafana@{ shape: rect, label: "Grafana" }
         Arr@{ shape: rect, label: "*arr" }
         qBit@{ shape: rect, label: "qBit" }
         phpLDAP@{ shape: rect, label: "phpLDAP" }
+
+        row1_admin ~~~ row2_admin
+        Grafana ~~~ Arr
+        qBit ~~~ phpLDAP
     end
 
     subgraph media["`**Media Services**`"]
@@ -221,12 +226,15 @@ flowchart LR
         Jellyseerr@{ shape: rect, label: "Jellyseerr" }
     end
 
-    Admins --> admin & media
-    Family --> media
+    Admins --> admin
+    Admins & Family --> media
 
-    classDef groupStyle fill:#9c27b0,stroke:#7b1fa2,stroke-width:2px
-    classDef adminStyle fill:#ffcdd2,stroke:#f44336,stroke-width:2px
-    classDef mediaStyle fill:#c8e6c9,stroke:#4caf50,stroke-width:2px
+    style row1_admin fill:none,stroke:none
+    style row2_admin fill:none,stroke:none
+
+    classDef groupStyle fill:#e9d5ff,stroke:#a855f7,stroke-width:2px
+    classDef adminStyle fill:#fecaca,stroke:#ef4444,stroke-width:2px
+    classDef mediaStyle fill:#a7f3d0,stroke:#10b981,stroke-width:2px
 
     class Admins,Family groupStyle
     class Grafana,Arr,qBit,phpLDAP adminStyle
