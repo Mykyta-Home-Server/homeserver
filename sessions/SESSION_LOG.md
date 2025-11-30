@@ -701,17 +701,13 @@ User (HTTPS) → Cloudflare Edge → Encrypted Tunnel → Caddy (HTTPS with Orig
 ✅ Comprehensive documentation for adding services
 ✅ Zero exposed ports (everything through Cloudflare Tunnel)
 
-**Next Session Goals:**
-- Deploy additional services (Plex, qBittorrent, etc.) using the modular template
-- Or: Deploy portfolio website to replace Hello World
-- Or: Set up monitoring and logging (Grafana, Prometheus)
-- Or: Implement automated backups
-
 **Tailscale VPN Status:**
 - ✅ Configured and working
 - Access server via: `mykyta@home-server` (Tailscale Magic DNS)
 - IP: Dynamic (Tailscale assigns from 100.x.x.x range)
 - Purpose: Secure SSH access from anywhere
+
+**Note:** Session 3 goals are outdated - infrastructure has evolved significantly since then. See SESSION_LOG.md for current project state.
 
 ---
 

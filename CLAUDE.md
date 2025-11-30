@@ -711,49 +711,92 @@ When updating CLAUDE.md, also check:
 
 ## Session Management
 
+**Single Source of Truth:** `/sessions/SESSION_LOG.md`
+
+This is a **single-file approach** to avoid confusion from multiple outdated session files. All session history is maintained in one comprehensive log.
+
 ### Starting a Session
 
-1. Read `CLAUDE.md` (this file)
-2. Read `/sessions/SESSION_LOG.md` for current state
+1. Read `CLAUDE.md` (this file) for project context and guidelines
+2. Read `/sessions/SESSION_LOG.md` for complete project history and current state
 3. Check `/.claude/architecture.md` if architecture questions arise
+4. Check `/.claude/technical_specs.md` for service specifications
 
 ### During a Session
 
 - Update `SESSION_LOG.md` as significant progress is made
 - Flag documentation that needs updating
-- Note architectural decisions
+- Note architectural decisions and key learnings
+- Document troubleshooting solutions
 
 ### Ending a Session
 
 **Checklist:**
 
 1. **Update Session Log** (`/sessions/SESSION_LOG.md`)
+   - Add new session entry at the end of the file
+   - Include date, duration, and focus
+   - Document accomplishments with technical details
+   - Record key learnings (WHY, not just WHAT)
+   - List commits made
+   - Note current status
+
    ```markdown
-   ### Session [N] - YYYY-MM-DD
+   ### Session N - YYYY-MM-DD
+   **Duration:** ~X hours
    **Focus:** [main topic]
 
    **Accomplishments:**
-   - [completed items]
+   - ✅ [completed items with details]
 
-   **Decisions:**
-   - [architectural/technical decisions made]
+   **Technical Implementation:**
+   - [specific techniques used]
+   - [code patterns applied]
 
-   **Next:**
-   - [what to tackle next]
+   **Key Learnings:**
+   1. **[Concept]:**
+      - [Insight and explanation]
+
+   **Commits:**
+   1. `commit-hash` - Brief description
+
+   **Current Status:**
+   ✅ [what's working]
    ```
 
-2. **Update Documentation** (if procedures changed)
+2. **Update User Documentation** (if procedures changed)
+   - `/docs-site/src/content/docs/` for guides
 
-3. **Update Architecture** (if architecture changed)
+3. **Update Architecture Documentation** (if architecture changed)
+   - `/.claude/architecture.md`, `technical_specs.md`, etc.
 
-4. **Provide Summary**
+4. **Update CLAUDE.md** (if major changes)
+   - Version history
+   - Service count
+
+5. **Provide Summary**
    ```markdown
    ## Session Complete! 🎉
 
    **Accomplished:** [key achievements]
    **Updated:** [files changed]
-   **Next session:** [starting point]
+   **Commits:** [commit hashes]
    ```
+
+### Session File Management
+
+**Keep Active:**
+- `SESSION_LOG.md` - The only active session file
+
+**Archive:**
+- Move old individual session files to `archive/` folder
+- Reference only - SESSION_LOG.md is current
+
+**Purpose:**
+- Single file prevents confusion from outdated information
+- Chronological history shows project evolution
+- Easy to search and reference
+- Provides complete context for Claude
 
 ### Documentation Update Protocol
 
