@@ -2,10 +2,6 @@
 home.mykyta-ryasny.dev {
     import cf_tls
 
-    # Logout: redirect to Authentik direct logout flow (no confirmation)
-    @logout path /logout
-    redir @logout "https://sso.mykyta-ryasny.dev/if/flow/direct-logout/" 302
-
     # Portal frontend (authenticated)
     handle {
         import authentik_auth
