@@ -8,6 +8,26 @@
 sso.mykyta-ryasny.dev {
     import cf_tls
 
-    # Authentik server (port 9000 for HTTP)
-    reverse_proxy authentik-server:9000
+    # CORS headers for API endpoints (allow portal to access user info)
+    @api path /api/*
+    handle @api {
+        header {
+            Access-Control-Allow-Origin "https://home.mykyta-ryasny.dev"
+            Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+            Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+            Access-Control-Allow-Credentials "true"
+            Access-Control-Max-Age "3600"
+        }
+
+        # Handle preflight requests
+        @options method OPTIONS
+        respond @options 204
+
+        reverse_proxy authentik-server:9000
+    }
+
+    # All other requests (no CORS headers needed for regular auth flows)
+    handle {
+        reverse_proxy authentik-server:9000
+    }
 }

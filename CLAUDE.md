@@ -233,6 +233,51 @@ Quick Reference:
 | Compose | `service.yml` | `media.yml` |
 | Caddyfiles | `service.Caddyfile` | `jellyfin.Caddyfile` |
 
+### External Repositories
+
+Some services are maintained in separate GitHub repositories outside the main homeserver repo:
+
+#### Home Portal (Angular Dashboard)
+
+**Repository:** `Mykyta-Home-Server/homeserver-portal` (private)
+**Live URL:** https://home.mykyta-ryasny.dev
+**Technology:** Angular 19 (standalone components, signals)
+
+**Purpose:** Web-based home dashboard with service links and user information from Authentik SSO.
+
+**CI/CD:** Automatically builds and deploys Docker image to `portal` container on push to `main`.
+
+**Editing Files Directly via gh CLI:**
+
+You can edit files without cloning the repository:
+
+```bash
+# View file contents
+gh api repos/Mykyta-Home-Server/homeserver-portal/contents/path/to/file.ts --jq '.content' | base64 -d
+
+# Edit and push directly (single file)
+# 1. Get current file SHA
+gh api repos/Mykyta-Home-Server/homeserver-portal/contents/path/to/file.ts --jq '.sha'
+
+# 2. Prepare updated file (base64 encoded)
+base64 -w 0 /path/to/edited/file.ts > /tmp/file.b64
+
+# 3. Create commit JSON with jq
+jq -n \
+  --arg message "commit message here" \
+  --arg content "$(cat /tmp/file.b64)" \
+  --arg sha "CURRENT_FILE_SHA" \
+  '{message: $message, content: $content, sha: $sha}' > /tmp/commit.json
+
+# 4. Push update
+gh api -X PUT repos/Mykyta-Home-Server/homeserver-portal/contents/path/to/file.ts --input /tmp/commit.json
+```
+
+**When to Edit Portal:**
+- Updating authentication logic (AuthService)
+- Adding new service links (SidebarComponent)
+- Changing permission mappings (group → access level)
+
 ---
 
 ## Documentation System
