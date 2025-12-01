@@ -95,8 +95,8 @@
       "gridPos": { "h": 3, "w": 3, "x": 6, "y": 3 },
       "id": 12,
       "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false }, "textMode": "value" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"authelia\"}[5m]))", "legendFormat": "Authelia", "refId": "A" }],
-      "title": "Authelia",
+      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"authentik-server\"}[5m]))", "legendFormat": "Authentik", "refId": "A" }],
+      "title": "Authentik",
       "type": "stat"
     },
     {
@@ -242,7 +242,7 @@
       },
       "targets": [
         { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=~\"caddy|cloudflared\"}[5m]))", "legendFormat": "Infrastructure", "refId": "A" },
-        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=~\"authelia|openldap|postgres-auth|redis-auth\"}[5m]))", "legendFormat": "Auth", "refId": "B" },
+        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=~\"authentik-server|authentik-worker|postgres-auth|redis-auth\"}[5m]))", "legendFormat": "Auth", "refId": "B" },
         { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=~\"jellyfin|radarr|sonarr|prowlarr|qbittorrent|jellyseerr|bazarr\"}[5m]))", "legendFormat": "Media", "refId": "C" },
         { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=~\"grafana|loki|promtail|github-runner|maintenance-cron\"}[5m]))", "legendFormat": "Operations", "refId": "D" }
       ],
@@ -271,7 +271,7 @@
       },
       "targets": [
         { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=~\"caddy|cloudflared\"}[1h]))", "legendFormat": "Infrastructure", "refId": "A" },
-        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=~\"authelia|openldap|postgres-auth|redis-auth\"}[1h]))", "legendFormat": "Auth", "refId": "B" },
+        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=~\"authentik-server|authentik-worker|postgres-auth|redis-auth\"}[1h]))", "legendFormat": "Auth", "refId": "B" },
         { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=~\"jellyfin|radarr|sonarr|prowlarr|qbittorrent|jellyseerr|bazarr\"}[1h]))", "legendFormat": "Media", "refId": "C" },
         { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=~\"grafana|loki|promtail|github-runner|maintenance-cron\"}[1h]))", "legendFormat": "Operations", "refId": "D" }
       ],
