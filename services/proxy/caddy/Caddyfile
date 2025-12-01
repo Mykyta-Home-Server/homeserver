@@ -26,19 +26,20 @@
     tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
 }
 
-# Authelia Forward Authentication snippet
-# Use this to protect services with SSO: import authelia_auth
-(authelia_auth) {
-    # Forward authentication request to Authelia
-    forward_auth authelia:9091 {
-        # Forward the original URI and method to Authelia
-        uri /api/verify?rd=https://auth.mykyta-ryasny.dev
+# ============================================================================
+# Authentik Forward Authentication Snippet
+# ============================================================================
+# Use this to protect services with SSO: import authentik_auth
+# Requires: Proxy Provider configured in Authentik with Forward Auth mode
+(authentik_auth) {
+    # Forward authentication to Authentik outpost
+    forward_auth authentik-server:9000 {
+        uri /outpost.goauthentik.io/auth/caddy
 
-        # Copy headers from Authelia response back to the original request
-        # These headers tell the backend service who the authenticated user is
-        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+        # Copy Authentik headers - capitalization is important!
+        copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
 
-        # Trusted proxies (Authelia's response is trusted)
+        # Trust private ranges (Docker network)
         trusted_proxies private_ranges
     }
 }

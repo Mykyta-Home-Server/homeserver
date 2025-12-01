@@ -13,8 +13,7 @@
 # DEFAULT (no profile):
 #   docker compose up -d
 #   → Starts: Infrastructure + Authentication
-#   → Services: caddy, cloudflared, postgres-auth, redis-auth, authelia,
-#               openldap, phpldapadmin, user-management
+#   → Services: caddy, cloudflared, postgres-auth, redis-auth, authentik-server, authentik-worker
 #
 # PROFILES:
 #   --profile web         : Web applications (portal, hello-world)
@@ -55,11 +54,9 @@ include:
   # =========================================================================
   # Authentication Stack - Always runs
   # =========================================================================
-  - compose/auth/postgres.yml                  # PostgreSQL for Authelia
+  - compose/auth/postgres.yml                  # PostgreSQL for auth services
   - compose/auth/redis.yml                     # Redis for sessions
-  - compose/auth/authelia.yml                  # SSO authentication
-  - compose/auth/ldap.yml                      # OpenLDAP + phpLDAPadmin
-  - compose/auth/user-management.yml           # User management API
+  - compose/auth/authentik.yml                 # Authentik SSO identity provider
 
   # =========================================================================
   # Media Stack (profile: media, all)

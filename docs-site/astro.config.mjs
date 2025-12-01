@@ -107,7 +107,6 @@ export default defineConfig({
         {
           label: 'Infrastructure',
           items: [
-            { label: 'LDAP Guide', slug: 'guides/ldap' },
             { label: 'Monitoring', slug: 'guides/monitoring' },
             { label: 'Migration Guide', slug: 'guides/migration' },
           ],

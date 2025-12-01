@@ -63,12 +63,12 @@ ingress:
       noTLSVerify: true
       originServerName: deploy.mykyta-ryasny.dev
 
-  # Authentication - Authelia SSO portal
-  - hostname: auth.mykyta-ryasny.dev
+  # Authentication - Authentik SSO portal
+  - hostname: sso.mykyta-ryasny.dev
     service: https://caddy:443
     originRequest:
       noTLSVerify: true
-      originServerName: auth.mykyta-ryasny.dev
+      originServerName: sso.mykyta-ryasny.dev
 
   # Home Portal - Angular dashboard
   - hostname: home.mykyta-ryasny.dev

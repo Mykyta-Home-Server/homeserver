@@ -1,7 +1,7 @@
 # CLAUDE.md - Home Server Automation Project
 
-**Version:** 3.5
-**Last Updated:** 2025-11-30
+**Version:** 3.6
+**Last Updated:** 2025-12-01
 **Project:** Personal Home Server with AI-Powered Automation
 
 ---
@@ -10,7 +10,7 @@
 
 You are assisting with a personal learning project to build a comprehensive home server with AI-powered natural language automation. The developer has 2+ years of experience, works solo, and prioritizes **understanding WHY** over quick implementations.
 
-**Current State:** Production infrastructure with 24 containers, CI/CD pipeline, media stack (with Bazarr subtitles, Recyclarr sync, FlareSolverr), authentication, monitoring, and dockerized maintenance cron.
+**Current State:** Production infrastructure with 22 containers, CI/CD pipeline, media stack (with Bazarr subtitles, Recyclarr sync, FlareSolverr), Authentik SSO authentication, monitoring, and dockerized maintenance cron.
 
 ---
 
@@ -69,7 +69,7 @@ Internet → Cloudflare (DNS + DDoS) → Encrypted Tunnel → Caddy (Reverse Pro
 | **Reverse Proxy** | Caddy with Cloudflare Origin Certs | ✅ Production |
 | **Tunnel** | Cloudflare Tunnel (Zero exposed ports) | ✅ Production |
 | **Media Stack** | Jellyfin, *arr suite, qBittorrent | ✅ Production |
-| **Authentication** | Authelia + PostgreSQL + Redis | ✅ Production |
+| **Authentication** | Authentik + PostgreSQL + Redis | ✅ Production |
 | **Monitoring** | Grafana + Loki + Promtail | ✅ Production |
 | **CI/CD** | GitHub Actions + Self-hosted Runner | ✅ Production |
 | **Maintenance** | Dockerized Cron (Alpine) | ✅ Production |
@@ -79,7 +79,7 @@ Internet → Cloudflare (DNS + DDoS) → Encrypted Tunnel → Caddy (Reverse Pro
 ```
 Networks (Docker):
 ├── proxy          # External-facing services (Caddy, Tunnel)
-├── auth           # Authentication stack (Authelia, PostgreSQL, Redis)
+├── internal       # Authentication stack (Authentik, PostgreSQL, Redis)
 ├── monitoring     # Logging stack (Loki, Promtail, Grafana)
 ├── web            # Web services and portal
 └── media          # Media services (*arr stack, Jellyfin)
@@ -109,7 +109,7 @@ Quick Reference:
 ├── .env                         # Environment variables (gitignored)
 ├── .env.example                 # Template for .env
 │
-├── compose/                     # Docker Compose definitions (21 files)
+├── compose/                     # Docker Compose definitions (18 files)
 │   ├── _networks.yml            # Network definitions
 │   ├── _snippets.yml            # Reusable YAML patterns
 │   ├── infrastructure/          # Core services
@@ -117,12 +117,10 @@ Quick Reference:
 │   │   └── tunnel.yml           # Cloudflare Tunnel
 │   ├── ci/                      # CI/CD services
 │   │   └── github-runner.yml   # Self-hosted runner
-│   ├── auth/                    # Authentication stack (5 files)
+│   ├── auth/                    # Authentication stack (3 files)
 │   │   ├── postgres.yml         # PostgreSQL database
 │   │   ├── redis.yml            # Redis sessions
-│   │   ├── authelia.yml         # SSO authentication
-│   │   ├── ldap.yml             # OpenLDAP + phpLDAPadmin
-│   │   └── user-management.yml  # User management API
+│   │   └── authentik.yml        # Authentik SSO identity provider
 │   ├── media/                   # Media stack (9 files)
 │   │   ├── qbittorrent.yml      # Download client
 │   │   ├── jellyfin.yml         # Media server
@@ -151,8 +149,11 @@ Quick Reference:
 │   │   └── cloudflared/
 │   │       └── config.yml       # Tunnel routes
 │   ├── auth/
-│   │   └── authelia/
-│   │       └── configuration.yml
+│   │   └── authentik/
+│   │       ├── media/               # User-uploaded media
+│   │       ├── templates/           # Custom templates
+│   │       └── branding/
+│   │           └── custom.css       # Custom login page styling
 │   ├── monitoring/
 │   │   ├── grafana/
 │   │   ├── loki/
@@ -198,7 +199,6 @@ Quick Reference:
 │           │   ├── introduction.mdx   # With architecture diagrams
 │           │   ├── docker.mdx
 │           │   ├── adding-services.mdx
-│           │   ├── ldap.mdx           # With auth flow diagrams
 │           │   ├── monitoring.mdx     # With logging diagrams
 │           │   └── migration.md
 │           ├── reference/       # Quick references
@@ -384,7 +384,7 @@ flowchart TB
 ```mermaid
 flowchart TB
     Source --> Target1 & Target2 & Target3
-    Authelia --- PG & Redis
+    Authentik --- PG & Redis
     Caddy ==> auth & media & monitor
 ```
 
@@ -545,7 +545,6 @@ When creating or updating diagrams:
 | `guides/adding-services.mdx` | Step-by-step service addition |
 | `guides/monitoring.md` | Monitoring stack setup and LogQL |
 | `guides/migration.md` | VM to physical server migration |
-| `guides/ldap.md` | LDAP user and group management |
 | `reference/quick-reference.md` | Essential commands cheat sheet |
 | `reference/service-profiles.md` | Docker Compose profiles reference |
 | `reference/scripts.md` | All automation scripts documentation |
@@ -636,7 +635,7 @@ Encourage installed QoL tools:
 - `home.json` - Default homepage with service overview
 - `infrastructure.json` - Caddy proxy & Cloudflare tunnel
 - `media-stack.json` - Media services (Jellyfin, *arr stack)
-- `authentication.json` - Auth stack (Authelia, LDAP, PostgreSQL, Redis)
+- `authentication.json` - Auth stack (Authentik, PostgreSQL, Redis) **[NEEDS UPDATE]**
 - `operations.json` - CI/CD, maintenance cron, monitoring stack
 
 **Update Grafana dashboards when:**
@@ -885,10 +884,10 @@ Before providing code/config:
 
 ## Quick Reference
 
-### Current Services (24 containers)
+### Current Services (22 containers)
 
 **Infrastructure:** Caddy, Cloudflared
-**Auth:** Authelia, PostgreSQL, Redis, OpenLDAP, phpLDAPadmin, User-Management
+**Auth:** Authentik-Server, Authentik-Worker, PostgreSQL, Redis
 **Media:** Jellyfin, Sonarr, Radarr, Prowlarr, Jellyseerr, qBittorrent, Bazarr, Recyclarr, FlareSolverr
 **Monitoring:** Grafana, Loki, Promtail
 **Maintenance:** maintenance-cron (Alpine with Python, Docker CLI)
@@ -952,12 +951,13 @@ docker compose --profile all up -d
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 3.6 | 2025-12-01 | **Major Auth Migration:** Replaced Authelia/LDAP/User-Management with Authentik SSO (22 containers, 18 compose files). Added auto-SSO for Jellyseerr, custom Authentik branding, direct logout flow, removed legacy auth stack |
 | 3.5 | 2025-11-30 | Added comprehensive Mermaid v11.3.0+ guidelines: semantic shapes, compact grid layouts, consistent pastel palette, maintenance checklist |
 | 3.4 | 2025-11-30 | Enhanced Mermaid diagrams: pastel colors, rounded corners, click-to-expand modal, compact layouts |
-| 3.3 | 2025-11-29 | Added Mermaid diagram support, created architecture diagrams for introduction, monitoring, and LDAP guides |
+| 3.3 | 2025-11-29 | Added Mermaid diagram support, created architecture diagrams for introduction and monitoring guides |
 | 3.2 | 2025-11-29 | Migrated docs to Astro Starlight, deployed to GitHub Pages, deleted old /docs folder |
 | 3.1 | 2025-11-29 | Added Bazarr (subtitles), Recyclarr (TRaSH sync), FlareSolverr (Cloudflare bypass), radarr-delete-torrent script, quality limits (20GB movies, 5GB TV) |
-| 3.0 | 2025-11-27 | Round 1 & 2 Refactoring: Split compose files (21 total), dockerized cron, updated documentation structure |
+| 3.0 | 2025-11-27 | Round 1 & 2 Refactoring: Split compose files (18 core files), dockerized cron, updated documentation structure |
 | 2.0 | 2025-11-27 | Major refactor: Self-update protocol, tier documentation, simplified structure |
 | 1.0 | 2024-11-20 | Initial creation |
 

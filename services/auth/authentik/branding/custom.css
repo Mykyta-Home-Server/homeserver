@@ -1,0 +1,204 @@
+/* ============================================
+   Authentik Custom Branding - Match Portal Style
+   Light/Dark mode with auto-detection
+   ============================================ */
+
+/* CSS Variables - Light Mode (default) */
+:root {
+  --ak-bg-primary: #ffffff;
+  --ak-bg-secondary: #f8fafc;
+  --ak-bg-tertiary: #f1f5f9;
+  --ak-text-primary: #0f172a;
+  --ak-text-secondary: #64748b;
+  --ak-border: #e2e8f0;
+  --ak-accent: #3b82f6;
+  --ak-accent-hover: #2563eb;
+  --ak-input-bg: #ffffff;
+  --ak-card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ak-bg-primary: #0f172a;
+    --ak-bg-secondary: #1e293b;
+    --ak-bg-tertiary: #334155;
+    --ak-text-primary: #f8fafc;
+    --ak-text-secondary: #94a3b8;
+    --ak-border: #334155;
+    --ak-accent: #60a5fa;
+    --ak-accent-hover: #93c5fd;
+    --ak-input-bg: #1e293b;
+    --ak-card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+  }
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+/* Page background */
+.pf-c-page,
+.pf-c-background-image {
+  background: var(--ak-bg-primary) !important;
+}
+
+/* Hide default background image */
+.pf-c-background-image::before {
+  display: none !important;
+}
+
+/* Main login container */
+.pf-c-login {
+  background: var(--ak-bg-primary) !important;
+}
+
+.pf-c-login__main {
+  background: var(--ak-bg-secondary) !important;
+  border: 1px solid var(--ak-border) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--ak-card-shadow) !important;
+  max-width: 420px !important;
+}
+
+/* Header */
+.pf-c-login__main-header {
+  padding: 2rem 2rem 1rem !important;
+}
+
+.pf-c-login__main-header-desc {
+  color: var(--ak-text-secondary) !important;
+}
+
+/* Title */
+.pf-c-title {
+  color: var(--ak-text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* Body */
+.pf-c-login__main-body {
+  padding: 1rem 2rem 2rem !important;
+}
+
+/* Footer */
+.pf-c-login__main-footer {
+  padding: 1rem 2rem 2rem !important;
+  border-top: 1px solid var(--ak-border) !important;
+}
+
+/* ============================================
+   Form Elements
+   ============================================ */
+
+/* Form labels */
+.pf-c-form__label-text {
+  color: var(--ak-text-primary) !important;
+  font-weight: 500 !important;
+}
+
+/* Input fields */
+.pf-c-form-control {
+  background-color: var(--ak-input-bg) !important;
+  border: 1px solid var(--ak-border) !important;
+  border-radius: 8px !important;
+  color: var(--ak-text-primary) !important;
+  padding: 0.75rem 1rem !important;
+  font-size: 1rem !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+.pf-c-form-control:focus {
+  border-color: var(--ak-accent) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  outline: none !important;
+}
+
+.pf-c-form-control::placeholder {
+  color: var(--ak-text-secondary) !important;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+
+/* Primary button (Login) */
+.pf-c-button.pf-m-primary {
+  background-color: var(--ak-accent) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 1rem !important;
+  transition: background-color 0.2s, transform 0.1s !important;
+  width: 100% !important;
+}
+
+.pf-c-button.pf-m-primary:hover {
+  background-color: var(--ak-accent-hover) !important;
+  transform: translateY(-1px) !important;
+}
+
+.pf-c-button.pf-m-primary:active {
+  transform: translateY(0) !important;
+}
+
+/* Secondary/Link buttons */
+.pf-c-button.pf-m-link {
+  color: var(--ak-accent) !important;
+}
+
+.pf-c-button.pf-m-link:hover {
+  color: var(--ak-accent-hover) !important;
+}
+
+/* ============================================
+   Links
+   ============================================ */
+
+a {
+  color: var(--ak-accent) !important;
+}
+
+a:hover {
+  color: var(--ak-accent-hover) !important;
+}
+
+/* ============================================
+   Alerts & Messages
+   ============================================ */
+
+.pf-c-alert {
+  border-radius: 8px !important;
+}
+
+/* ============================================
+   Logo Area
+   ============================================ */
+
+.pf-c-login__header {
+  padding: 2rem !important;
+}
+
+.pf-c-brand {
+  max-height: 60px !important;
+}
+
+/* ============================================
+   Hide Unnecessary Elements
+   ============================================ */
+
+/* Hide "Powered by Authentik" if desired */
+/* .pf-c-login__footer { display: none !important; } */
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 576px) {
+  .pf-c-login__main {
+    margin: 1rem !important;
+    border-radius: 12px !important;
+  }
+}

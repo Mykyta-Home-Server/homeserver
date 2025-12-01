@@ -1,0 +1,108 @@
+# ============================================================================
+# Authentik - Identity Provider & SSO
+# ============================================================================
+# Profile: default (always runs)
+# Networks: internal, proxy
+# Replaces: Authelia, OpenLDAP, phpLDAPadmin
+#
+# Components:
+#   - authentik-server: Main application (web UI, OIDC, forward auth)
+#   - authentik-worker: Background tasks (emails, sync)
+#   - Uses existing postgres-auth and redis-auth
+# ============================================================================
+
+services:
+  # ==========================================================================
+  # Authentik Server
+  # ==========================================================================
+  authentik-server:
+    image: ghcr.io/goauthentik/server:2025.10.2
+    container_name: authentik-server
+    restart: unless-stopped
+    command: server
+
+    environment:
+      # Database (reusing existing postgres user)
+      AUTHENTIK_POSTGRESQL__HOST: postgres-auth
+      AUTHENTIK_POSTGRESQL__NAME: ${AUTHENTIK_DB:-authentik}
+      AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_USER:-authelia_user}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
+      # Redis
+      AUTHENTIK_REDIS__HOST: redis-auth
+      AUTHENTIK_REDIS__PASSWORD: ${REDIS_PASSWORD}
+      # Security
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
+      # Disable error reporting
+      AUTHENTIK_ERROR_REPORTING__ENABLED: "false"
+      # Timezone
+      TZ: ${TZ}
+
+    volumes:
+      - ../../services/auth/authentik/media:/media
+      - ../../services/auth/authentik/templates:/templates
+
+    networks:
+      - internal   # Connect to postgres-auth, redis-auth
+      - proxy      # Expose to Caddy for forward auth
+
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      redis-auth:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "ak", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    labels:
+      - "com.homeserver.group=auth"
+      - "com.homeserver.description=Authentik identity server"
+
+  # ==========================================================================
+  # Authentik Worker
+  # ==========================================================================
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:2025.10.2
+    container_name: authentik-worker
+    restart: unless-stopped
+    command: worker
+
+    environment:
+      # Database (reusing existing postgres user)
+      AUTHENTIK_POSTGRESQL__HOST: postgres-auth
+      AUTHENTIK_POSTGRESQL__NAME: ${AUTHENTIK_DB:-authentik}
+      AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_USER:-authelia_user}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
+      # Redis
+      AUTHENTIK_REDIS__HOST: redis-auth
+      AUTHENTIK_REDIS__PASSWORD: ${REDIS_PASSWORD}
+      # Security
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
+      # Disable error reporting
+      AUTHENTIK_ERROR_REPORTING__ENABLED: "false"
+      # Timezone
+      TZ: ${TZ}
+
+    # Worker needs access to media for file operations
+    volumes:
+      - ../../services/auth/authentik/media:/media
+      - ../../services/auth/authentik/templates:/templates
+      # Docker socket for container operations (optional, for outpost management)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    networks:
+      - internal
+
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      redis-auth:
+        condition: service_healthy
+
+    labels:
+      - "com.homeserver.group=auth"
+      - "com.homeserver.description=Authentik background worker"

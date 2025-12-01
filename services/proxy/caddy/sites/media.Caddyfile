@@ -1,5 +1,5 @@
 # Media Services - Caddy Configuration
-# All media-related subdomains with authentication
+# All media-related subdomains with authentication via Authentik
 
 # qBittorrent - Torrent download client
 # Access: torrent.mykyta-ryasny.dev
@@ -7,8 +7,8 @@ torrent.mykyta-ryasny.dev {
     # Use Cloudflare Origin Certificate
     import cf_tls
 
-    # Authelia SSO Authentication
-    import authelia_auth
+    # Authentik SSO Authentication (forward auth)
+    import authentik_auth
 
     reverse_proxy qbittorrent:8080 {
         # qBittorrent bypass authentication based on subnet whitelist (172.18.0.0/16)
@@ -16,19 +16,18 @@ torrent.mykyta-ryasny.dev {
         header_up -X-Forwarded-For
         header_up -X-Real-IP
 
-        # Pass authentication headers (for future use/logging)
-        header_up X-Forwarded-User {http.request.header.Remote-User}
+        # Pass authentication headers from Authentik
+        header_up X-Forwarded-User {http.request.header.X-Authentik-Username}
     }
 }
 
 # Jellyfin - Media streaming server
 # Access: streaming.mykyta-ryasny.dev
-# NOTE: No Authelia auth - Jellyfin has its own authentication via LDAP
+# Direct link: /sso/OID/start/authentik for SSO login
 streaming.mykyta-ryasny.dev {
     import cf_tls
 
-    # No Authelia - users go directly to Jellyfin login (uses LDAP)
-
+    # Direct pass-through - use /sso/OID/start/authentik for SSO login
     reverse_proxy jellyfin:8096
 }
 
@@ -37,12 +36,12 @@ streaming.mykyta-ryasny.dev {
 movies.mykyta-ryasny.dev {
     import cf_tls
 
-    # Authelia SSO Authentication
-    import authelia_auth
+    # Authentik SSO Authentication (forward auth)
+    import authentik_auth
 
-    # Intercept logout and redirect to Authelia logout with return URL
+    # Intercept logout: redirect to Authentik direct logout flow (no confirmation)
     @logout path /logout
-    redir @logout auth.mykyta-ryasny.dev/logout?rd=movies.mykyta-ryasny.dev 302
+    redir @logout "https://sso.mykyta-ryasny.dev/if/flow/direct-logout/" 302
 
     reverse_proxy radarr:7878
 }
@@ -52,12 +51,12 @@ movies.mykyta-ryasny.dev {
 tv.mykyta-ryasny.dev {
     import cf_tls
 
-    # Authelia SSO Authentication
-    import authelia_auth
+    # Authentik SSO Authentication (forward auth)
+    import authentik_auth
 
-    # Intercept logout and redirect to Authelia logout with return URL
+    # Intercept logout: redirect to Authentik direct logout flow (no confirmation)
     @logout path /logout
-    redir @logout auth.mykyta-ryasny.dev/logout?rd=tv.mykyta-ryasny.dev 302
+    redir @logout "https://sso.mykyta-ryasny.dev/if/flow/direct-logout/" 302
 
     reverse_proxy sonarr:8989
 }
@@ -67,23 +66,37 @@ tv.mykyta-ryasny.dev {
 indexers.mykyta-ryasny.dev {
     import cf_tls
 
-    # Authelia SSO Authentication
-    import authelia_auth
+    # Authentik SSO Authentication (forward auth)
+    import authentik_auth
 
-    # Intercept logout and redirect to Authelia logout with return URL
+    # Intercept logout: redirect to Authentik direct logout flow (no confirmation)
     @logout path /logout
-    redir @logout auth.mykyta-ryasny.dev/logout?rd=indexers.mykyta-ryasny.dev 302
+    redir @logout "https://sso.mykyta-ryasny.dev/if/flow/direct-logout/" 302
 
     reverse_proxy prowlarr:9696
 }
 
 # Jellyseerr - Request management interface
 # Access: requests.mykyta-ryasny.dev
-# NOTE: No Authelia auth - Jellyseerr uses Jellyfin authentication (which uses LDAP)
+# Auto-login via OIDC (Authentik)
+# Portal link: requests.mykyta-ryasny.dev/sso for auto-login
 requests.mykyta-ryasny.dev {
     import cf_tls
 
-    # No Authelia - users authenticate via Jellyfin (uses LDAP)
+    # Intercept logout: redirect to Authentik direct logout flow (no confirmation)
+    @logout path /logout
+    redir @logout "https://sso.mykyta-ryasny.dev/if/flow/direct-logout/" 302
 
-    reverse_proxy jellyseerr:5055
+    # Auto-SSO: /sso path serves auto-sso.html which handles OIDC login
+    handle /sso {
+        root * /etc/caddy/sites
+        rewrite * /auto-sso.html
+        file_server
+    }
+
+    # All other requests go to Jellyseerr
+    # Host header is critical for OIDC redirect_uri generation
+    reverse_proxy jellyseerr:5055 {
+        header_up Host {host}
+    }
 }

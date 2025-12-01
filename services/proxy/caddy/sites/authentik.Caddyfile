@@ -1,0 +1,13 @@
+# ============================================================================
+# Authentik - Identity Provider
+# ============================================================================
+# Access: sso.mykyta-ryasny.dev (temporary during migration)
+# After migration: will be moved to auth.mykyta-ryasny.dev
+# ============================================================================
+
+sso.mykyta-ryasny.dev {
+    import cf_tls
+
+    # Authentik server (port 9000 for HTTP)
+    reverse_proxy authentik-server:9000
+}

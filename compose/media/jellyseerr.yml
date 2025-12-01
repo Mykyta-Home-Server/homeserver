@@ -9,7 +9,8 @@
 services:
   jellyseerr:
     profiles: ["media", "all"]
-    image: fallenbagel/jellyseerr:latest
+    # Using preview-OIDC for OpenID Connect SSO support
+    image: fallenbagel/jellyseerr:preview-OIDC
     container_name: jellyseerr
     restart: unless-stopped
 

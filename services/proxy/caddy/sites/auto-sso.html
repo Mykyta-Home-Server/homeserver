@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting to SSO...</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: white;
+        }
+        .loader {
+            text-align: center;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loader">
+        <div class="spinner"></div>
+        <h2>Redirecting to SSO login...</h2>
+    </div>
+    <script>
+        // Prevent infinite loops by checking if we already tried SSO
+        const ssoAttempted = sessionStorage.getItem('sso_redirect_attempted');
+        const attemptTime = sessionStorage.getItem('sso_redirect_time');
+        const now = Date.now();
+
+        // If SSO was attempted less than 10 seconds ago, redirect to login page instead
+        if (ssoAttempted && attemptTime && (now - parseInt(attemptTime)) < 10000) {
+            console.log('SSO redirect loop detected, redirecting to login page');
+            window.location.href = '/login';
+        } else {
+            // Mark that we're attempting SSO
+            sessionStorage.setItem('sso_redirect_attempted', 'true');
+            sessionStorage.setItem('sso_redirect_time', now.toString());
+
+            // Fetch OIDC login endpoint - it returns JSON with redirectUrl
+            fetch('/api/v1/auth/oidc/login/authentik')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.redirectUrl) {
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        console.error('No redirectUrl in response:', data);
+                        window.location.href = '/login';
+                    }
+                })
+                .catch(error => {
+                    console.error('SSO redirect failed:', error);
+                    window.location.href = '/login';
+                });
+        }
+
+        // Clear the flag after successful login (when page fully loads)
+        window.addEventListener('pageshow', function() {
+            if (performance.navigation.type === performance.navigation.TYPE_NAVIGATE) {
+                // Clear SSO attempt flag if we successfully navigated somewhere
+                setTimeout(() => {
+                    sessionStorage.removeItem('sso_redirect_attempted');
+                    sessionStorage.removeItem('sso_redirect_time');
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>

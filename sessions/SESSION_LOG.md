@@ -2608,3 +2608,199 @@ Commits made during session for theme and layout implementation.
 **End of Session Status Notes**
 
 _This file should be updated at the end of each session with new progress, decisions, and blockers._
+---
+
+## Session 15 - 2025-12-01: Authentik SSO Migration & Complete Auth Stack Replacement
+
+**Duration:** ~6 hours (split across multiple sub-sessions)
+**Focus:** Migrate from Authelia/LDAP/User-Management to Authentik SSO with auto-login, custom branding, and confirmation-free logout
+
+### Accomplishments
+
+✅ **Complete Authentik Setup**
+- Deployed Authentik SSO (server + worker containers)
+- Configured PostgreSQL and Redis integration (reused existing auth stack databases)
+- Set up forward auth with Caddy reverse proxy
+- Created proxy provider for all services
+
+✅ **Auto-SSO for Jellyseerr**
+- Implemented `/sso` endpoint serving `auto-sso.html`
+- Auto-fetches Jellyseerr's OIDC login URL and redirects
+- Updated portal repository to link to `/sso` path instead of root
+- Includes loop detection and fallback to manual login
+
+✅ **Custom Authentik Branding**
+- Created `services/auth/authentik/branding/custom.css`
+- Matched portal's design system (light/dark mode with `prefers-color-scheme`)
+- Custom colors, rounded borders (8px), centered login card
+- Single-step login page (username + password together)
+
+✅ **Confirmation-Free Logout**
+- Created custom `direct-logout` flow (Stage Configuration designation)
+- Updated ALL service logout endpoints across 7 Caddyfiles
+- Bypassed Authentik's automatic confirmation stage insertion
+- Immediate session destruction + redirect to login
+
+✅ **Complete Legacy Auth Removal**
+- Stopped and removed containers: authelia, openldap, phpldapadmin, user-management
+- Deleted compose files: `authelia.yml`, `ldap.yml`, `user-management.yml`
+- Removed `services/auth/authelia/` and `services/auth/ldap/` directories
+- Deleted `services/proxy/caddy/sites/auth.Caddyfile`
+- Removed `authelia_auth` snippet from main Caddyfile
+- Removed `auth.mykyta-ryasny.dev` route from cloudflared config
+
+✅ **Documentation Cleanup**
+- Deleted `docs-site/src/content/docs/guides/ldap.mdx`
+- Removed LDAP Guide from astro.config.mjs sidebar
+- Updated docker-compose.yml service list comments
+- Updated CLAUDE.md v3.6:
+  - Changed container count: 24 → 22
+  - Changed compose files: 21 → 18
+  - Updated Current Infrastructure table
+  - Updated Network Architecture (auth → internal)
+  - Updated Directory Structure
+  - Updated Service list in Quick Reference
+  - Updated Version History with migration details
+- Marked `authentication.json` Grafana dashboard for update
+
+### Technical Implementation
+
+**Authentik Configuration:**
+- **Image:** `ghcr.io/goauthentik/server:2025.10.2`
+- **Containers:** authentik-server (port 9000), authentik-worker
+- **Networks:** internal (database access), proxy (Caddy forward auth)
+- **Volumes:** media, templates, branding (CSS), Docker socket (worker)
+
+**Auto-SSO Pattern:**
+```javascript
+// /services/proxy/caddy/sites/auto-sso.html
+fetch('/api/v1/auth/oidc/login/authentik')
+  .then(response => response.json())
+  .then(data => window.location.href = data.redirectUrl)
+```
+
+**Caddyfile Logout Pattern:**
+```caddyfile
+@logout path /logout
+redir @logout "https://sso.mykyta-ryasny.dev/if/flow/direct-logout/" 302
+```
+
+**Services Updated with Logout:**
+- Portal (`home.mykyta-ryasny.dev`)
+- Radarr (`movies.mykyta-ryasny.dev`)
+- Sonarr (`tv.mykyta-ryasny.dev`)
+- Prowlarr (`indexers.mykyta-ryasny.dev`)
+- Jellyseerr (`requests.mykyta-ryasny.dev`)
+- Bazarr (`bazarr.mykyta-ryasny.dev`)
+- Grafana (`monitor.mykyta-ryasny.dev`)
+
+### Key Learnings
+
+1. **Authentik Flow System Complexity:**
+   - Flow "Designation" determines automatic stage injection
+   - "Invalidation" flows auto-insert confirmation stages (unavoidable)
+   - "Stage Configuration" designation bypasses user-facing stages
+   - Dynamic in-memory stages can't be removed from UI
+   - Solution: Bypass flows entirely with client-side cookie clearing
+
+2. **Forward Auth Header Mapping:**
+   - Authentik uses `X-Authentik-*` headers (capitalized)
+   - Must explicitly copy headers in Caddy forward_auth block
+   - Header names are case-sensitive
+   - Portal needs headers passed as response headers for JavaScript access
+
+3. **OIDC Auto-Login Pattern:**
+   - Fetch JSON endpoint for `redirectUrl`
+   - Session storage prevents infinite loops
+   - Fallback to manual `/login` after failed attempts
+   - Critical for seamless user experience
+
+4. **Cloudflare Tunnel + Caddy Integration:**
+   - Tunnel → Caddy (HTTPS with origin certs)
+   - `noTLSVerify: true` required for self-signed origin certs
+   - `originServerName` required for proper SNI
+   - All services routed through single Caddy instance
+
+5. **Docker Compose Profile Architecture:**
+   - Default profile: infrastructure + auth (6 containers)
+   - Profiles enable selective service startup
+   - Auth stack shared by all profiles (PostgreSQL, Redis)
+   - Authentik containers always run (no profile designation)
+
+### Files Created
+
+- `compose/auth/authentik.yml` - Authentik server + worker configuration
+- `services/auth/authentik/branding/custom.css` - Custom login page styling
+- `services/proxy/caddy/sites/authentik.Caddyfile` - SSO portal config
+- `services/proxy/caddy/sites/auto-sso.html` - Jellyseerr auto-login page
+- `services/proxy/caddy/sites/logout.html` - Client-side logout (unused, kept for reference)
+
+### Files Modified
+
+- `docker-compose.yml` - Replaced legacy auth includes with authentik.yml
+- `services/proxy/caddy/Caddyfile` - Removed authelia_auth, kept authentik_auth
+- `services/tunnel/cloudflared/config.yml` - Removed auth.mykyta-ryasny.dev
+- `services/proxy/caddy/sites/portal.Caddyfile` - Added logout handler, updated auth headers
+- `services/proxy/caddy/sites/media.Caddyfile` - Updated 5 services (logout handlers)
+- `services/proxy/caddy/sites/bazarr.Caddyfile` - Added logout handler
+- `services/proxy/caddy/sites/monitoring.Caddyfile` - Added logout handler
+- `CLAUDE.md` - Updated to v3.6 with Authentik references
+- `docs-site/astro.config.mjs` - Removed LDAP Guide from sidebar
+- `compose/media/jellyseerr.yml` - Already using preview-OIDC image (no changes)
+
+### Files Deleted
+
+- `compose/auth/authelia.yml`
+- `compose/auth/ldap.yml`
+- `compose/auth/user-management.yml`
+- `services/proxy/caddy/sites/auth.Caddyfile`
+- `services/auth/authelia/` (directory + contents)
+- `services/auth/ldap/` (directory + contents)
+- `docs-site/src/content/docs/guides/ldap.mdx`
+
+### Remaining Tasks
+
+**Manual Updates Needed:**
+1. **Grafana Dashboards:**
+   - `services/monitoring/grafana/provisioning/dashboards/authentication.json`
+   - Replace Authelia/LDAP panels with Authentik panels
+   - Update container queries: `authelia`/`openldap` → `authentik-server`/`authentik-worker`
+   - `home.json` - Update Authelia status panel to Authentik
+
+2. **Architecture Documentation:**
+   - `.claude/architecture.md` - Update auth flow diagrams
+   - `.claude/technical_specs.md` - Update auth stack specifications
+
+### Current Status
+
+✅ **Production Infrastructure:**
+- **22 containers** running (down from 24)
+- **18 compose files** (down from 21)
+- **Authentik SSO** fully operational
+- **All services** protected with forward auth
+- **Jellyseerr** auto-SSO working
+- **Custom branding** applied
+- **Logout flows** working (no confirmation)
+
+⚠️ **Pending:**
+- Grafana dashboards still reference old auth services
+- Architecture documentation needs Authentik diagrams
+- User-Management API container gone (was used by portal admin panel)
+
+### Session Flow Summary
+
+1. **Initial Setup** - Deployed Authentik, configured forward auth
+2. **Auto-SSO Implementation** - Built auto-login flow for Jellyseerr
+3. **Custom Branding** - Styled login page to match portal
+4. **Logout Confirmation Battle** - Tried multiple approaches to remove confirmation:
+   - Attempted to modify default-invalidation-flow
+   - Tried creating custom flow with different designations
+   - Discovered Authentik's automatic stage injection behavior
+   - Solution: Created `direct-logout` flow with Stage Configuration designation
+5. **Legacy Removal** - Systematically removed all Authelia/LDAP components
+6. **Documentation Update** - Updated CLAUDE.md, cleaned up references
+
+### Commits
+
+To be created in next step with comprehensive message documenting the migration.
+
