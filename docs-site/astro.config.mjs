@@ -108,6 +108,8 @@ export default defineConfig({
           label: 'Infrastructure',
           items: [
             { label: 'Monitoring', slug: 'guides/monitoring' },
+            { label: 'Authentik Migration', slug: 'guides/authentik-migration' },
+            { label: 'Subdomain Cleanup', slug: 'guides/subdomain-cleanup' },
             { label: 'Migration Guide', slug: 'guides/migration' },
           ],
         },

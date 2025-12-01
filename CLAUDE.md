@@ -1,7 +1,7 @@
 # CLAUDE.md - Home Server Automation Project
 
-**Version:** 3.6
-**Last Updated:** 2025-12-01
+**Version:** 3.7
+**Last Updated:** 2025-12-02
 **Project:** Personal Home Server with AI-Powered Automation
 
 ---
@@ -891,6 +891,226 @@ This is a **single-file approach** to avoid confusion from multiple outdated ses
 
 ---
 
+## Authentik SSO Best Practices
+
+### Overview
+
+Authentik is the single sign-on (SSO) solution for all home server services. It replaced Authelia + OpenLDAP in December 2024.
+
+**Version:** 2025.10.2
+**Documentation:** https://docs.goauthentik.io/
+**API Docs:** https://docs.goauthentik.io/developer-docs/api/
+
+### Critical Configuration Requirements
+
+#### 1. User Logout Stage for SLO
+
+**Problem:** Default invalidation flows use Redirect Stage, which doesn't trigger Single Logout.
+
+**Solution:** Configure flows to use User Logout Stage via API.
+
+```bash
+# Get User Logout stage UUID
+GET /api/v3/stages/user_logout/
+
+# Update flow binding
+PATCH /api/v3/flows/bindings/<binding-uuid>/
+{
+  "stage": "<user-logout-stage-uuid>"
+}
+```
+
+**Flows requiring User Logout Stage:**
+- `default-invalidation-flow` - Main logout flow
+- `default-provider-invalidation-flow` - OAuth2 provider logout
+
+**Verification:**
+```bash
+curl -H "Authorization: Bearer <token>" \
+  http://authentik-server:9000/api/v3/flows/instances/default-invalidation-flow/
+```
+
+#### 2. Backchannel Logout on OAuth2 Providers
+
+**Requirement:** All OAuth2/OIDC providers MUST have `logout_method: "backchannel"` for SLO.
+
+**Why:** When a user logs out, Authentik sends backchannel requests to all providers to invalidate sessions.
+
+**Default:** Authentik sets this correctly, but always verify:
+
+```bash
+curl -H "Authorization: Bearer <token>" \
+  http://authentik-server:9000/api/v3/providers/oauth2/ | grep logout_method
+```
+
+**Expected:** `"logout_method": "backchannel"` for all providers.
+
+#### 3. CORS Headers for API Access
+
+**Use case:** Portal (Angular SPA) calling Authentik API from different subdomain.
+
+**Caddy configuration:**
+```caddyfile
+sso.mykyta-ryasny.dev {
+    import cf_tls
+
+    @api path /api/*
+    handle @api {
+        header {
+            Access-Control-Allow-Origin "https://home.mykyta-ryasny.dev"
+            Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+            Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+            Access-Control-Allow-Credentials "true"  # Required for session cookies!
+            Access-Control-Max-Age "3600"
+        }
+
+        @options method OPTIONS
+        respond @options 204
+
+        reverse_proxy authentik-server:9000
+    }
+
+    handle {
+        reverse_proxy authentik-server:9000
+    }
+}
+```
+
+**Critical:** `Access-Control-Allow-Credentials: true` is required for `withCredentials: true` in fetch/axios.
+
+### Common Operations
+
+#### Creating API Tokens
+
+**Via Django Shell (when CLI unavailable):**
+
+```bash
+docker exec authentik-server python manage.py shell << 'EOF'
+from authentik.core.models import Token, TokenIntents, User
+
+# Get user
+user = User.objects.get(username='your-username')
+
+# Create non-expiring API token
+token, created = Token.objects.get_or_create(
+    user=user,
+    intent=TokenIntents.INTENT_API,
+    expiring=False,
+    defaults={'identifier': 'api-automation'}
+)
+
+print(f"Token: {token.key}")
+EOF
+```
+
+**Security:** Delete temporary tokens after use:
+```python
+Token.objects.filter(identifier='temp-token').delete()
+```
+
+#### Listing Users and Groups
+
+```bash
+# List all users
+curl -H "Authorization: Bearer <token>" \
+  http://authentik-server:9000/api/v3/core/users/
+
+# Get current authenticated user
+curl -H "Authorization: Bearer <token>" \
+  -H "Cookie: authentik_session=<session>" \
+  http://authentik-server:9000/api/v3/core/users/me/
+
+# List groups
+curl -H "Authorization: Bearer <token>" \
+  http://authentik-server:9000/api/v3/core/groups/
+```
+
+#### Updating Flows and Stages
+
+```bash
+# List all flows
+curl -H "Authorization: Bearer <token>" \
+  http://authentik-server:9000/api/v3/flows/instances/
+
+# List all stages
+curl -H "Authorization: Bearer <token>" \
+  http://authentik-server:9000/api/v3/stages/all/
+
+# Get flow bindings (stages attached to flow)
+curl -H "Authorization: Bearer <token>" \
+  "http://authentik-server:9000/api/v3/flows/bindings/?target=<flow-uuid>"
+
+# Update flow binding
+curl -X PATCH \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"stage": "<new-stage-uuid>"}' \
+  http://authentik-server:9000/api/v3/flows/bindings/<binding-uuid>/
+```
+
+### Debugging Authentik Issues
+
+#### Check Logs
+
+```bash
+# Server logs (authentication, API requests)
+docker compose logs -f authentik-server
+
+# Worker logs (background tasks, emails, webhooks)
+docker compose logs -f authentik-worker
+
+# Database logs
+docker compose logs -f postgres-auth
+
+# Redis logs
+docker compose logs -f redis-auth
+```
+
+#### Test Logout Flow
+
+1. Open browser DevTools → Network tab
+2. Log in to any service
+3. Click logout button
+4. Watch for:
+   - Redirect to `/if/flow/default-invalidation-flow/`
+   - Session cookie deletion
+   - Backchannel logout requests to OAuth2 providers (check server logs)
+   - Final redirect to login page
+
+**If logout doesn't work:**
+- Check flow has User Logout Stage (not Redirect Stage)
+- Verify OAuth2 providers have `logout_method: "backchannel"`
+- Check Authentik server logs for errors
+
+#### Test API Access from Portal
+
+```bash
+# Test CORS headers
+curl -i -X OPTIONS \
+  -H "Origin: https://home.mykyta-ryasny.dev" \
+  -H "Access-Control-Request-Method: GET" \
+  -H "Access-Control-Request-Headers: Content-Type" \
+  https://sso.mykyta-ryasny.dev/api/v3/core/users/me/
+
+# Expected headers:
+# Access-Control-Allow-Origin: https://home.mykyta-ryasny.dev
+# Access-Control-Allow-Credentials: true
+```
+
+### Resources
+
+**Official Docs:**
+- Main Documentation: https://docs.goauthentik.io/
+- User Logout Stage: https://docs.goauthentik.io/add-secure-apps/flows-stages/stages/user_logout/
+- Flow Executor: https://docs.goauthentik.io/docs/flow/
+- API Reference: https://docs.goauthentik.io/developer-docs/api/
+- Forward Auth with Caddy: https://docs.goauthentik.io/docs/add-secure-apps/providers/proxy/forward_auth/caddy
+
+**Migration Guide:**
+- See `/docs-site/src/content/docs/guides/authentik-migration.md` for complete migration from Authelia/LDAP
+
+---
+
 ## Quality Standards
 
 ### Response Checklist
@@ -996,6 +1216,7 @@ docker compose --profile all up -d
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 3.7 | 2025-12-02 | **Authentik Logout Flow Fix & Documentation:** Fixed Single Logout (SLO) by configuring User Logout Stage via API, enabled backchannel logout on all OAuth2 providers, added comprehensive Authentik best practices section to CLAUDE.md, created complete Authentik migration guide with lessons learned |
 | 3.6 | 2025-12-01 | **Major Auth Migration:** Replaced Authelia/LDAP/User-Management with Authentik SSO (22 containers, 18 compose files). Added auto-SSO for Jellyseerr, custom Authentik branding, direct logout flow, removed legacy auth stack |
 | 3.5 | 2025-11-30 | Added comprehensive Mermaid v11.3.0+ guidelines: semantic shapes, compact grid layouts, consistent pastel palette, maintenance checklist |
 | 3.4 | 2025-11-30 | Enhanced Mermaid diagrams: pastel colors, rounded corners, click-to-expand modal, compact layouts |
