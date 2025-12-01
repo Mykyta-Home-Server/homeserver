@@ -2,36 +2,6 @@
 home.mykyta-ryasny.dev {
     import cf_tls
 
-    # Public API endpoints (no auth - API validates tokens internally)
-    @public_api path /api/register /api/invitations/validate/* /api/health /api/health/*
-    handle @public_api {
-        reverse_proxy user-management:3000
-    }
-
-    # User info endpoint (authenticated - returns current user's info)
-    @user_info path /api/me
-    handle @user_info {
-        import authentik_auth
-        # Prevent browser caching of API responses
-        header Cache-Control "no-store, no-cache, must-revalidate, private"
-        header Pragma "no-cache"
-        header Expires "0"
-        reverse_proxy user-management:3000 {
-            # Forward Authentik headers to backend
-            header_up Remote-User {http.request.header.X-Authentik-Username}
-            header_up Remote-Groups {http.request.header.X-Authentik-Groups}
-            header_up Remote-Name {http.request.header.X-Authentik-Name}
-            header_up Remote-Email {http.request.header.X-Authentik-Email}
-        }
-    }
-
-    # Admin API endpoints (Authentik required - admin only)
-    @admin_api path /api/users* /api/invitations /api/invitations/*
-    handle @admin_api {
-        import authentik_auth
-        reverse_proxy user-management:3000
-    }
-
     # Logout: redirect to Authentik direct logout flow (no confirmation)
     @logout path /logout
     redir @logout "https://sso.mykyta-ryasny.dev/if/flow/direct-logout/" 302
