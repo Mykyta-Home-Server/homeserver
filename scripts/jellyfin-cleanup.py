@@ -42,13 +42,22 @@ def authenticate():
 def check_file_exists(file_path):
     """Check if file exists on mounted media volume"""
     try:
-        # Convert Jellyfin internal path to mounted path
-        # Jellyfin sees: /media/tv/... or /media/movies/...
-        # We have mounted: /data/media/...
+        # Check if file exists at the given path
+        # Jellyfin may use either /media/... or /data/media/... depending on config
+        # Container has media mounted at /data/media/
+
         if file_path.startswith('/media/'):
+            # Convert /media/ to /data/media/ for container path
             local_path = file_path.replace('/media/', '/data/media/', 1)
-            return os.path.exists(local_path)
-        return True  # Assume exists if path format is unexpected
+        elif file_path.startswith('/data/media/'):
+            # Already using container path
+            local_path = file_path
+        else:
+            # Unexpected path format, log warning
+            print(f"  WARNING: Unexpected path format: {file_path}")
+            return True  # Assume exists to avoid accidental deletion
+
+        return os.path.exists(local_path)
     except Exception as e:
         print(f"Error checking file: {e}")
         return True  # Assume exists to avoid accidental deletion
@@ -78,10 +87,10 @@ def get_all_items():
         # Use first user to get all items
         user_id = users[0]['Id']
 
-        # Get all items for this user
+        # Get all items for this user (Movies, TV Series, and Episodes)
         params = {
             'Recursive': 'true',
-            'IncludeItemTypes': 'Movie,Episode',
+            'IncludeItemTypes': 'Movie,Series,Episode',
             'Fields': 'Path'
         }
 
@@ -99,34 +108,25 @@ def get_all_items():
         print(f"Error getting items from Jellyfin: {e}")
         sys.exit(1)
 
-def refresh_library(library_id, library_name):
-    """Refresh library metadata to detect missing files"""
+def delete_item(item_id, item_name):
+    """Delete an item from Jellyfin database"""
     try:
-        # Use the Refresh API with scan for new and updated files
-        response = requests.post(
-            f'{JELLYFIN_URL}/Items/{library_id}/Refresh',
-            headers=headers,
-            params={
-                'Recursive': 'true',
-                'ImageRefreshMode': 'Default',
-                'MetadataRefreshMode': 'Default',
-                'ReplaceAllImages': 'false',
-                'RegenerateTrickplay': 'false',
-                'ReplaceAllMetadata': 'false'
-            }
+        response = requests.delete(
+            f'{JELLYFIN_URL}/Items/{item_id}',
+            headers=headers
         )
 
         if response.status_code in [200, 204]:
             return True
 
         # Log the failure reason
-        print(f"      REFRESH failed: HTTP {response.status_code}")
+        print(f"      DELETE failed: HTTP {response.status_code}")
         if response.text:
             print(f"      Response: {response.text[:200]}")
 
         return False
     except Exception as e:
-        print(f"      Error refreshing {library_name}: {e}")
+        print(f"      Error deleting {item_name}: {e}")
         return False
 
 def get_libraries():
@@ -195,51 +195,35 @@ def main():
             print(f"  Missing: {item_name} ({item_type})")
             print(f"           Path: {item_path}")
 
-    # Show summary and trigger library refresh
+    # Show summary and delete missing items
     if not missing_items:
         print("\n✓ No missing items found. Database is clean!")
         return
 
     print(f"\nFound {len(missing_items)} missing items.")
+    print(f"\n🗑️  Deleting missing items from Jellyfin database...")
 
-    # Get unique libraries that contain missing items
-    libraries_to_refresh = set()
-    for item in missing_items:
-        # Extract library from path (format: /media/movies/... or /media/tv/...)
-        path = item['path']
-        if path.startswith('/media/'):
-            library_type = path.split('/')[2] if len(path.split('/')) > 2 else None
-            if library_type:
-                libraries_to_refresh.add(library_type)
-
-    print(f"\n🔄 Refreshing libraries to remove missing items...")
-
-    # Get all libraries from Jellyfin
-    libraries = get_libraries()
-
-    refreshed_count = 0
+    deleted_count = 0
     failed_count = 0
 
-    for library in libraries:
-        library_id = library.get('Id')
-        library_name = library.get('Name', 'Unknown')
+    for item in missing_items:
+        item_id = item['id']
+        item_name = item['name']
+        item_type = item['type']
 
-        # Refresh all libraries (simpler approach)
-        # Jellyfin will automatically remove items with missing files
-        if refresh_library(library_id, library_name):
-            print(f"   ✓ Refreshed: {library_name}")
-            refreshed_count += 1
+        if delete_item(item_id, item_name):
+            print(f"   ✓ Deleted: {item_name} ({item_type})")
+            deleted_count += 1
         else:
-            print(f"   ✗ Failed to refresh: {library_name}")
+            print(f"   ✗ Failed to delete: {item_name} ({item_type})")
             failed_count += 1
 
     # Summary
-    if refreshed_count > 0:
-        print(f"\n✓ Successfully refreshed {refreshed_count} library(ies)")
-        print("   Jellyfin will automatically remove items with missing files during the scan")
+    if deleted_count > 0:
+        print(f"\n✓ Successfully deleted {deleted_count} missing item(s)")
 
     if failed_count > 0:
-        print(f"\n⚠️  Failed to refresh {failed_count} library(ies)")
+        print(f"\n⚠️  Failed to delete {failed_count} item(s)")
 
     print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Cleanup complete.")
 

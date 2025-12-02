@@ -24,6 +24,7 @@ services:
       - JELLYFIN_API_KEY=${JELLYFIN_API_KEY:-}
       # Media stack APIs (for cleanup script)
       - JELLYSEERR_URL=http://jellyseerr:5055
+      - JELLYSEERR_API_KEY=${JELLYSEERR_API_KEY:-}
       - RADARR_URL=http://radarr:7878
       - SONARR_URL=http://sonarr:8989
       - QBITTORRENT_URL=http://qbittorrent:8080

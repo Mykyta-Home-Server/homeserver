@@ -49,26 +49,12 @@ ingress:
       noTLSVerify: true
       originServerName: monitor.mykyta-ryasny.dev
 
-  # Monitoring - Uptime Kuma
-  - hostname: uptime.mykyta-ryasny.dev
-    service: https://caddy:443
-    originRequest:
-      noTLSVerify: true
-      originServerName: uptime.mykyta-ryasny.dev
-
   # Automation - Deployment API
   - hostname: deploy.mykyta-ryasny.dev
     service: https://caddy:443
     originRequest:
       noTLSVerify: true
       originServerName: deploy.mykyta-ryasny.dev
-
-  # Authentication - Authentik SSO portal
-  - hostname: sso.mykyta-ryasny.dev
-    service: https://caddy:443
-    originRequest:
-      noTLSVerify: true
-      originServerName: sso.mykyta-ryasny.dev
 
   # Home Portal - Angular dashboard
   - hostname: home.mykyta-ryasny.dev

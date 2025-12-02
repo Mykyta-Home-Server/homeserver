@@ -21,6 +21,7 @@ RADARR_URL = os.getenv('RADARR_URL', 'http://radarr:7878')
 SONARR_URL = os.getenv('SONARR_URL', 'http://sonarr:8989')
 QBITTORRENT_URL = os.getenv('QBITTORRENT_URL', 'http://qbittorrent:8080')
 
+JELLYSEERR_API_KEY = os.getenv('JELLYSEERR_API_KEY', '')
 RADARR_API_KEY = os.getenv('RADARR_API_KEY', '')
 SONARR_API_KEY = os.getenv('SONARR_API_KEY', '')
 
@@ -38,11 +39,17 @@ def get_jellyseerr_media():
         # Get all media requests (approved/available)
         media_ids = {'movies': set(), 'tv': set()}
 
+        # Prepare headers with API key
+        headers = {}
+        if JELLYSEERR_API_KEY:
+            headers['X-Api-Key'] = JELLYSEERR_API_KEY
+
         # Fetch movies
         page = 1
         while True:
             response = requests.get(
                 f'{JELLYSEERR_URL}/api/v1/media',
+                headers=headers,
                 params={'take': 100, 'skip': (page - 1) * 100},
                 timeout=30
             )
