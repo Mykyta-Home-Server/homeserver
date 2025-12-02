@@ -12,10 +12,6 @@ monitor.mykyta-ryasny.dev {
     # Users must authenticate via Authentik before accessing Grafana
     import authentik_auth
 
-    # Intercept logout: redirect to Authentik direct logout flow (no confirmation)
-    @logout path /logout
-    redir @logout "https://sso.mykyta-ryasny.dev/if/flow/direct-logout/" 302
-
     # Reverse proxy to Grafana
     reverse_proxy grafana:3000 {
         # Enable WebSocket support for real-time features
@@ -33,6 +29,12 @@ monitor.mykyta-ryasny.dev {
         header_up X-Real-IP {http.request.remote.host}
         header_up X-Forwarded-For {http.request.remote.host}
         header_up X-Forwarded-Proto {http.request.scheme}
+
+        # Pass Authentik headers to Grafana for auth proxy
+        header_up X-Authentik-Username {http.request.header.X-Authentik-Username}
+        header_up X-Authentik-Email {http.request.header.X-Authentik-Email}
+        header_up X-Authentik-Name {http.request.header.X-Authentik-Name}
+        header_up X-Authentik-Groups {http.request.header.X-Authentik-Groups}
     }
 
     # Security headers
