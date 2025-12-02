@@ -98,7 +98,7 @@ AUTHENTIK_REDIS__HOST=redis-auth
 - Proper handling of OPTIONS preflight requests
 - Reverse proxy to `authentik-server:9000`
 
-**Domain:** `sso.mykyta-ryasny.dev` (temporary during migration)
+**Domain:** `sso.mykyta-ryasny.dev`
 
 ### 3. Create Users and Groups
 
@@ -258,28 +258,6 @@ docker volume rm homeserver_ldap_data
 **To update:**
 - Remove from `services/tunnel/cloudflared/config.yml`
 - Delete CNAME records in Cloudflare dashboard
-
-### Future Migration Task
-
-**Move Authentik to final domain:**
-
-Currently: `sso.mykyta-ryasny.dev` (temporary)
-Target: `auth.mykyta-ryasny.dev` (permanent)
-
-**Steps required:**
-1. Update `services/proxy/caddy/sites/authentik.Caddyfile`:
-   - Change hostname from `sso.mykyta-ryasny.dev` to `auth.mykyta-ryasny.dev`
-2. Update `services/tunnel/cloudflared/config.yml`:
-   - Change hostname from `sso.` to `auth.`
-3. Update portal API calls in `homeserver-portal` repository:
-   - Change all `https://sso.mykyta-ryasny.dev` to `https://auth.mykyta-ryasny.dev`
-4. Update Cloudflare DNS:
-   - Create CNAME: `auth.mykyta-ryasny.dev` → tunnel
-   - Delete CNAME: `sso.mykyta-ryasny.dev`
-5. Restart services:
-   ```bash
-   docker compose restart caddy cloudflared
-   ```
 
 ---
 
