@@ -19,11 +19,9 @@ services:
     # Environment
     environment:
       - TZ=Europe/Madrid
-      # Jellyfin authentication (from .env)
+      # Jellyfin authentication (API key - required for OIDC/SSO setup)
       - JELLYFIN_URL=http://jellyfin:8096
       - JELLYFIN_API_KEY=${JELLYFIN_API_KEY:-}
-      - JELLYFIN_ADMIN_USERNAME=${JELLYFIN_ADMIN_USERNAME:-}
-      - JELLYFIN_ADMIN_PASSWORD=${JELLYFIN_ADMIN_PASSWORD:-}
       # Media stack APIs (for cleanup script)
       - JELLYSEERR_URL=http://jellyseerr:5055
       - RADARR_URL=http://radarr:7878

@@ -14,49 +14,29 @@ from pathlib import Path
 # Configuration
 JELLYFIN_URL = os.getenv('JELLYFIN_URL', 'http://jellyfin:8096')
 API_KEY = os.getenv('JELLYFIN_API_KEY', '')
-ADMIN_USERNAME = os.getenv('JELLYFIN_ADMIN_USERNAME', '')
-ADMIN_PASSWORD = os.getenv('JELLYFIN_ADMIN_PASSWORD', '')
 
 # Headers for API requests (will be set after authentication)
 headers = {}
 
 def authenticate():
-    """Authenticate with Jellyfin using username/password or API key"""
+    """Authenticate with Jellyfin using API key"""
     global headers
 
-    # Try admin username/password first
-    if ADMIN_USERNAME and ADMIN_PASSWORD:
-        try:
-            auth_response = requests.post(
-                f'{JELLYFIN_URL}/Users/AuthenticateByName',
-                json={
-                    'Username': ADMIN_USERNAME,
-                    'Pw': ADMIN_PASSWORD
-                },
-                headers={'X-Emby-Authorization': 'MediaBrowser Client="Cleanup Script", Device="Docker", DeviceId="maintenance-cron", Version="1.0.0"'}
-            )
-            auth_response.raise_for_status()
-            auth_data = auth_response.json()
-            access_token = auth_data.get('AccessToken')
-
-            if access_token:
-                headers['X-Emby-Token'] = access_token
-                print(f"✓ Authenticated as admin user: {ADMIN_USERNAME}")
-                return True
-        except Exception as e:
-            print(f"Failed to authenticate with username/password: {e}")
-
-    # Fallback to API key
+    # Use API key authentication
+    # Note: Since Jellyfin is configured with Authentik SSO (OIDC),
+    # local username/password authentication is no longer supported.
+    # API keys are the recommended method for script/automation access.
     if API_KEY:
         headers['X-Emby-Token'] = API_KEY
         print("✓ Using API key authentication")
         return True
 
-    print("ERROR: No authentication method available")
-    print("\nPlease set either:")
-    print("  JELLYFIN_ADMIN_USERNAME and JELLYFIN_ADMIN_PASSWORD")
-    print("  OR")
-    print("  JELLYFIN_API_KEY")
+    print("ERROR: JELLYFIN_API_KEY environment variable not set")
+    print("\nTo create an API key:")
+    print("  1. Log in to Jellyfin web interface")
+    print("  2. Go to Dashboard → Advanced → API Keys")
+    print("  3. Click 'New API Key' and copy the generated key")
+    print("  4. Set JELLYFIN_API_KEY in .env file")
     sys.exit(1)
 
 def check_file_exists(file_path):
