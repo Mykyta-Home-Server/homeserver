@@ -8,7 +8,7 @@
 services:
   radarr:
     profiles: ["media", "all"]
-    image: lscr.io/linuxserver/radarr:latest
+    image: lscr.io/linuxserver/radarr:6.0.4.10291-ls287
     container_name: radarr
     restart: unless-stopped
 

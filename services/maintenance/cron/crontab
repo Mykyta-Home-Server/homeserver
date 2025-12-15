@@ -5,6 +5,9 @@
 # All output goes to stdout/stderr → captured by Docker → Promtail → Loki
 # ============================================================================
 
+# Check for Docker image updates daily at 2 AM
+0 2 * * * echo "[CRON] Checking for Docker image updates..." >> /var/log/cron.log 2>&1 && python3 /scripts/check-updates.py >> /var/log/cron.log 2>&1 && echo "[CRON] Update check complete" >> /var/log/cron.log 2>&1
+
 # Daily backup at 3 AM
 0 3 * * * echo "[CRON] Starting backup..." >> /var/log/cron.log 2>&1 && /scripts/backup.sh >> /var/log/cron.log 2>&1 && echo "[CRON] Backup complete" >> /var/log/cron.log 2>&1
 

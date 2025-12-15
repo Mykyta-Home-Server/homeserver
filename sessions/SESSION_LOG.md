@@ -2804,3 +2804,186 @@ redir @logout "https://sso.mykyta-ryasny.dev/if/flow/direct-logout/" 302
 
 To be created in next step with comprehensive message documenting the migration.
 
+
+---
+
+### Session 13 - 2025-12-15
+**Duration:** ~2 hours
+**Focus:** Docker Image Version Pinning & Update Monitoring System
+
+### Accomplishments
+
+✅ **Pinned Docker Images (11 services):**
+- Replaced all `latest` tags with specific versions for production stability
+- **Media stack:** flaresolverr (v3.4.5), bazarr (v1.5.3-ls325), sonarr (4.0.16.2944-ls298), prowlarr (2.3.0.5236-ls132), radarr (6.0.4.10291-ls287), jellyfin (10.11.3ubu2404-ls8), recyclarr (7.4.1), qbittorrent (5.1.4-r0-ls427)
+- **Infrastructure:** alpine (3.22), caddy (2), cloudflared (2025.11.1)
+- Portal image remains on `latest` (custom CI/CD image)
+
+✅ **Created Update Monitoring System:**
+- Built `scripts/check-updates.py` - Automated version checker
+- Queries Docker Hub, GHCR, and LSCR registries for newer versions
+- Detects LinuxServer.io build number increments (e.g., `-ls298` → `-ls300`)
+- Logs structured JSON to stdout for Loki ingestion
+- Added to maintenance-cron: runs daily at 2 AM
+
+✅ **Created Docker Updates Grafana Dashboard:**
+- New dedicated dashboard: `docker-updates.json`
+- **4 stat panels:**
+  - Updates Available (green/yellow/orange thresholds)
+  - Total Images Monitored
+  - Last Check Status (OK/No Data)
+  - Check Failures (auth issues)
+- **Log viewer:** JSON-parsed logs with level filtering (DEBUG/INFO/WARNING/ERROR)
+- **Pinned versions reference:** Shows current `image:version` for all monitored images
+- 30-second auto-refresh
+
+✅ **Standardized Grafana Navigation:**
+- Updated all 6 dashboards with consistent 3x3 navigation grid
+- **Row 1:** Home, Infrastructure, Media Stack
+- **Row 2:** Authentication, Operations, Docker Updates
+- Each tab: 8 columns wide (24÷3=8)
+- Fixed duplicate navigation panels in home dashboard
+
+### Technical Implementation
+
+**1. Version Detection Logic:**
+```python
+# LinuxServer.io images use -lsXXX build numbers
+if "-ls" in current_version:
+    current_ls = int(re.search(r'-ls(\d+)', current_version).group(1))
+    latest_ls = max([int(re.search(r'-ls(\d+)', t).group(1)) 
+                   for t in tags if re.search(r'-ls(\d+)', t)], default=current_ls)
+    if latest_ls > current_ls:
+        # Update available!
+```
+
+**2. JSON Logging for Loki:**
+```python
+log_entry = {
+    "timestamp": datetime.utcnow().isoformat() + "Z",
+    "level": "INFO",
+    "script": "check-updates",
+    "message": "Update available",
+    "image": "lscr.io/linuxserver/sonarr",
+    "current_version": "4.0.16.2944-ls298",
+    "latest_version": "4.0.16.2944-ls300",
+    "update_available": True
+}
+print(json.dumps(log_entry), flush=True)
+```
+
+**3. Grafana LogQL Queries:**
+```logql
+# Updates available count
+sum(count_over_time({container="maintenance-cron"} |= "check-updates" | json | update_available="true" [24h]))
+
+# Current pinned versions
+{container="maintenance-cron"} |= "check-updates" | json | image!="" | line_format "{{.image}}:{{.current_version}}"
+```
+
+### Key Learnings
+
+1. **Version Pinning Benefits:**
+   - **Prevents breaking changes** from automatic `latest` pulls
+   - **Enables controlled updates** - you decide when to upgrade
+   - **Audit trail** - know exactly what version is running
+   - **Rollback safety** - easy to revert to known-good version
+   - **Production best practice** - never use `latest` in prod
+
+2. **Registry API Limitations:**
+   - **GHCR (GitHub Container Registry):** Requires authentication for tag listing
+   - **LSCR (LinuxServer.io):** Requires authentication (401 errors)
+   - **Docker Hub:** Works without auth for public images
+   - **Solution:** Script handles auth failures gracefully, logs warnings
+   - **Future:** Add registry tokens via environment variables
+
+3. **LinuxServer.io Versioning Pattern:**
+   - Format: `{app_version}-ls{build_number}`
+   - Example: `4.0.16.2944-ls298`
+   - **App version:** Upstream software version
+   - **Build number:** LinuxServer's container build iteration
+   - Build number increments indicate image updates (security patches, base image updates)
+   - Comparing `-ls` numbers is reliable update detection method
+
+4. **Grafana Dashboard Provisioning:**
+   - Dashboards must have correct file permissions (644)
+   - UID must match for navigation links (`/d/{uid}`)
+   - Transparent text panels for navigation (consistent positioning)
+   - JSON structure sensitive to panel positioning (gridPos.y)
+
+5. **Structured Logging Benefits:**
+   - **JSON logging** makes Loki queries powerful
+   - **Field extraction:** `| json` operator parses fields automatically
+   - **Filtering:** Can filter by `update_available`, `level`, `image`, etc.
+   - **Aggregation:** `count_over_time()` works across JSON fields
+   - **Better than grep:** Searchable by structured fields, not just text
+
+### Files Created
+
+**Scripts:**
+- `scripts/check-updates.py` - Update checker (JSON logging, registry queries)
+
+**Grafana:**
+- `services/monitoring/grafana/provisioning/dashboards/docker-updates.json` - Update monitoring dashboard
+
+### Files Modified
+
+**Compose files (11):**
+- `compose/media/flaresolverr.yml` - Pinned to v3.4.5
+- `compose/media/bazarr.yml` - Pinned to v1.5.3-ls325
+- `compose/media/sonarr.yml` - Pinned to 4.0.16.2944-ls298
+- `compose/media/prowlarr.yml` - Pinned to 2.3.0.5236-ls132
+- `compose/media/radarr.yml` - Pinned to 6.0.4.10291-ls287
+- `compose/media/jellyfin.yml` - Pinned to 10.11.3ubu2404-ls8
+- `compose/media/recyclarr.yml` - Pinned to 7.4.1
+- `compose/media/qbittorrent.yml` - Pinned to 5.1.4-r0-ls427
+- `compose/maintenance/cron.yml` - Pinned to alpine:3.22
+- `compose/infrastructure/proxy.yml` - Pinned to caddy:2
+- `compose/infrastructure/tunnel.yml` - Pinned to cloudflare/cloudflared:2025.11.1
+
+**Cron:**
+- `services/maintenance/cron/crontab` - Added update checker (daily at 2 AM)
+
+**Grafana Dashboards (6):**
+- `services/monitoring/grafana/provisioning/dashboards/home.json` - Updated navigation, removed duplicates
+- `services/monitoring/grafana/provisioning/dashboards/infrastructure.json` - Updated navigation
+- `services/monitoring/grafana/provisioning/dashboards/media-stack.json` - Updated navigation
+- `services/monitoring/grafana/provisioning/dashboards/authentication.json` - Updated navigation
+- `services/monitoring/grafana/provisioning/dashboards/operations.json` - Updated navigation
+
+### Current Status
+
+✅ **All Docker images pinned to specific versions**
+✅ **Automated update monitoring running (daily at 2 AM)**
+✅ **Grafana dashboard showing update status**
+✅ **Consistent navigation across all dashboards**
+
+📊 **Monitoring Coverage:**
+- 20 images monitored
+- 10 successfully checking for updates (Docker Hub)
+- 10 requiring authentication (GHCR/LSCR) - gracefully handled
+
+### Commits
+
+Pending commit with message documenting version pinning and update monitoring implementation.
+
+### Next Steps (Future Sessions)
+
+1. **When updates are available:**
+   - Check Docker Updates dashboard
+   - Review changelog for breaking changes
+   - Update compose file version tags
+   - Test updated service
+   - Commit version bump
+
+2. **Registry authentication (optional):**
+   - Add GHCR token to check GitHub packages
+   - Add LSCR token to check LinuxServer images
+   - Improves coverage from 50% to 100%
+
+3. **Update automation (future enhancement):**
+   - Create update approval workflow
+   - Auto-create GitHub issues for available updates
+   - Track update age (how old is current version?)
+   - Grafana alerts for critical updates
+

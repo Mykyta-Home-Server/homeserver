@@ -9,7 +9,7 @@
 services:
   flaresolverr:
     profiles: ["media", "all"]
-    image: ghcr.io/flaresolverr/flaresolverr:latest
+    image: ghcr.io/flaresolverr/flaresolverr:v3.4.5
     container_name: flaresolverr
     restart: unless-stopped
 

@@ -8,7 +8,7 @@
 services:
   qbittorrent:
     profiles: ["media", "all"]
-    image: lscr.io/linuxserver/qbittorrent:latest
+    image: lscr.io/linuxserver/qbittorrent:5.1.4-r0-ls427
     container_name: qbittorrent
     restart: unless-stopped
 

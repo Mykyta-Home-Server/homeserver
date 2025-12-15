@@ -11,13 +11,13 @@
     {
       "gridPos": {
         "h": 2,
-        "w": 8,
+        "w": 6,
         "x": 0,
         "y": 0
       },
       "id": 50,
       "options": {
-        "content": "### [\ud83c\udfe0 Home](/d/home)",
+        "content": "### [🌐 Infrastructure](/d/infrastructure)",
         "mode": "markdown"
       },
       "transparent": true,
@@ -26,13 +26,13 @@
     {
       "gridPos": {
         "h": 2,
-        "w": 8,
-        "x": 8,
+        "w": 6,
+        "x": 6,
         "y": 0
       },
       "id": 51,
       "options": {
-        "content": "### [\ud83c\udf10 Infrastructure](/d/infrastructure)",
+        "content": "### [📺 Media Stack](/d/media-stack)",
         "mode": "markdown"
       },
       "transparent": true,
@@ -41,13 +41,13 @@
     {
       "gridPos": {
         "h": 2,
-        "w": 8,
-        "x": 16,
+        "w": 6,
+        "x": 12,
         "y": 0
       },
       "id": 52,
       "options": {
-        "content": "### [\ud83d\udcfa Media Stack](/d/media-stack)",
+        "content": "### [🔐 Authentication](/d/authentication)",
         "mode": "markdown"
       },
       "transparent": true,
@@ -56,43 +56,13 @@
     {
       "gridPos": {
         "h": 2,
-        "w": 8,
-        "x": 0,
-        "y": 2
+        "w": 6,
+        "x": 18,
+        "y": 0
       },
       "id": 53,
       "options": {
-        "content": "### [\ud83d\udd10 Authentication](/d/authentication)",
-        "mode": "markdown"
-      },
-      "transparent": true,
-      "type": "text"
-    },
-    {
-      "gridPos": {
-        "h": 2,
-        "w": 8,
-        "x": 8,
-        "y": 2
-      },
-      "id": 54,
-      "options": {
-        "content": "### [\u2699\ufe0f Operations](/d/operations)",
-        "mode": "markdown"
-      },
-      "transparent": true,
-      "type": "text"
-    },
-    {
-      "gridPos": {
-        "h": 2,
-        "w": 8,
-        "x": 16,
-        "y": 2
-      },
-      "id": 55,
-      "options": {
-        "content": "### [\ud83d\udd04 Docker Updates](/d/docker-updates)",
+        "content": "### [⚙️ Operations](/d/operations)",
         "mode": "markdown"
       },
       "transparent": true,
@@ -104,11 +74,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 2
       },
-      "id": 100,
+      "id": 101,
       "panels": [],
-      "title": "\ud83d\udcfa Media Services",
+      "title": "🚀 CI/CD Pipeline",
       "type": "row"
     },
     {
@@ -116,7 +86,7 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Log activity in last 5 min. UP = generating logs, DOWN = no logs (may be idle or down)",
+      "description": "Log activity in last 5 min. UP = generating logs, DOWN = no recent logs",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -126,7 +96,7 @@
             {
               "options": {
                 "0": {
-                  "color": "red",
+                  "color": "dark-red",
                   "index": 0,
                   "text": "DOWN"
                 }
@@ -138,7 +108,7 @@
                 "from": 1,
                 "to": 999999,
                 "result": {
-                  "color": "green",
+                  "color": "dark-green",
                   "index": 1,
                   "text": "UP"
                 }
@@ -150,11 +120,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "dark-red",
                 "value": null
               },
               {
-                "color": "green",
+                "color": "dark-green",
                 "value": 1
               }
             ]
@@ -162,10 +132,10 @@
         }
       },
       "gridPos": {
-        "h": 3,
-        "w": 3,
+        "h": 4,
+        "w": 6,
         "x": 0,
-        "y": 4
+        "y": 3
       },
       "id": 1,
       "options": {
@@ -175,12 +145,12 @@
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "sum"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
         },
-        "textMode": "value"
+        "textMode": "auto"
       },
       "targets": [
         {
@@ -188,12 +158,12 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container=\"jellyfin\"}[5m]))",
-          "legendFormat": "Jellyfin",
+          "expr": "sum(count_over_time({container=\"github-runner\"}[5m]))",
+          "legendFormat": "Runner",
           "refId": "A"
         }
       ],
-      "title": "Jellyfin",
+      "title": "🏃 GitHub Runner",
       "type": "stat"
     },
     {
@@ -201,71 +171,44 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Log activity in last 5 min",
+      "description": "Log lines matching 'running job' or 'Listening for Jobs' in last 24h",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "red",
-                  "index": 0,
-                  "text": "DOWN"
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "from": 1,
-                "to": 999999,
-                "result": {
-                  "color": "green",
-                  "index": 1,
-                  "text": "UP"
-                }
-              },
-              "type": "range"
-            }
-          ],
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "super-light-purple",
                 "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
               }
             ]
           }
         }
       },
       "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 3,
-        "y": 4
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 3
       },
       "id": 2,
       "options": {
         "colorMode": "background_solid",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "sum"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
         },
-        "textMode": "value"
+        "textMode": "auto"
       },
       "targets": [
         {
@@ -273,12 +216,12 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container=\"jellyseerr\"}[5m]))",
-          "legendFormat": "Jellyseerr",
+          "expr": "sum(count_over_time({container=\"github-runner\"} |~ \"(?i)running job|Listening for Jobs\" [24h]))",
+          "legendFormat": "Jobs",
           "refId": "A"
         }
       ],
-      "title": "Jellyseerr",
+      "title": "🔨 Jobs Detected (24h)",
       "type": "stat"
     },
     {
@@ -286,71 +229,44 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Log activity in last 5 min",
+      "description": "Log lines matching 'completed' or 'success' in last 24h",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "red",
-                  "index": 0,
-                  "text": "DOWN"
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "from": 1,
-                "to": 999999,
-                "result": {
-                  "color": "green",
-                  "index": 1,
-                  "text": "UP"
-                }
-              },
-              "type": "range"
-            }
-          ],
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "semi-dark-green",
                 "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
               }
             ]
           }
         }
       },
       "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 6,
-        "y": 4
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 3
       },
       "id": 3,
       "options": {
         "colorMode": "background_solid",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "sum"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
         },
-        "textMode": "value"
+        "textMode": "auto"
       },
       "targets": [
         {
@@ -358,12 +274,12 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container=\"radarr\"}[5m]))",
-          "legendFormat": "Radarr",
+          "expr": "sum(count_over_time({container=\"github-runner\"} |~ \"(?i)completed|success\" [24h]))",
+          "legendFormat": "Success",
           "refId": "A"
         }
       ],
-      "title": "Radarr",
+      "title": "✅ Successful (24h)",
       "type": "stat"
     },
     {
@@ -371,45 +287,22 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Log activity in last 5 min",
+      "description": "Log lines matching 'failed' or 'error' in last 24h",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "red",
-                  "index": 0,
-                  "text": "DOWN"
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "from": 1,
-                "to": 999999,
-                "result": {
-                  "color": "green",
-                  "index": 1,
-                  "text": "UP"
-                }
-              },
-              "type": "range"
-            }
-          ],
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "semi-dark-green",
                 "value": null
               },
               {
-                "color": "green",
+                "color": "dark-red",
                 "value": 1
               }
             ]
@@ -417,25 +310,25 @@
         }
       },
       "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 9,
-        "y": 4
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 3
       },
       "id": 4,
       "options": {
         "colorMode": "background_solid",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "sum"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
         },
-        "textMode": "value"
+        "textMode": "auto"
       },
       "targets": [
         {
@@ -443,20 +336,33 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container=\"sonarr\"}[5m]))",
-          "legendFormat": "Sonarr",
+          "expr": "sum(count_over_time({container=\"github-runner\"} |~ \"(?i)failed|error\" [24h]))",
+          "legendFormat": "Failed",
           "refId": "A"
         }
       ],
-      "title": "Sonarr",
+      "title": "❌ Failed (24h)",
       "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 102,
+      "panels": [],
+      "title": "🔧 Scheduled Maintenance",
+      "type": "row"
     },
     {
       "datasource": {
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Log activity in last 5 min",
+      "description": "Log activity in last 5 min. ACTIVE = running task, IDLE = waiting (normal)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -466,9 +372,9 @@
             {
               "options": {
                 "0": {
-                  "color": "red",
+                  "color": "semi-dark-yellow",
                   "index": 0,
-                  "text": "DOWN"
+                  "text": "IDLE"
                 }
               },
               "type": "value"
@@ -478,9 +384,9 @@
                 "from": 1,
                 "to": 999999,
                 "result": {
-                  "color": "green",
+                  "color": "dark-green",
                   "index": 1,
-                  "text": "UP"
+                  "text": "ACTIVE"
                 }
               },
               "type": "range"
@@ -490,11 +396,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "semi-dark-yellow",
                 "value": null
               },
               {
-                "color": "green",
+                "color": "dark-green",
                 "value": 1
               }
             ]
@@ -502,10 +408,10 @@
         }
       },
       "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 12,
-        "y": 4
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 8
       },
       "id": 5,
       "options": {
@@ -515,12 +421,12 @@
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "sum"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
         },
-        "textMode": "value"
+        "textMode": "auto"
       },
       "targets": [
         {
@@ -528,12 +434,12 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container=\"prowlarr\"}[5m]))",
-          "legendFormat": "Prowlarr",
+          "expr": "sum(count_over_time({container=\"maintenance-cron\"}[5m]))",
+          "legendFormat": "Cron",
           "refId": "A"
         }
       ],
-      "title": "Prowlarr",
+      "title": "⏰ Cron Scheduler",
       "type": "stat"
     },
     {
@@ -541,71 +447,44 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Log activity in last 5 min",
+      "description": "Log lines matching backup/cleanup/sync in last 24h",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "red",
-                  "index": 0,
-                  "text": "DOWN"
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "from": 1,
-                "to": 999999,
-                "result": {
-                  "color": "green",
-                  "index": 1,
-                  "text": "UP"
-                }
-              },
-              "type": "range"
-            }
-          ],
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "super-light-blue",
                 "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
               }
             ]
           }
         }
       },
       "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 15,
-        "y": 4
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 8
       },
       "id": 6,
       "options": {
         "colorMode": "background_solid",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "sum"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
         },
-        "textMode": "value"
+        "textMode": "auto"
       },
       "targets": [
         {
@@ -613,12 +492,12 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container=\"qbittorrent\"}[5m]))",
-          "legendFormat": "qBit",
+          "expr": "sum(count_over_time({container=\"maintenance-cron\"} |~ \"(?i)backup|cleanup|sync\" [24h]))",
+          "legendFormat": "Tasks",
           "refId": "A"
         }
       ],
-      "title": "qBittorrent",
+      "title": "📋 Task Logs (24h)",
       "type": "stat"
     },
     {
@@ -626,71 +505,44 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Log activity in last 5 min",
+      "description": "Log lines matching completed/success/done in last 24h",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "red",
-                  "index": 0,
-                  "text": "DOWN"
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "from": 1,
-                "to": 999999,
-                "result": {
-                  "color": "green",
-                  "index": 1,
-                  "text": "UP"
-                }
-              },
-              "type": "range"
-            }
-          ],
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "semi-dark-green",
                 "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
               }
             ]
           }
         }
       },
       "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 18,
-        "y": 4
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 8
       },
       "id": 7,
       "options": {
         "colorMode": "background_solid",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "sum"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
         },
-        "textMode": "value"
+        "textMode": "auto"
       },
       "targets": [
         {
@@ -698,12 +550,12 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container=\"bazarr\"}[5m]))",
-          "legendFormat": "Bazarr",
+          "expr": "sum(count_over_time({container=\"maintenance-cron\"} |~ \"(?i)completed|success|done\" [24h]))",
+          "legendFormat": "Completed",
           "refId": "A"
         }
       ],
-      "title": "Bazarr",
+      "title": "✅ Completed (24h)",
       "type": "stat"
     },
     {
@@ -711,7 +563,7 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Log activity in last 5 min",
+      "description": "Log activity in last 5 min. UP = generating logs, DOWN = no recent logs",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -721,7 +573,7 @@
             {
               "options": {
                 "0": {
-                  "color": "red",
+                  "color": "dark-red",
                   "index": 0,
                   "text": "DOWN"
                 }
@@ -733,7 +585,7 @@
                 "from": 1,
                 "to": 999999,
                 "result": {
-                  "color": "green",
+                  "color": "dark-green",
                   "index": 1,
                   "text": "UP"
                 }
@@ -745,11 +597,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "dark-red",
                 "value": null
               },
               {
-                "color": "green",
+                "color": "dark-green",
                 "value": 1
               }
             ]
@@ -757,10 +609,10 @@
         }
       },
       "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 21,
-        "y": 4
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 8
       },
       "id": 8,
       "options": {
@@ -770,12 +622,12 @@
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "sum"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
         },
-        "textMode": "value"
+        "textMode": "auto"
       },
       "targets": [
         {
@@ -783,12 +635,110 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container=\"flaresolverr\"}[5m]))",
-          "legendFormat": "FlareSolverr",
+          "expr": "sum(count_over_time({container=\"recyclarr\"}[5m]))",
+          "legendFormat": "Recyclarr",
           "refId": "A"
         }
       ],
-      "title": "FlareSolverr",
+      "title": "♻️ Recyclarr",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 103,
+      "panels": [],
+      "title": "📊 Monitoring Stack",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Log activity in last 5 min",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "dark-red",
+                  "index": 0,
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "UP"
+                }
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 0,
+        "y": 13
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"grafana\"}[5m]))",
+          "legendFormat": "Grafana",
+          "refId": "A"
+        }
+      ],
+      "title": "📊 Grafana",
       "type": "stat"
     },
     {
@@ -796,40 +746,66 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Log lines mentioning 'imported' in Radarr logs",
+      "description": "Log activity in last 5 min",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "dark-red",
+                  "index": 0,
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "UP"
+                }
+              },
+              "type": "range"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "blue",
+                "color": "dark-red",
                 "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 1
               }
             ]
-          },
-          "unit": "short"
+          }
         }
       },
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 0,
-        "y": 6
+        "h": 3,
+        "w": 4,
+        "x": 4,
+        "y": 13
       },
       "id": 10,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "sum"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
@@ -842,12 +818,12 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container=\"radarr\"} |~ \"(?i)imported\" [24h]))",
-          "legendFormat": "Movies",
+          "expr": "sum(count_over_time({container=\"loki\"}[5m]))",
+          "legendFormat": "Loki",
           "refId": "A"
         }
       ],
-      "title": "Movies Imported (24h)",
+      "title": "📝 Loki",
       "type": "stat"
     },
     {
@@ -855,40 +831,66 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Log lines mentioning 'imported' in Sonarr logs",
+      "description": "Log activity in last 5 min",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "dark-red",
+                  "index": 0,
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "UP"
+                }
+              },
+              "type": "range"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "purple",
+                "color": "dark-red",
                 "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 1
               }
             ]
-          },
-          "unit": "short"
+          }
         }
       },
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 6
+        "h": 3,
+        "w": 4,
+        "x": 8,
+        "y": 13
       },
       "id": 11,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "sum"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
@@ -901,12 +903,12 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container=\"sonarr\"} |~ \"(?i)imported\" [24h]))",
-          "legendFormat": "Episodes",
+          "expr": "sum(count_over_time({container=\"promtail\"}[5m]))",
+          "legendFormat": "Promtail",
           "refId": "A"
         }
       ],
-      "title": "Episodes Imported (24h)",
+      "title": "📋 Promtail",
       "type": "stat"
     },
     {
@@ -914,7 +916,7 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Log lines mentioning 'downloaded' in Bazarr logs",
+      "description": "Total log lines collected from all containers in last hour",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -925,7 +927,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "super-light-blue",
                 "value": null
               }
             ]
@@ -934,20 +936,20 @@
         }
       },
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 6,
         "x": 12,
-        "y": 6
+        "y": 13
       },
       "id": 12,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background_solid",
         "graphMode": "area",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "sum"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
@@ -960,12 +962,12 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container=\"bazarr\"} |~ \"(?i)downloaded\" [24h]))",
-          "legendFormat": "Subtitles",
+          "expr": "sum(count_over_time({container!=\"\"}[1h]))",
+          "legendFormat": "Total",
           "refId": "A"
         }
       ],
-      "title": "Subtitles Downloaded (24h)",
+      "title": "📈 Log Lines (1h)",
       "type": "stat"
     },
     {
@@ -973,7 +975,7 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Log lines mentioning 'finished' in qBittorrent logs",
+      "description": "Log lines containing 'error' from all containers in last hour",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -984,8 +986,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "orange",
+                "color": "semi-dark-green",
                 "value": null
+              },
+              {
+                "color": "semi-dark-yellow",
+                "value": 50
+              },
+              {
+                "color": "dark-red",
+                "value": 200
               }
             ]
           },
@@ -993,20 +1003,20 @@
         }
       },
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 6,
         "x": 18,
-        "y": 6
+        "y": 13
       },
       "id": 13,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background_solid",
         "graphMode": "area",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "sum"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
@@ -1019,281 +1029,27 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum(count_over_time({container=\"qbittorrent\"} |~ \"(?i)download finished\" [24h]))",
-          "legendFormat": "Downloads",
-          "refId": "A"
-        }
-      ],
-      "title": "Downloads Finished (24h)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "description": "Number of log lines per service over time",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "Log lines",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "bars",
-            "fillOpacity": 80,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        }
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 10
-      },
-      "id": 14,
-      "options": {
-        "legend": {
-          "calcs": [
-            "sum"
-          ],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki"
-          },
-          "expr": "sum by (container) (count_over_time({container=~\"jellyfin|jellyseerr|radarr|sonarr|prowlarr|qbittorrent|bazarr\"} [10m]))",
-          "legendFormat": "{{container}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Log Volume by Service",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "description": "Distribution of log volume across media services (1h)",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": [],
-          "unit": "short"
-        }
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 12,
-        "y": 10
-      },
-      "id": 15,
-      "options": {
-        "displayLabels": [
-          "name",
-          "percent"
-        ],
-        "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "values": [
-            "value"
-          ]
-        },
-        "pieType": "donut",
-        "reduceOptions": {
-          "calcs": [
-            "sum"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki"
-          },
-          "expr": "sum(count_over_time({container=\"radarr\"}[1h]))",
-          "legendFormat": "Radarr",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki"
-          },
-          "expr": "sum(count_over_time({container=\"sonarr\"}[1h]))",
-          "legendFormat": "Sonarr",
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki"
-          },
-          "expr": "sum(count_over_time({container=\"jellyfin\"}[1h]))",
-          "legendFormat": "Jellyfin",
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki"
-          },
-          "expr": "sum(count_over_time({container=\"qbittorrent\"}[1h]))",
-          "legendFormat": "qBittorrent",
-          "refId": "D"
-        }
-      ],
-      "title": "Log Distribution (1h)",
-      "type": "piechart"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "description": "Log lines containing 'error' or 'fail' in media services",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 5
-              },
-              {
-                "color": "red",
-                "value": 20
-              }
-            ]
-          },
-          "unit": "short"
-        }
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 18,
-        "y": 10
-      },
-      "id": 16,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "sum"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki"
-          },
-          "expr": "sum(count_over_time({container=~\"radarr|sonarr|prowlarr|jellyfin|qbittorrent|bazarr\"} |~ \"(?i)error|fail\" [1h]))",
+          "expr": "sum(count_over_time({container!=\"\"} |~ \"(?i)error\" [1h]))",
           "legendFormat": "Errors",
           "refId": "A"
         }
       ],
-      "title": "Error Count (1h)",
-      "type": "gauge"
+      "title": "⚠️ Errors (1h)",
+      "type": "stat"
     },
     {
       "datasource": {
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Filtered logs from media services. Use dropdown to filter by severity.",
+      "description": "Live logs from GitHub Runner, filtered by log level dropdown",
       "gridPos": {
         "h": 8,
-        "w": 24,
+        "w": 12,
         "x": 0,
-        "y": 18
+        "y": 16
       },
-      "id": 17,
+      "id": 14,
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
@@ -1310,11 +1066,374 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "{container=~\"jellyfin|radarr|sonarr|prowlarr|qbittorrent|bazarr|jellyseerr\"} |~ \"$log_level\"",
+          "expr": "{container=\"github-runner\"} |~ \"$log_level\"",
           "refId": "A"
         }
       ],
-      "title": "Media Logs (filtered by $log_level)",
+      "title": "🏃 GitHub Runner Logs",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Live logs from maintenance cron container, filtered by log level dropdown",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 15,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{container=\"maintenance-cron\"} |~ \"$log_level\"",
+          "refId": "A"
+        }
+      ],
+      "title": "⏰ Maintenance Logs",
+      "type": "logs"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 110,
+      "panels": [],
+      "title": "🔄 Docker Image Updates",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Number of Docker images with updates available (based on last check)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": null
+              },
+              {
+                "color": "semi-dark-yellow",
+                "value": 1
+              },
+              {
+                "color": "semi-dark-orange",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 25
+      },
+      "id": 111,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"maintenance-cron\"} |= \"check-updates\" | json | update_available=\"true\" [24h]))",
+          "legendFormat": "Updates",
+          "refId": "A"
+        }
+      ],
+      "title": "🔔 Updates Available",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Total Docker images being monitored for updates",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 25
+      },
+      "id": 112,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum by (image) (count_over_time({container=\"maintenance-cron\"} |= \"check-updates\" | json | image!=\"\" [24h])) or vector(0)",
+          "legendFormat": "Images",
+          "refId": "A"
+        }
+      ],
+      "title": "📦 Total Images",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Status of last update check run",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "dark-red",
+                  "index": 0,
+                  "text": "No Data"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "OK"
+                }
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 25
+      },
+      "id": 113,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"maintenance-cron\"} |= \"Update check complete\" [6h]))",
+          "legendFormat": "Status",
+          "refId": "A"
+        }
+      ],
+      "title": "✅ Last Check Status",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Images that failed version check (auth required or unavailable)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": null
+              },
+              {
+                "color": "semi-dark-yellow",
+                "value": 3
+              },
+              {
+                "color": "semi-dark-orange",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 25
+      },
+      "id": 114,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"maintenance-cron\"} |= \"check-updates\" | json | level=\"WARNING\" | message=~\"Failed to fetch.*\" [24h]))",
+          "legendFormat": "Failed",
+          "refId": "A"
+        }
+      ],
+      "title": "⚠️ Check Failures (24h)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Detailed logs from update checker showing available updates and check results",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "id": 115,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": true,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{container=\"maintenance-cron\"} |= \"check-updates\"",
+          "refId": "A"
+        }
+      ],
+      "title": "📋 Update Check Logs",
       "type": "logs"
     }
   ],
@@ -1322,15 +1441,17 @@
   "schemaVersion": 38,
   "tags": [
     "homeserver",
-    "media"
+    "operations",
+    "cicd",
+    "maintenance"
   ],
   "templating": {
     "list": [
       {
         "current": {
           "selected": true,
-          "text": "All Activity",
-          "value": "(?i)imported|download|grabbed|completed|error|warning"
+          "text": "All Logs",
+          "value": ".*"
         },
         "hide": 0,
         "includeAll": false,
@@ -1339,14 +1460,9 @@
         "name": "log_level",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "All Logs",
             "value": ".*"
-          },
-          {
-            "selected": true,
-            "text": "All Activity",
-            "value": "(?i)imported|download|grabbed|completed|error|warning"
           },
           {
             "selected": false,
@@ -1360,22 +1476,22 @@
           },
           {
             "selected": false,
-            "text": "Downloads Only",
-            "value": "(?i)imported|download|grabbed|completed"
+            "text": "Task Events",
+            "value": "(?i)backup|cleanup|sync|completed|success"
           }
         ],
-        "query": "All Logs : .*, All Activity : (?i)imported|download|grabbed|completed|error|warning, Errors & Warnings : (?i)error|warning|fail, Errors Only : (?i)error|fail, Downloads Only : (?i)imported|download|grabbed|completed",
+        "query": "All Logs : .*, Errors & Warnings : (?i)error|warning|fail, Errors Only : (?i)error|fail, Task Events : (?i)backup|cleanup|sync|completed|success",
         "type": "custom"
       }
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "\ud83d\udcfa Media Stack",
-  "uid": "media-stack",
+  "title": "⚙️ Operations",
+  "uid": "operations",
   "version": 1
 }

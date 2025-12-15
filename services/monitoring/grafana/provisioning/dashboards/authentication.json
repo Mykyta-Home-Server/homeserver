@@ -1,5 +1,7 @@
 {
-  "annotations": { "list": [] },
+  "annotations": {
+    "list": []
+  },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -7,161 +9,583 @@
   "links": [],
   "panels": [
     {
-      "gridPos": { "h": 2, "w": 6, "x": 0, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
       "id": 50,
-      "options": { "content": "### [🌐 Infrastructure](/d/infrastructure)", "mode": "markdown" },
+      "options": {
+        "content": "### [\ud83c\udfe0 Home](/d/home)",
+        "mode": "markdown"
+      },
       "transparent": true,
       "type": "text"
     },
     {
-      "gridPos": { "h": 2, "w": 6, "x": 6, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
       "id": 51,
-      "options": { "content": "### [📺 Media Stack](/d/media-stack)", "mode": "markdown" },
+      "options": {
+        "content": "### [\ud83c\udf10 Infrastructure](/d/infrastructure)",
+        "mode": "markdown"
+      },
       "transparent": true,
       "type": "text"
     },
     {
-      "gridPos": { "h": 2, "w": 6, "x": 12, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
       "id": 52,
-      "options": { "content": "### [🔐 Authentication](/d/authentication)", "mode": "markdown" },
+      "options": {
+        "content": "### [\ud83d\udcfa Media Stack](/d/media-stack)",
+        "mode": "markdown"
+      },
       "transparent": true,
       "type": "text"
     },
     {
-      "gridPos": { "h": 2, "w": 6, "x": 18, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 0,
+        "y": 2
+      },
       "id": 53,
-      "options": { "content": "### [⚙️ Operations](/d/operations)", "mode": "markdown" },
+      "options": {
+        "content": "### [\ud83d\udd10 Authentication](/d/authentication)",
+        "mode": "markdown"
+      },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 8,
+        "y": 2
+      },
+      "id": 54,
+      "options": {
+        "content": "### [\u2699\ufe0f Operations](/d/operations)",
+        "mode": "markdown"
+      },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 16,
+        "y": 2
+      },
+      "id": 55,
+      "options": {
+        "content": "### [\ud83d\udd04 Docker Updates](/d/docker-updates)",
+        "mode": "markdown"
+      },
       "transparent": true,
       "type": "text"
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 2 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
       "id": 100,
       "panels": [],
-      "title": "🔐 Auth Services",
+      "title": "\ud83d\udd10 Auth Services",
       "type": "row"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log activity in last 5 min. UP = generating logs, DOWN = no recent logs",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
-            { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "to": 999999, "result": { "color": "green", "index": 1, "text": "UP" } }, "type": "range" }
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "UP"
+                }
+              },
+              "type": "range"
+            }
           ],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 3 },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 4
+      },
       "id": 1,
-      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"authelia\"}[5m]))", "legendFormat": "Authelia", "refId": "A" }],
-      "title": "🔐 Authentik Server",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"authelia\"}[5m]))",
+          "legendFormat": "Authelia",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udd10 Authentik Server",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log activity in last 5 min. UP = generating logs, DOWN = no recent logs",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
-            { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "to": 999999, "result": { "color": "green", "index": 1, "text": "UP" } }, "type": "range" }
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "UP"
+                }
+              },
+              "type": "range"
+            }
           ],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 3 },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 4
+      },
       "id": 2,
-      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"openldap\"}[5m]))", "legendFormat": "LDAP", "refId": "A" }],
-      "title": "⚙️ Authentik Worker",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"openldap\"}[5m]))",
+          "legendFormat": "LDAP",
+          "refId": "A"
+        }
+      ],
+      "title": "\u2699\ufe0f Authentik Worker",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log activity in last 5 min. UP = generating logs, DOWN = no recent logs",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
-            { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "to": 999999, "result": { "color": "green", "index": 1, "text": "UP" } }, "type": "range" }
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "UP"
+                }
+              },
+              "type": "range"
+            }
           ],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 3 },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 4
+      },
       "id": 3,
-      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"postgres-auth\"}[5m]))", "legendFormat": "PostgreSQL", "refId": "A" }],
-      "title": "🐘 PostgreSQL",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"postgres-auth\"}[5m]))",
+          "legendFormat": "PostgreSQL",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udc18 PostgreSQL",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log activity in last 5 min. UP = generating logs, DOWN = no recent logs",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
-            { "options": { "0": { "color": "red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "to": 999999, "result": { "color": "green", "index": 1, "text": "UP" } }, "type": "range" }
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "UP"
+                }
+              },
+              "type": "range"
+            }
           ],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 3 },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 4
+      },
       "id": 4,
-      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"redis-auth\"}[5m]))", "legendFormat": "Redis", "refId": "A" }],
-      "title": "🔴 Redis",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"redis-auth\"}[5m]))",
+          "legendFormat": "Redis",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udd34 Redis",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Authentication success events from Authentik logs (last hour)",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 3 },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 4
+      },
       "id": 5,
-      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"authelia\"} |~ \"(?i)successful\" [1h]))", "legendFormat": "Logins", "refId": "A" }],
-      "title": "✅ Successful Logins (1h)",
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"authelia\"} |~ \"(?i)successful\" [1h]))",
+          "legendFormat": "Logins",
+          "refId": "A"
+        }
+      ],
+      "title": "\u2705 Successful Logins (1h)",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Authentication failure events from Authentik (last hour)",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 3 }, { "color": "red", "value": 10 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 3
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 3 },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 4
+      },
       "id": 6,
-      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"authelia\"} |~ \"(?i)failed|denied|unauthorized\" [1h]))", "legendFormat": "Failed", "refId": "A" }],
-      "title": "❌ Failed Attempts (1h)",
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"authelia\"} |~ \"(?i)failed|denied|unauthorized\" [1h]))",
+          "legendFormat": "Failed",
+          "refId": "A"
+        }
+      ],
+      "title": "\u274c Failed Attempts (1h)",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Authentication events from Authentik SSO",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -172,41 +596,104 @@
             "drawStyle": "line",
             "fillOpacity": 20,
             "gradientMode": "opacity",
-            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
             "insertNulls": false,
             "lineInterpolation": "smooth",
             "lineWidth": 2,
             "pointSize": 5,
-            "scaleDistribution": { "type": "linear" },
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "never",
             "spanNulls": false,
-            "stacking": { "group": "A", "mode": "none" },
-            "thresholdsStyle": { "mode": "off" }
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 7
+      },
       "id": 7,
       "options": {
-        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "right", "showLegend": true },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "targets": [
-        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"authelia\"} |~ \"(?i)authentication\" [5m]))", "legendFormat": "Auth Events", "refId": "A" },
-        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"authelia\"} |~ \"(?i)successful\" [5m]))", "legendFormat": "Successful", "refId": "B" },
-        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"authelia\"} |~ \"(?i)failed\" [5m]))", "legendFormat": "Failed", "refId": "C" }
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"authelia\"} |~ \"(?i)authentication\" [5m]))",
+          "legendFormat": "Auth Events",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"authelia\"} |~ \"(?i)successful\" [5m]))",
+          "legendFormat": "Successful",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"authelia\"} |~ \"(?i)failed\" [5m]))",
+          "legendFormat": "Failed",
+          "refId": "C"
+        }
       ],
-      "title": "📊 Authentication Activity",
+      "title": "\ud83d\udcca Authentication Activity",
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log volume from each auth stack service over time",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "axisBorderShow": false,
             "axisCenteredZero": false,
@@ -217,37 +704,85 @@
             "drawStyle": "bars",
             "fillOpacity": 100,
             "gradientMode": "none",
-            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
             "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
-            "scaleDistribution": { "type": "linear" },
+            "scaleDistribution": {
+              "type": "linear"
+            },
             "showPoints": "never",
             "spanNulls": false,
-            "stacking": { "group": "A", "mode": "normal" },
-            "thresholdsStyle": { "mode": "off" }
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 7 },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 7
+      },
       "id": 8,
       "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
-        "tooltip": { "mode": "multi", "sort": "desc" }
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
       },
       "targets": [
-        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum by (container) (count_over_time({container=~\"authentik-server|authentik-worker|postgres-auth|redis-auth\"}[10m]))", "legendFormat": "{{container}}", "refId": "A" }
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum by (container) (count_over_time({container=~\"authentik-server|authentik-worker|postgres-auth|redis-auth\"}[10m]))",
+          "legendFormat": "{{container}}",
+          "refId": "A"
+        }
       ],
-      "title": "📈 Auth Stack Log Activity",
+      "title": "\ud83d\udcc8 Auth Stack Log Activity",
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Authentication and session events from Authentik",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
       "id": 9,
       "options": {
         "dedupStrategy": "none",
@@ -260,15 +795,30 @@
         "wrapLogMessage": true
       },
       "targets": [
-        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "{container=\"authelia\"} |~ \"(?i)authentication|session|login|logout|successful|failed\"", "refId": "A" }
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{container=\"authelia\"} |~ \"(?i)authentication|session|login|logout|successful|failed\"",
+          "refId": "A"
+        }
       ],
-      "title": "🔐 Authentik Auth Events",
+      "title": "\ud83d\udd10 Authentik Auth Events",
       "type": "logs"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Errors, failures, and security-related alerts from auth services",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
       "id": 10,
       "options": {
         "dedupStrategy": "none",
@@ -281,39 +831,73 @@
         "wrapLogMessage": true
       },
       "targets": [
-        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "{container=~\"authentik-server|authentik-worker\"} |~ \"$log_level\"", "refId": "A" }
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{container=~\"authentik-server|authentik-worker\"} |~ \"$log_level\"",
+          "refId": "A"
+        }
       ],
-      "title": "⚠️ Security Alerts",
+      "title": "\u26a0\ufe0f Security Alerts",
       "type": "logs"
     }
   ],
   "refresh": "30s",
   "schemaVersion": 38,
-  "tags": ["homeserver", "auth", "security"],
+  "tags": [
+    "homeserver",
+    "auth",
+    "security"
+  ],
   "templating": {
     "list": [
       {
-        "current": { "selected": true, "text": "Errors & Warnings", "value": "(?i)error|warning|fail|denied|unauthorized" },
+        "current": {
+          "selected": true,
+          "text": "Errors & Warnings",
+          "value": "(?i)error|warning|fail|denied|unauthorized"
+        },
         "hide": 0,
         "includeAll": false,
         "label": "Log Level",
         "multi": false,
         "name": "log_level",
         "options": [
-          { "selected": false, "text": "All Logs", "value": ".*" },
-          { "selected": true, "text": "Errors & Warnings", "value": "(?i)error|warning|fail|denied|unauthorized" },
-          { "selected": false, "text": "Errors Only", "value": "(?i)error|fail" },
-          { "selected": false, "text": "Auth Failures", "value": "(?i)failed|denied|unauthorized" }
+          {
+            "selected": false,
+            "text": "All Logs",
+            "value": ".*"
+          },
+          {
+            "selected": true,
+            "text": "Errors & Warnings",
+            "value": "(?i)error|warning|fail|denied|unauthorized"
+          },
+          {
+            "selected": false,
+            "text": "Errors Only",
+            "value": "(?i)error|fail"
+          },
+          {
+            "selected": false,
+            "text": "Auth Failures",
+            "value": "(?i)failed|denied|unauthorized"
+          }
         ],
         "query": "All Logs : .*, Errors & Warnings : (?i)error|warning|fail|denied|unauthorized, Errors Only : (?i)error|fail, Auth Failures : (?i)failed|denied|unauthorized",
         "type": "custom"
       }
     ]
   },
-  "time": { "from": "now-6h", "to": "now" },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
   "timepicker": {},
   "timezone": "",
-  "title": "🔐 Authentication",
+  "title": "\ud83d\udd10 Authentication",
   "uid": "authentication",
   "version": 1
 }

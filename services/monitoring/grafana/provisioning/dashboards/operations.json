@@ -1,5 +1,7 @@
 {
-  "annotations": { "list": [] },
+  "annotations": {
+    "list": []
+  },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -7,302 +9,1076 @@
   "links": [],
   "panels": [
     {
-      "gridPos": { "h": 2, "w": 6, "x": 0, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
       "id": 50,
-      "options": { "content": "### [🌐 Infrastructure](/d/infrastructure)", "mode": "markdown" },
+      "options": {
+        "content": "### [\ud83c\udfe0 Home](/d/home)",
+        "mode": "markdown"
+      },
       "transparent": true,
       "type": "text"
     },
     {
-      "gridPos": { "h": 2, "w": 6, "x": 6, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
       "id": 51,
-      "options": { "content": "### [📺 Media Stack](/d/media-stack)", "mode": "markdown" },
+      "options": {
+        "content": "### [\ud83c\udf10 Infrastructure](/d/infrastructure)",
+        "mode": "markdown"
+      },
       "transparent": true,
       "type": "text"
     },
     {
-      "gridPos": { "h": 2, "w": 6, "x": 12, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
       "id": 52,
-      "options": { "content": "### [🔐 Authentication](/d/authentication)", "mode": "markdown" },
+      "options": {
+        "content": "### [\ud83d\udcfa Media Stack](/d/media-stack)",
+        "mode": "markdown"
+      },
       "transparent": true,
       "type": "text"
     },
     {
-      "gridPos": { "h": 2, "w": 6, "x": 18, "y": 0 },
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 0,
+        "y": 2
+      },
       "id": 53,
-      "options": { "content": "### [⚙️ Operations](/d/operations)", "mode": "markdown" },
+      "options": {
+        "content": "### [\ud83d\udd10 Authentication](/d/authentication)",
+        "mode": "markdown"
+      },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 8,
+        "y": 2
+      },
+      "id": 54,
+      "options": {
+        "content": "### [\u2699\ufe0f Operations](/d/operations)",
+        "mode": "markdown"
+      },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 16,
+        "y": 2
+      },
+      "id": 55,
+      "options": {
+        "content": "### [\ud83d\udd04 Docker Updates](/d/docker-updates)",
+        "mode": "markdown"
+      },
       "transparent": true,
       "type": "text"
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 2 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
       "id": 101,
       "panels": [],
-      "title": "🚀 CI/CD Pipeline",
+      "title": "\ud83d\ude80 CI/CD Pipeline",
       "type": "row"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log activity in last 5 min. UP = generating logs, DOWN = no recent logs",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
-            { "options": { "0": { "color": "dark-red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "to": 999999, "result": { "color": "dark-green", "index": 1, "text": "UP" } }, "type": "range" }
+            {
+              "options": {
+                "0": {
+                  "color": "dark-red",
+                  "index": 0,
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "UP"
+                }
+              },
+              "type": "range"
+            }
           ],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "dark-red", "value": null }, { "color": "dark-green", "value": 1 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 1
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 3 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 4
+      },
       "id": 1,
-      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"github-runner\"}[5m]))", "legendFormat": "Runner", "refId": "A" }],
-      "title": "🏃 GitHub Runner",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"github-runner\"}[5m]))",
+          "legendFormat": "Runner",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83c\udfc3 GitHub Runner",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log lines matching 'running job' or 'Listening for Jobs' in last 24h",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "super-light-purple", "value": null }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-purple",
+                "value": null
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 3 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 4
+      },
       "id": 2,
-      "options": { "colorMode": "background_solid", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"github-runner\"} |~ \"(?i)running job|Listening for Jobs\" [24h]))", "legendFormat": "Jobs", "refId": "A" }],
-      "title": "🔨 Jobs Detected (24h)",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"github-runner\"} |~ \"(?i)running job|Listening for Jobs\" [24h]))",
+          "legendFormat": "Jobs",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udd28 Jobs Detected (24h)",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log lines matching 'completed' or 'success' in last 24h",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-green", "value": null }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": null
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 3 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
       "id": 3,
-      "options": { "colorMode": "background_solid", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"github-runner\"} |~ \"(?i)completed|success\" [24h]))", "legendFormat": "Success", "refId": "A" }],
-      "title": "✅ Successful (24h)",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"github-runner\"} |~ \"(?i)completed|success\" [24h]))",
+          "legendFormat": "Success",
+          "refId": "A"
+        }
+      ],
+      "title": "\u2705 Successful (24h)",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log lines matching 'failed' or 'error' in last 24h",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-green", "value": null }, { "color": "dark-red", "value": 1 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": null
+              },
+              {
+                "color": "dark-red",
+                "value": 1
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 3 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
       "id": 4,
-      "options": { "colorMode": "background_solid", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"github-runner\"} |~ \"(?i)failed|error\" [24h]))", "legendFormat": "Failed", "refId": "A" }],
-      "title": "❌ Failed (24h)",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"github-runner\"} |~ \"(?i)failed|error\" [24h]))",
+          "legendFormat": "Failed",
+          "refId": "A"
+        }
+      ],
+      "title": "\u274c Failed (24h)",
       "type": "stat"
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
       "id": 102,
       "panels": [],
-      "title": "🔧 Scheduled Maintenance",
+      "title": "\ud83d\udd27 Scheduled Maintenance",
       "type": "row"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log activity in last 5 min. ACTIVE = running task, IDLE = waiting (normal)",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
-            { "options": { "0": { "color": "semi-dark-yellow", "index": 0, "text": "IDLE" } }, "type": "value" },
-            { "options": { "from": 1, "to": 999999, "result": { "color": "dark-green", "index": 1, "text": "ACTIVE" } }, "type": "range" }
+            {
+              "options": {
+                "0": {
+                  "color": "semi-dark-yellow",
+                  "index": 0,
+                  "text": "IDLE"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "ACTIVE"
+                }
+              },
+              "type": "range"
+            }
           ],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-yellow", "value": null }, { "color": "dark-green", "value": 1 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-yellow",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 1
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 8
+      },
       "id": 5,
-      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"maintenance-cron\"}[5m]))", "legendFormat": "Cron", "refId": "A" }],
-      "title": "⏰ Cron Scheduler",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"maintenance-cron\"}[5m]))",
+          "legendFormat": "Cron",
+          "refId": "A"
+        }
+      ],
+      "title": "\u23f0 Cron Scheduler",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log lines matching backup/cleanup/sync in last 24h",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "super-light-blue", "value": null }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-blue",
+                "value": null
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 8 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 8
+      },
       "id": 6,
-      "options": { "colorMode": "background_solid", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"maintenance-cron\"} |~ \"(?i)backup|cleanup|sync\" [24h]))", "legendFormat": "Tasks", "refId": "A" }],
-      "title": "📋 Task Logs (24h)",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"maintenance-cron\"} |~ \"(?i)backup|cleanup|sync\" [24h]))",
+          "legendFormat": "Tasks",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udccb Task Logs (24h)",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log lines matching completed/success/done in last 24h",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-green", "value": null }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": null
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 8 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 8
+      },
       "id": 7,
-      "options": { "colorMode": "background_solid", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"maintenance-cron\"} |~ \"(?i)completed|success|done\" [24h]))", "legendFormat": "Completed", "refId": "A" }],
-      "title": "✅ Completed (24h)",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"maintenance-cron\"} |~ \"(?i)completed|success|done\" [24h]))",
+          "legendFormat": "Completed",
+          "refId": "A"
+        }
+      ],
+      "title": "\u2705 Completed (24h)",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log activity in last 5 min. UP = generating logs, DOWN = no recent logs",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
-            { "options": { "0": { "color": "dark-red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "to": 999999, "result": { "color": "dark-green", "index": 1, "text": "UP" } }, "type": "range" }
+            {
+              "options": {
+                "0": {
+                  "color": "dark-red",
+                  "index": 0,
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "UP"
+                }
+              },
+              "type": "range"
+            }
           ],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "dark-red", "value": null }, { "color": "dark-green", "value": 1 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 1
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 8 },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 8
+      },
       "id": 8,
-      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"recyclarr\"}[5m]))", "legendFormat": "Recyclarr", "refId": "A" }],
-      "title": "♻️ Recyclarr",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"recyclarr\"}[5m]))",
+          "legendFormat": "Recyclarr",
+          "refId": "A"
+        }
+      ],
+      "title": "\u267b\ufe0f Recyclarr",
       "type": "stat"
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 12 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
       "id": 103,
       "panels": [],
-      "title": "📊 Monitoring Stack",
+      "title": "\ud83d\udcca Monitoring Stack",
       "type": "row"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log activity in last 5 min",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
-            { "options": { "0": { "color": "dark-red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "to": 999999, "result": { "color": "dark-green", "index": 1, "text": "UP" } }, "type": "range" }
+            {
+              "options": {
+                "0": {
+                  "color": "dark-red",
+                  "index": 0,
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "UP"
+                }
+              },
+              "type": "range"
+            }
           ],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "dark-red", "value": null }, { "color": "dark-green", "value": 1 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 1
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 3, "w": 4, "x": 0, "y": 13 },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 0,
+        "y": 13
+      },
       "id": 9,
-      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"grafana\"}[5m]))", "legendFormat": "Grafana", "refId": "A" }],
-      "title": "📊 Grafana",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"grafana\"}[5m]))",
+          "legendFormat": "Grafana",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udcca Grafana",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log activity in last 5 min",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
-            { "options": { "0": { "color": "dark-red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "to": 999999, "result": { "color": "dark-green", "index": 1, "text": "UP" } }, "type": "range" }
+            {
+              "options": {
+                "0": {
+                  "color": "dark-red",
+                  "index": 0,
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "UP"
+                }
+              },
+              "type": "range"
+            }
           ],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "dark-red", "value": null }, { "color": "dark-green", "value": 1 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 1
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 3, "w": 4, "x": 4, "y": 13 },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 4,
+        "y": 13
+      },
       "id": 10,
-      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"loki\"}[5m]))", "legendFormat": "Loki", "refId": "A" }],
-      "title": "📝 Loki",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"loki\"}[5m]))",
+          "legendFormat": "Loki",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udcdd Loki",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log activity in last 5 min",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
-            { "options": { "0": { "color": "dark-red", "index": 0, "text": "DOWN" } }, "type": "value" },
-            { "options": { "from": 1, "to": 999999, "result": { "color": "dark-green", "index": 1, "text": "UP" } }, "type": "range" }
+            {
+              "options": {
+                "0": {
+                  "color": "dark-red",
+                  "index": 0,
+                  "text": "DOWN"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "UP"
+                }
+              },
+              "type": "range"
+            }
           ],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "dark-red", "value": null }, { "color": "dark-green", "value": 1 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 1
+              }
+            ]
+          }
         }
       },
-      "gridPos": { "h": 3, "w": 4, "x": 8, "y": 13 },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 8,
+        "y": 13
+      },
       "id": 11,
-      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container=\"promtail\"}[5m]))", "legendFormat": "Promtail", "refId": "A" }],
-      "title": "📋 Promtail",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"promtail\"}[5m]))",
+          "legendFormat": "Promtail",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udccb Promtail",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Total log lines collected from all containers in last hour",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "super-light-blue", "value": null }] },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-blue",
+                "value": null
+              }
+            ]
+          },
           "unit": "short"
         }
       },
-      "gridPos": { "h": 3, "w": 6, "x": 12, "y": 13 },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 12,
+        "y": 13
+      },
       "id": 12,
-      "options": { "colorMode": "background_solid", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container!=\"\"}[1h]))", "legendFormat": "Total", "refId": "A" }],
-      "title": "📈 Log Lines (1h)",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container!=\"\"}[1h]))",
+          "legendFormat": "Total",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udcc8 Log Lines (1h)",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Log lines containing 'error' from all containers in last hour",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-green", "value": null }, { "color": "semi-dark-yellow", "value": 50 }, { "color": "dark-red", "value": 200 }] },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": null
+              },
+              {
+                "color": "semi-dark-yellow",
+                "value": 50
+              },
+              {
+                "color": "dark-red",
+                "value": 200
+              }
+            ]
+          },
           "unit": "short"
         }
       },
-      "gridPos": { "h": 3, "w": 6, "x": 18, "y": 13 },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 13
+      },
       "id": 13,
-      "options": { "colorMode": "background_solid", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
-      "targets": [{ "datasource": { "type": "loki", "uid": "loki" }, "expr": "sum(count_over_time({container!=\"\"} |~ \"(?i)error\" [1h]))", "legendFormat": "Errors", "refId": "A" }],
-      "title": "⚠️ Errors (1h)",
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container!=\"\"} |~ \"(?i)error\" [1h]))",
+          "legendFormat": "Errors",
+          "refId": "A"
+        }
+      ],
+      "title": "\u26a0\ufe0f Errors (1h)",
       "type": "stat"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Live logs from GitHub Runner, filtered by log level dropdown",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
       "id": 14,
       "options": {
         "dedupStrategy": "none",
@@ -315,15 +1091,30 @@
         "wrapLogMessage": true
       },
       "targets": [
-        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "{container=\"github-runner\"} |~ \"$log_level\"", "refId": "A" }
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{container=\"github-runner\"} |~ \"$log_level\"",
+          "refId": "A"
+        }
       ],
-      "title": "🏃 GitHub Runner Logs",
+      "title": "\ud83c\udfc3 GitHub Runner Logs",
       "type": "logs"
     },
     {
-      "datasource": { "type": "loki", "uid": "loki" },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Live logs from maintenance cron container, filtered by log level dropdown",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
       "id": 15,
       "options": {
         "dedupStrategy": "none",
@@ -336,39 +1127,74 @@
         "wrapLogMessage": true
       },
       "targets": [
-        { "datasource": { "type": "loki", "uid": "loki" }, "expr": "{container=\"maintenance-cron\"} |~ \"$log_level\"", "refId": "A" }
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{container=\"maintenance-cron\"} |~ \"$log_level\"",
+          "refId": "A"
+        }
       ],
-      "title": "⏰ Maintenance Logs",
+      "title": "\u23f0 Maintenance Logs",
       "type": "logs"
     }
   ],
   "refresh": "30s",
   "schemaVersion": 38,
-  "tags": ["homeserver", "operations", "cicd", "maintenance"],
+  "tags": [
+    "homeserver",
+    "operations",
+    "cicd",
+    "maintenance"
+  ],
   "templating": {
     "list": [
       {
-        "current": { "selected": true, "text": "All Logs", "value": ".*" },
+        "current": {
+          "selected": true,
+          "text": "All Logs",
+          "value": ".*"
+        },
         "hide": 0,
         "includeAll": false,
         "label": "Log Level",
         "multi": false,
         "name": "log_level",
         "options": [
-          { "selected": true, "text": "All Logs", "value": ".*" },
-          { "selected": false, "text": "Errors & Warnings", "value": "(?i)error|warning|fail" },
-          { "selected": false, "text": "Errors Only", "value": "(?i)error|fail" },
-          { "selected": false, "text": "Task Events", "value": "(?i)backup|cleanup|sync|completed|success" }
+          {
+            "selected": true,
+            "text": "All Logs",
+            "value": ".*"
+          },
+          {
+            "selected": false,
+            "text": "Errors & Warnings",
+            "value": "(?i)error|warning|fail"
+          },
+          {
+            "selected": false,
+            "text": "Errors Only",
+            "value": "(?i)error|fail"
+          },
+          {
+            "selected": false,
+            "text": "Task Events",
+            "value": "(?i)backup|cleanup|sync|completed|success"
+          }
         ],
         "query": "All Logs : .*, Errors & Warnings : (?i)error|warning|fail, Errors Only : (?i)error|fail, Task Events : (?i)backup|cleanup|sync|completed|success",
         "type": "custom"
       }
     ]
   },
-  "time": { "from": "now-24h", "to": "now" },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
   "timepicker": {},
   "timezone": "",
-  "title": "⚙️ Operations",
+  "title": "\u2699\ufe0f Operations",
   "uid": "operations",
   "version": 1
 }

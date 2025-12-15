@@ -8,7 +8,7 @@
 services:
   jellyfin:
     profiles: ["media", "all"]
-    image: lscr.io/linuxserver/jellyfin:latest
+    image: lscr.io/linuxserver/jellyfin:10.11.3ubu2404-ls8
     container_name: jellyfin
     restart: unless-stopped
 

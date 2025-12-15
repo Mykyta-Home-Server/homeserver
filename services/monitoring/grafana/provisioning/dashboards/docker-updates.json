@@ -1,0 +1,561 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "id": 50,
+      "options": {
+        "content": "### [\ud83c\udfe0 Home](/d/home)",
+        "mode": "markdown"
+      },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "id": 51,
+      "options": {
+        "content": "### [\ud83c\udf10 Infrastructure](/d/infrastructure)",
+        "mode": "markdown"
+      },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 52,
+      "options": {
+        "content": "### [\ud83d\udcfa Media Stack](/d/media-stack)",
+        "mode": "markdown"
+      },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 0,
+        "y": 2
+      },
+      "id": 53,
+      "options": {
+        "content": "### [\ud83d\udd10 Authentication](/d/authentication)",
+        "mode": "markdown"
+      },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 8,
+        "y": 2
+      },
+      "id": 54,
+      "options": {
+        "content": "### [\u2699\ufe0f Operations](/d/operations)",
+        "mode": "markdown"
+      },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "gridPos": {
+        "h": 2,
+        "w": 8,
+        "x": 16,
+        "y": 2
+      },
+      "id": 55,
+      "options": {
+        "content": "### [\ud83d\udd04 Docker Updates](/d/docker-updates)",
+        "mode": "markdown"
+      },
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 100,
+      "panels": [],
+      "title": "\ud83d\udcca Update Status Overview",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Number of Docker images with updates available (based on last check)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": null
+              },
+              {
+                "color": "semi-dark-yellow",
+                "value": 1
+              },
+              {
+                "color": "semi-dark-orange",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 4
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"maintenance-cron\"} |= \"check-updates\" | json | update_available=\"true\" [24h]))",
+          "legendFormat": "Updates",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udd14 Updates Available",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Total Docker images being monitored for updates",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 4
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum by (image) (count_over_time({container=\"maintenance-cron\"} |= \"check-updates\" | json | image!=\"\" [24h])) or vector(0)",
+          "legendFormat": "Images",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udce6 Total Images Monitored",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Status of last update check run (checks at 2 AM daily)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "dark-red",
+                  "index": 0,
+                  "text": "No Data"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "to": 999999,
+                "result": {
+                  "color": "dark-green",
+                  "index": 1,
+                  "text": "OK"
+                }
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"maintenance-cron\"} |= \"Update check complete\" [6h]))",
+          "legendFormat": "Status",
+          "refId": "A"
+        }
+      ],
+      "title": "\u2705 Last Check Status",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Images that failed version check (auth required or registry unavailable)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": null
+              },
+              {
+                "color": "semi-dark-yellow",
+                "value": 3
+              },
+              {
+                "color": "semi-dark-orange",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({container=\"maintenance-cron\"} |= \"check-updates\" | json | level=\"WARNING\" | message=~\"Failed to fetch.*\" [24h]))",
+          "legendFormat": "Failed",
+          "refId": "A"
+        }
+      ],
+      "title": "\u26a0\ufe0f Check Failures (24h)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 101,
+      "panels": [],
+      "title": "\ud83d\udccb Update Check Logs",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Detailed logs from update checker showing available updates and check results. Filter by log level using dropdown.",
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "id": 5,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": true,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{container=\"maintenance-cron\"} |= \"check-updates\" | json | level=~\"$log_level\"",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udcc4 Update Checker Logs (JSON parsed)",
+      "type": "logs"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 102,
+      "panels": [],
+      "title": "\ud83d\udccc Pinned Versions Reference",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Current pinned versions being monitored (from last check)",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 6,
+      "options": {
+        "dedupStrategy": "exact",
+        "enableLogDetails": true,
+        "prettifyLogMessage": true,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": false,
+        "sortOrder": "Ascending",
+        "wrapLogMessage": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{container=\"maintenance-cron\"} |= \"check-updates\" | json | image!=\"\" | line_format \"{{.image}}:{{.current_version}}\"",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udc33 Current Pinned Versions",
+      "type": "logs"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": [
+    "docker",
+    "updates",
+    "maintenance"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "INFO",
+            "WARNING"
+          ],
+          "value": [
+            "INFO",
+            "WARNING"
+          ]
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "Log Level",
+        "multi": true,
+        "name": "log_level",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "DEBUG",
+            "value": "DEBUG"
+          },
+          {
+            "selected": true,
+            "text": "INFO",
+            "value": "INFO"
+          },
+          {
+            "selected": true,
+            "text": "WARNING",
+            "value": "WARNING"
+          },
+          {
+            "selected": false,
+            "text": "ERROR",
+            "value": "ERROR"
+          }
+        ],
+        "query": "DEBUG,INFO,WARNING,ERROR",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Docker Updates",
+  "uid": "docker-updates",
+  "version": 1,
+  "weekStart": ""
+}
